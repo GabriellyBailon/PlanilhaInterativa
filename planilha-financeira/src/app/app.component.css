@@ -11,10 +11,40 @@
   margin-bottom: 2rem;
 }
 
-.header h1 {
-  margin: 0 0 1rem;
+.titulo-pagina-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.titulo-pagina {
+  display: block;
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto 1rem;
+  padding: 0.5rem 0.75rem;
   font-size: 1.75rem;
   font-weight: 700;
+  text-align: center;
+  color: #1e293b;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.titulo-pagina:hover,
+.titulo-pagina:focus {
+  border-color: #cbd5e1;
+  background: #fff;
+  outline: none;
+}
+
+.titulo-pagina::placeholder {
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 .saldo {

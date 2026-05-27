@@ -92,6 +92,46 @@ describe('AppComponent', () => {
     expect(dados.dados).toEqual([80, 150]);
   });
 
+  it('should not add entrada without description and positive value', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.descricaoEntrada = '';
+    app.valorEntrada = 100;
+    app.adicionarEntrada();
+    expect(app.entradas.length).toBe(0);
+
+    app.descricaoEntrada = 'Salário';
+    app.valorEntrada = 0;
+    app.adicionarEntrada();
+    expect(app.entradas.length).toBe(0);
+
+    app.valorEntrada = 500;
+    app.adicionarEntrada();
+    expect(app.entradas.length).toBe(1);
+    expect(app.entradas[0].descricao).toBe('Salário');
+  });
+
+  it('should persist and restore custom page name', () => {
+    const fixture1 = TestBed.createComponent(AppComponent);
+    const app1 = fixture1.componentInstance;
+    fixture1.detectChanges();
+
+    app1.nomePagina = 'Maio 2026';
+    app1.salvarNomePagina();
+
+    const fixture2 = TestBed.createComponent(AppComponent);
+    fixture2.detectChanges();
+    expect(fixture2.componentInstance.nomePagina).toBe('Maio 2026');
+    expect(fixture2.componentInstance.tituloPagina).toBe('Maio 2026');
+  });
+
+  it('should use default title when page name is empty', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    expect(app.tituloPagina).toBe('Planejador de Finanças');
+  });
+
   it('should persist lancamentos to localStorage and restore on init', () => {
     const fixture1 = TestBed.createComponent(AppComponent);
     const app1 = fixture1.componentInstance;

@@ -1,6 +1,17 @@
 <main class="app">
   <header class="header">
-    <h1>Planejador de Finanças</h1>
+    <label class="titulo-pagina-label" for="nome-pagina">Nome da planilha</label>
+    <input
+      id="nome-pagina"
+      class="titulo-pagina"
+      type="text"
+      [(ngModel)]="nomePagina"
+      (blur)="salvarNomePagina()"
+      name="nomePagina"
+      [placeholder]="tituloPagina"
+      maxlength="80"
+      aria-label="Nome da planilha"
+    />
     <p class="saldo" [class]="saldoClasse">
       Saldo total:
       <strong>{{ saldo | brl }}</strong>
@@ -19,6 +30,7 @@
           [(ngModel)]="descricaoEntrada"
           name="descricaoEntrada"
           placeholder="Ex.: Salário"
+          required
         />
 
         <label for="valor-entrada">Valor</label>
@@ -30,9 +42,13 @@
           name="valorEntrada"
           placeholder="R$ 0,00"
           inputmode="numeric"
+          required
         />
 
-        <button type="submit" [disabled]="valorEntrada <= 0">
+        <button
+          type="submit"
+          [disabled]="!descricaoEntrada.trim() || valorEntrada <= 0"
+        >
           Adicionar ganho
         </button>
       </form>
@@ -74,6 +90,7 @@
           [(ngModel)]="descricaoSaida"
           name="descricaoSaida"
           placeholder="Ex.: Aluguel"
+          required
         />
 
         <label for="valor-saida">Valor</label>
@@ -85,9 +102,13 @@
           name="valorSaida"
           placeholder="R$ 0,00"
           inputmode="numeric"
+          required
         />
 
-        <button type="submit" [disabled]="valorSaida <= 0">
+        <button
+          type="submit"
+          [disabled]="!descricaoSaida.trim() || valorSaida <= 0"
+        >
           Adicionar gasto
         </button>
       </form>
@@ -129,6 +150,7 @@
           [(ngModel)]="descricaoEconomia"
           name="descricaoEconomia"
           placeholder="Ex.: Reserva de emergência"
+          required
         />
 
         <label for="valor-economia">Valor</label>
@@ -140,9 +162,13 @@
           name="valorEconomia"
           placeholder="R$ 0,00"
           inputmode="numeric"
+          required
         />
 
-        <button type="submit" [disabled]="valorEconomia <= 0">
+        <button
+          type="submit"
+          [disabled]="!descricaoEconomia.trim() || valorEconomia <= 0"
+        >
           Adicionar economia
         </button>
       </form>

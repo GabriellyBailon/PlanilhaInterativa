@@ -11,6 +11,7 @@ export interface EstadoPlanilha {
   saidas: LancamentoPersistido[];
   economias: LancamentoPersistido[];
   nextId: number;
+  nomePagina?: string;
 }
 
 const STORAGE_KEY = 'planilha-financeira:v1';
@@ -83,7 +84,25 @@ export class PlanilhaStorageService {
       nextId = maiorId + 1;
     }
 
-    return { entradas, saidas, economias, nextId };
+    const nomePagina = this.validarNomePagina(obj['nomePagina']);
+
+    return nomePagina
+      ? { entradas, saidas, economias, nextId, nomePagina }
+      : { entradas, saidas, economias, nextId };
+  }
+
+  private validarNomePagina(valor: unknown): string | undefined {
+    if (valor === undefined || valor === null) {
+      return undefined;
+    }
+    if (typeof valor !== 'string') {
+      return undefined;
+    }
+    const nome = valor.trim();
+    if (!nome) {
+      return undefined;
+    }
+    return nome.slice(0, 80);
   }
 
   private validarLista(valor: unknown): LancamentoPersistido[] | null {

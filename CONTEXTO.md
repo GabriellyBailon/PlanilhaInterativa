@@ -63,24 +63,36 @@ PlanilhaInterativa/
 interface Lancamento {
   id: number;        // incremental em memória (nextId)
   descricao: string;
-  valor: number;     // sempre >= 0
+  valor: number;     // sempre > 0 ao adicionar
+}
+
+interface EstadoPlanilha {
+  entradas: Lancamento[];
+  saidas: Lancamento[];
+  economias: Lancamento[];
+  nextId: number;
+  nomePagina?: string;  // opcional, até 80 caracteres (ex.: "Maio 2026")
 }
 ```
 
 - **entradas:** lista de ganhos  
 - **economias:** lista de valores guardados (descontam do saldo como gastos)  
 - **saidas:** lista de gastos  
-- Descrição vazia ao salvar vira `"Entrada"`, `"Economia"` ou `"Saída"`
+- **nomePagina:** título personalizado da planilha; vazio exibe **"Planejador de Finanças"**
 
 ---
 
 ## Funcionalidades atuais
 
+### Cabeçalho
+
+- Campo **Nome da planilha** no topo (ex.: `Maio 2026`); salvo em `localStorage` ao sair do campo (`blur`). Placeholder padrão: **Planejador de Finanças**.
+
 ### Lançamentos
 
 - Três colunas: entradas, economias e saídas, cada uma com formulário (descrição + valor) e lista com botão remover (×).
+- **Descrição e valor obrigatórios** (`required` no HTML + validação no componente); botão desabilitado se descrição vazia ou valor ≤ 0.
 - Valores monetários via diretiva `appBrlCurrency` e pipe `brl` (formato pt-BR, 2 casas decimais).
-- Não aceita valores ≤ 0 ao adicionar.
 - **Persistência local:** ao adicionar ou remover, o estado (`entradas`, `economias`, `saídas`, `nextId`) é salvo em `localStorage`. Ao abrir a página, os dados são restaurados automaticamente. JSON inválido ou corrompido é ignorado (começa vazio). Dados antigos sem `economias` carregam com lista vazia.
 
 ### Saldo
@@ -140,6 +152,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Feature | Inputs obrigatórios (descrição + valor); nome personalizado da planilha com persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
 | 2026-05-27 | Docs | Troubleshooting: erro `<path> attribute d` no console (extensão do navegador, não Chart.js) | `docs/aprendizados-grafico-chartjs.md` |
 | 2026-05-27 | Docs | Aprendizados e checklist do gráfico Chart.js + Angular | `docs/aprendizados-grafico-chartjs.md` |
 | 2026-05-27 | Fix | Gráfico: init após layout (`afterNextRender`), destroy/recriação do canvas, labels únicas por tipo, `economias: null` no storage | `app.component.ts`, `planilha-storage.service.ts` |

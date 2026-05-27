@@ -41,6 +41,7 @@ export class AppComponent implements OnInit, OnDestroy {
   saidas: Lancamento[] = [];
   economias: Lancamento[] = [];
 
+  nomePagina = '';
   descricaoEntrada = '';
   valorEntrada = 0;
   descricaoSaida = '';
@@ -104,6 +105,11 @@ export class AppComponent implements OnInit, OnDestroy {
     return this.totalEntradas - this.totalSaidas - this.totalEconomias;
   }
 
+  get tituloPagina(): string {
+    const nome = this.nomePagina.trim();
+    return nome || 'Planejador de Finanças';
+  }
+
   get saldoClasse(): string {
     if (this.saldo < 0) {
       return 'saldo-negativo';
@@ -129,14 +135,18 @@ export class AppComponent implements OnInit, OnDestroy {
     this.chart = undefined;
   }
 
+  salvarNomePagina(): void {
+    this.persistir();
+  }
+
   adicionarEntrada(): void {
-    if (!this.podeAdicionar(this.valorEntrada)) {
+    if (!this.podeAdicionar(this.descricaoEntrada, this.valorEntrada)) {
       return;
     }
 
     this.entradas.push({
       id: this.nextId++,
-      descricao: this.descricaoEntrada.trim() || 'Entrada',
+      descricao: this.descricaoEntrada.trim(),
       valor: this.asNumero(this.valorEntrada),
     });
 
@@ -147,13 +157,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   adicionarSaida(): void {
-    if (!this.podeAdicionar(this.valorSaida)) {
+    if (!this.podeAdicionar(this.descricaoSaida, this.valorSaida)) {
       return;
     }
 
     this.saidas.push({
       id: this.nextId++,
-      descricao: this.descricaoSaida.trim() || 'Saída',
+      descricao: this.descricaoSaida.trim(),
       valor: this.asNumero(this.valorSaida),
     });
 
@@ -164,13 +174,13 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   adicionarEconomia(): void {
-    if (!this.podeAdicionar(this.valorEconomia)) {
+    if (!this.podeAdicionar(this.descricaoEconomia, this.valorEconomia)) {
       return;
     }
 
     this.economias.push({
       id: this.nextId++,
-      descricao: this.descricaoEconomia.trim() || 'Economia',
+      descricao: this.descricaoEconomia.trim(),
       valor: this.asNumero(this.valorEconomia),
     });
 
@@ -208,19 +218,22 @@ export class AppComponent implements OnInit, OnDestroy {
     this.saidas = estado.saidas;
     this.economias = estado.economias ?? [];
     this.nextId = estado.nextId;
+    this.nomePagina = estado.nomePagina ?? '';
   }
 
   private persistir(): void {
+    const nome = this.nomePagina.trim();
     this.storage.salvar({
       entradas: this.entradas,
       saidas: this.saidas,
       economias: this.economias,
       nextId: this.nextId,
+      nomePagina: nome || undefined,
     });
   }
 
-  private podeAdicionar(valor: number): boolean {
-    return this.asNumero(valor) > 0;
+  private podeAdicionar(descricao: string, valor: number): boolean {
+    return descricao.trim().length > 0 && this.asNumero(valor) > 0;
   }
 
   private asNumero(valor: unknown): number {

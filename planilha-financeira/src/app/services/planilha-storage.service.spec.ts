@@ -70,6 +70,34 @@ describe('PlanilhaStorageService', () => {
     expect(service.carregar()).toBeNull();
   });
 
+  it('should save and load nomePagina', () => {
+    const estado = {
+      entradas: [],
+      saidas: [],
+      economias: [],
+      nextId: 1,
+      nomePagina: 'Maio 2026',
+    };
+
+    service.salvar(estado);
+    expect(service.carregar()).toEqual(estado);
+  });
+
+  it('should ignore invalid nomePagina', () => {
+    localStorage.setItem(
+      'planilha-financeira:v1',
+      JSON.stringify({
+        entradas: [{ id: 1, descricao: 'Salário', valor: 500 }],
+        saidas: [],
+        economias: [],
+        nextId: 2,
+        nomePagina: 123,
+      }),
+    );
+
+    expect(service.carregar()?.nomePagina).toBeUndefined();
+  });
+
   it('should reject lists with invalid lancamentos', () => {
     localStorage.setItem(
       'planilha-financeira:v1',
