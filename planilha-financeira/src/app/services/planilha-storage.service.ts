@@ -62,7 +62,7 @@ export class PlanilhaStorageService {
 
     const economiasBruto = obj['economias'];
     const economias =
-      economiasBruto === undefined
+      economiasBruto === undefined || economiasBruto === null
         ? []
         : this.validarLista(economiasBruto);
     if (economias === null) {

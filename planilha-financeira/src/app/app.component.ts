@@ -1,10 +1,10 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
   OnDestroy,
   OnInit,
   ViewChild,
+  afterNextRender,
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -31,10 +31,11 @@ interface CategoriaGrafico {
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
+export class AppComponent implements OnInit, OnDestroy {
   @ViewChild('pieChart') pieChartRef!: ElementRef<HTMLCanvasElement>;
 
   private readonly storage = inject(PlanilhaStorageService);
+  private graficoInicializado = false;
 
   entradas: Lancamento[] = [];
   saidas: Lancamento[] = [];
@@ -113,16 +114,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     return 'saldo-alerta';
   }
 
+  constructor() {
+    afterNextRender(() => {
+      this.inicializarGrafico();
+    });
+  }
+
   ngOnInit(): void {
     this.carregarDados();
   }
 
-  ngAfterViewInit(): void {
-    this.criarGrafico();
-  }
-
   ngOnDestroy(): void {
     this.chart?.destroy();
+    this.chart = undefined;
   }
 
   adicionarEntrada(): void {
@@ -202,7 +206,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.entradas = estado.entradas;
     this.saidas = estado.saidas;
-    this.economias = estado.economias;
+    this.economias = estado.economias ?? [];
     this.nextId = estado.nextId;
   }
 
@@ -227,6 +231,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private agruparPorCategoria(
     lancamentos: Lancamento[],
     nomePadrao: string,
+    prefixoLabel: string,
   ): CategoriaGrafico[] {
     const mapa = new Map<string, CategoriaGrafico>();
 
@@ -238,7 +243,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       if (existente) {
         existente.valor += lancamento.valor;
       } else {
-        mapa.set(chave, { label: nome, valor: lancamento.valor });
+        mapa.set(chave, {
+          label: `${prefixoLabel}${nome}`,
+          valor: lancamento.valor,
+        });
       }
     }
 
@@ -252,9 +260,13 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     dados: number[];
     cores: string[];
   } {
-    const ganhos = this.agruparPorCategoria(this.entradas, 'Entrada');
-    const economias = this.agruparPorCategoria(this.economias, 'Economia');
-    const gastos = this.agruparPorCategoria(this.saidas, 'Saída');
+    const ganhos = this.agruparPorCategoria(this.entradas, 'Entrada', 'Ganho: ');
+    const economias = this.agruparPorCategoria(
+      this.economias ?? [],
+      'Economia',
+      'Economia: ',
+    );
+    const gastos = this.agruparPorCategoria(this.saidas, 'Saída', 'Gasto: ');
     const fatias = [...ganhos, ...economias, ...gastos];
 
     const coresGanhos = ganhos.map(
@@ -274,7 +286,24 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     };
   }
 
+  private inicializarGrafico(): void {
+    if (this.graficoInicializado || !this.pieChartRef?.nativeElement) {
+      return;
+    }
+
+    this.graficoInicializado = true;
+    this.criarGrafico();
+    this.atualizarGrafico();
+  }
+
   private criarGrafico(): void {
+    if (!this.pieChartRef?.nativeElement) {
+      return;
+    }
+
+    this.chart?.destroy();
+    this.chart = undefined;
+
     const ctx = this.pieChartRef.nativeElement.getContext('2d');
     if (!ctx) {
       return;
@@ -305,7 +334,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           tooltip: {
             callbacks: {
               label: (context) => {
-                const valor = context.parsed ?? 0;
+                const valorBruto = context.parsed ?? context.raw;
+                const valor =
+                  typeof valorBruto === 'number' && Number.isFinite(valorBruto)
+                    ? valorBruto
+                    : 0;
                 const texto = valor.toLocaleString('pt-BR', {
                   style: 'currency',
                   currency: 'BRL',
@@ -320,10 +353,16 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     this.chart = new Chart(ctx, config);
+    this.chart.resize();
   }
 
   private atualizarGrafico(): void {
+    if (!this.pieChartRef?.nativeElement) {
+      return;
+    }
+
     if (!this.chart) {
+      this.criarGrafico();
       return;
     }
 
@@ -333,5 +372,6 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chart.data.datasets[0].data = dados;
     this.chart.data.datasets[0].backgroundColor = cores;
     this.chart.update();
+    this.chart.resize();
   }
 }

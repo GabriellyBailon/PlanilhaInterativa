@@ -38,6 +38,8 @@ npm run build      # build de produção
 ```
 PlanilhaInterativa/
 ├── CONTEXTO.md                 ← este arquivo (manter atualizado)
+├── docs/
+│   └── aprendizados-grafico-chartjs.md  ← fixes e armadilhas Chart.js + Angular
 ├── planilha-financeira/
 │   ├── src/
 │   │   ├── app/
@@ -92,7 +94,7 @@ interface Lancamento {
 ### Gráfico de pizza (`app.component.ts`)
 
 - Título na UI: **"Distribuição por categoria"**
-- **Agrupamento:** lançamentos com o **mesmo nome** (descrição, case-insensitive) são somados em uma fatia.
+- **Agrupamento:** lançamentos com o **mesmo nome** (descrição, case-insensitive) são somados em uma fatia. No gráfico, cada fatia é prefixada por tipo (`Ganho:`, `Economia:`, `Gasto:`) para evitar conflito entre categorias homônimas.
 - **Ganhos** (entradas): fatias em tons de **verde** (`coresGanhos`).
 - **Economias:** fatias com paleta **vibrante** (`coresEconomias` — magenta, ciano, amarelo elétrico, etc.).
 - **Gastos** (saídas): fatias com paleta variada (`coresGastos`).
@@ -126,7 +128,7 @@ interface Lancamento {
 
 - Manter UI e textos em **português (Brasil)**.
 - Preferir mudanças mínimas; reutilizar `agruparPorCategoria`, `brl`, `appBrlCurrency`.
-- Novos comportamentos do gráfico: ajustar `obterDadosGrafico()` e testes em `app.component.spec.ts`.
+- Novos comportamentos do gráfico: ajustar `obterDadosGrafico()` e testes em `app.component.spec.ts`. Consultar **`docs/aprendizados-grafico-chartjs.md`** antes de alterar ciclo de vida do Chart.js ou persistência.
 - Não commitar `node_modules/`, `dist/`, `.angular/cache/`.
 - Após mudanças de comportamento: **atualizar este `CONTEXTO.md`** e manter `planilha-financeira/README.md` alinhado (visão do usuário).
 
@@ -138,6 +140,8 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Docs | Aprendizados e checklist do gráfico Chart.js + Angular | `docs/aprendizados-grafico-chartjs.md` |
+| 2026-05-27 | Fix | Gráfico: init após layout (`afterNextRender`), destroy/recriação do canvas, labels únicas por tipo, `economias: null` no storage | `app.component.ts`, `planilha-storage.service.ts` |
 | 2026-05-27 | Feature | Seção **Economias**: CRUD, desconta do saldo, agrupamento no gráfico com cores vibrantes, persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
 | 2026-05-27 | Feature | Persistência em localStorage para entradas, saídas e nextId | `planilha-storage.service.ts`, `app.component.ts`, specs |
 | 2026-05-27 | Docs | README alinhado com gráfico por categoria e agrupamento de ganhos/gastos | `planilha-financeira/README.md` |

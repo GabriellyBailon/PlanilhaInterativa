@@ -43,7 +43,7 @@ describe('AppComponent', () => {
     const dados = (app as unknown as { obterDadosGrafico(): { labels: string[]; dados: number[] } })
       .obterDadosGrafico();
 
-    expect(dados.labels).toEqual(['Aluguel', 'Mercado']);
+    expect(dados.labels).toEqual(['Gasto: Aluguel', 'Gasto: Mercado']);
     expect(dados.dados).toEqual([150, 80]);
   });
 
@@ -60,7 +60,7 @@ describe('AppComponent', () => {
     const dados = (app as unknown as { obterDadosGrafico(): { labels: string[]; dados: number[] } })
       .obterDadosGrafico();
 
-    expect(dados.labels).toEqual(['Freela', 'Salário']);
+    expect(dados.labels).toEqual(['Ganho: Freela', 'Ganho: Salário']);
     expect(dados.dados).toEqual([300, 2500]);
   });
 
@@ -88,7 +88,7 @@ describe('AppComponent', () => {
     const dados = (app as unknown as { obterDadosGrafico(): { labels: string[]; dados: number[] } })
       .obterDadosGrafico();
 
-    expect(dados.labels).toEqual(['Investimento', 'Reserva']);
+    expect(dados.labels).toEqual(['Economia: Investimento', 'Economia: Reserva']);
     expect(dados.dados).toEqual([80, 150]);
   });
 
