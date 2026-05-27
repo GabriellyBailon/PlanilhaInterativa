@@ -16,6 +16,7 @@
 - [ ] Garantir **labels únicas** no array do gráfico quando o mesmo nome pode existir em tipos diferentes (ganho vs economia vs gasto).
 - [ ] Em `atualizarGrafico()`, se `this.chart` não existir, chamar `criarGrafico()` em vez de retornar em silêncio.
 - [ ] Validar `localStorage`: campos novos opcionais devem aceitar `undefined` **e** `null` sem invalidar o estado inteiro.
+- [ ] Erro `<path> attribute d: Expected number` com trecho `tc0.2,0,0.4-0.2,0` → em geral é **extensão do navegador**, não o Chart.js (ver seção 7).
 
 ---
 
@@ -224,6 +225,50 @@ Evita erro se `parsed` vier em formato inesperado em alguma versão/tipo de grá
 
 ---
 
+## 7. Erro de SVG no console (`<path> attribute d`) — falso positivo
+
+> **Não é bug do app.** O Planejador de Finanças desenha o gráfico em **`<canvas>`** (Chart.js). Não há elementos `<svg>` nem `<path>` no código da aplicação.
+
+### Sintoma
+
+No console do Chrome/Edge aparece algo como:
+
+```text
+Error: <path> attribute d: Expected number, "…               tc0.2,0,0.4-0.2,0…".
+```
+
+O usuário pode associar o aviso ao gráfico de pizza, mas o app **não gera** esse `d`.
+
+### Causa
+
+Extensões do navegador (muito comuns: **tradutor automático de página**, Grammarly, overlays) injetam ícones SVG com `path` malformado. O trecho `tc0.2,0,0.4-0.2,0` indica comandos SVG colados de forma inválida (`t` + `c`), típico de script de extensão — não de Chart.js.
+
+O mesmo padrão de mensagem já foi reportado em outros sites (ex.: extensões que usam `translateContent.js` + jQuery).
+
+### Como confirmar
+
+1. Abrir `http://localhost:4200` em **janela anônima** (extensões costumam ficar desativadas).
+2. No DevTools → **Console**, expandir o stack trace do erro:
+   - `chrome-extension://...` ou `content.js` → extensão.
+   - Apenas arquivos do Angular (`app.component.ts`, etc.) → aí sim investigar dados do gráfico (valores `NaN`, container com altura 0).
+
+### Correção (lado do usuário / ambiente)
+
+- Desativar a extensão suspeita ou configurá-la para **não traduzir** `localhost` e o domínio de produção do app.
+- Testar em outro navegador sem extensões.
+
+**Não é necessário alterar** `app.component.ts` nem a config do Chart.js por causa desse aviso, quando o stack aponta para extensão.
+
+### Se o erro persistir sem extensões
+
+Aí vale revisar o gráfico (seções 1–3 deste documento): dados inválidos, canvas em uso, container sem tamanho. Erros reais do Chart.js no canvas raramente aparecem como `<path> attribute d`.
+
+### Regra
+
+**Antes de debugar o gráfico por esse log, olhar o stack trace.** Se for extensão, ignorar para fins de correção do app.
+
+---
+
 ## Ordem das fatias no gráfico (comportamento esperado)
 
 1. Categorias de **ganhos** (A–Z, `pt-BR`)
@@ -250,4 +295,5 @@ Paleta: verde (`coresGanhos`), vibrante (`coresEconomias`), variada (`coresGasto
 
 | Data | O que foi registrado |
 |------|----------------------|
+| 2026-05-27 | Seção 7: erro `<path> attribute d` / `tc0.2...` — falso positivo de extensão do navegador, não do Chart.js |
 | 2026-05-27 | Fixes após seção Economias: canvas em uso, `afterNextRender`, `resize`, labels prefixadas, `economias: null` no storage |

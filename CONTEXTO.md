@@ -140,6 +140,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Docs | Troubleshooting: erro `<path> attribute d` no console (extensão do navegador, não Chart.js) | `docs/aprendizados-grafico-chartjs.md` |
 | 2026-05-27 | Docs | Aprendizados e checklist do gráfico Chart.js + Angular | `docs/aprendizados-grafico-chartjs.md` |
 | 2026-05-27 | Fix | Gráfico: init após layout (`afterNextRender`), destroy/recriação do canvas, labels únicas por tipo, `economias: null` no storage | `app.component.ts`, `planilha-storage.service.ts` |
 | 2026-05-27 | Feature | Seção **Economias**: CRUD, desconta do saldo, agrupamento no gráfico com cores vibrantes, persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
