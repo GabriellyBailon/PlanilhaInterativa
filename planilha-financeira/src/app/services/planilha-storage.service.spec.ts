@@ -20,11 +20,30 @@ describe('PlanilhaStorageService', () => {
     const estado = {
       entradas: [{ id: 1, descricao: 'Salário', valor: 500 }],
       saidas: [{ id: 2, descricao: 'Aluguel', valor: 200 }],
-      nextId: 3,
+      economias: [{ id: 3, descricao: 'Reserva', valor: 100 }],
+      nextId: 4,
     };
 
     service.salvar(estado);
     expect(service.carregar()).toEqual(estado);
+  });
+
+  it('should load legacy estado without economias as empty list', () => {
+    localStorage.setItem(
+      'planilha-financeira:v1',
+      JSON.stringify({
+        entradas: [{ id: 1, descricao: 'Salário', valor: 500 }],
+        saidas: [],
+        nextId: 2,
+      }),
+    );
+
+    expect(service.carregar()).toEqual({
+      entradas: [{ id: 1, descricao: 'Salário', valor: 500 }],
+      saidas: [],
+      economias: [],
+      nextId: 2,
+    });
   });
 
   it('should reject invalid JSON payload', () => {
@@ -38,6 +57,7 @@ describe('PlanilhaStorageService', () => {
       JSON.stringify({
         entradas: [{ id: 1, descricao: 'Ok', valor: -10 }],
         saidas: [],
+        economias: [],
         nextId: 2,
       }),
     );

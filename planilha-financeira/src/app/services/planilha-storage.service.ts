@@ -9,6 +9,7 @@ export interface LancamentoPersistido {
 export interface EstadoPlanilha {
   entradas: LancamentoPersistido[];
   saidas: LancamentoPersistido[];
+  economias: LancamentoPersistido[];
   nextId: number;
 }
 
@@ -59,13 +60,22 @@ export class PlanilhaStorageService {
       return null;
     }
 
+    const economiasBruto = obj['economias'];
+    const economias =
+      economiasBruto === undefined
+        ? []
+        : this.validarLista(economiasBruto);
+    if (economias === null) {
+      return null;
+    }
+
     const nextIdBruto = obj['nextId'];
     let nextId =
       typeof nextIdBruto === 'number' && Number.isInteger(nextIdBruto) && nextIdBruto > 0
         ? nextIdBruto
         : 1;
 
-    const maiorId = [...entradas, ...saidas].reduce(
+    const maiorId = [...entradas, ...saidas, ...economias].reduce(
       (max, item) => Math.max(max, item.id),
       0,
     );
@@ -73,7 +83,7 @@ export class PlanilhaStorageService {
       nextId = maiorId + 1;
     }
 
-    return { entradas, saidas, nextId };
+    return { entradas, saidas, economias, nextId };
   }
 
   private validarLista(valor: unknown): LancamentoPersistido[] | null {

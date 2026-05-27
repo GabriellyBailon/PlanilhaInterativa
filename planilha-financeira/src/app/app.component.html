@@ -117,6 +117,61 @@
         <strong>{{ totalSaidas | brl }}</strong>
       </p>
     </section>
+
+    <section class="coluna coluna-economia">
+      <h2>Economias</h2>
+
+      <form class="formulario" (ngSubmit)="adicionarEconomia()">
+        <label for="descricao-economia">Descrição</label>
+        <input
+          id="descricao-economia"
+          type="text"
+          [(ngModel)]="descricaoEconomia"
+          name="descricaoEconomia"
+          placeholder="Ex.: Reserva de emergência"
+        />
+
+        <label for="valor-economia">Valor</label>
+        <input
+          id="valor-economia"
+          type="text"
+          appBrlCurrency
+          [(ngModel)]="valorEconomia"
+          name="valorEconomia"
+          placeholder="R$ 0,00"
+          inputmode="numeric"
+        />
+
+        <button type="submit" [disabled]="valorEconomia <= 0">
+          Adicionar economia
+        </button>
+      </form>
+
+      <ul class="lista" *ngIf="economias.length > 0; else vazioEconomias">
+        <li class="item" *ngFor="let item of economias">
+          <span>{{ item.descricao }}</span>
+          <span class="valor economia">
+            {{ item.valor | brl }}
+          </span>
+          <button
+            type="button"
+            class="remover"
+            (click)="removerEconomia(item.id)"
+            aria-label="Remover economia"
+          >
+            ×
+          </button>
+        </li>
+      </ul>
+      <ng-template #vazioEconomias>
+        <p class="vazio">Nenhuma economia registrada.</p>
+      </ng-template>
+
+      <p class="subtotal">
+        Total de economias:
+        <strong>{{ totalEconomias | brl }}</strong>
+      </p>
+    </section>
   </div>
 
   <section class="grafico-secao">
@@ -124,11 +179,14 @@
     <div class="grafico-container">
       <canvas
         #pieChart
-        aria-label="Gráfico de pizza com ganhos e gastos agrupados por categoria"
+        aria-label="Gráfico de pizza com ganhos, economias e gastos agrupados por categoria"
       ></canvas>
     </div>
-    <p class="grafico-legenda" *ngIf="totalEntradas === 0 && totalSaidas === 0">
-      Adicione entradas ou saídas para visualizar o gráfico.
+    <p
+      class="grafico-legenda"
+      *ngIf="totalEntradas === 0 && totalSaidas === 0 && totalEconomias === 0"
+    >
+      Adicione entradas, economias ou saídas para visualizar o gráfico.
     </p>
   </section>
 </main>

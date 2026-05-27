@@ -9,7 +9,7 @@
 
 ## Visão geral
 
-Aplicação web **Planejador de Finanças** para registrar **entradas (ganhos)** e **saídas (gastos)**, exibir saldo e um **gráfico de pizza** por categorias. Interface em português (pt-BR), valores em Real (R$).
+Aplicação web **Planejador de Finanças** para registrar **entradas (ganhos)**, **economias** e **saídas (gastos)**, exibir saldo e um **gráfico de pizza** por categorias. Interface em português (pt-BR), valores em Real (R$).
 
 | Item | Valor |
 |------|--------|
@@ -66,8 +66,9 @@ interface Lancamento {
 ```
 
 - **entradas:** lista de ganhos  
+- **economias:** lista de valores guardados (descontam do saldo como gastos)  
 - **saidas:** lista de gastos  
-- Descrição vazia ao salvar vira `"Entrada"` ou `"Saída"`
+- Descrição vazia ao salvar vira `"Entrada"`, `"Economia"` ou `"Saída"`
 
 ---
 
@@ -75,14 +76,14 @@ interface Lancamento {
 
 ### Lançamentos
 
-- Duas colunas: entradas e saídas, com formulário (descrição + valor) e lista com botão remover (×).
+- Três colunas: entradas, economias e saídas, cada uma com formulário (descrição + valor) e lista com botão remover (×).
 - Valores monetários via diretiva `appBrlCurrency` e pipe `brl` (formato pt-BR, 2 casas decimais).
 - Não aceita valores ≤ 0 ao adicionar.
-- **Persistência local:** ao adicionar ou remover, o estado (`entradas`, `saídas`, `nextId`) é salvo em `localStorage`. Ao abrir a página, os dados são restaurados automaticamente. JSON inválido ou corrompido é ignorado (começa vazio).
+- **Persistência local:** ao adicionar ou remover, o estado (`entradas`, `economias`, `saídas`, `nextId`) é salvo em `localStorage`. Ao abrir a página, os dados são restaurados automaticamente. JSON inválido ou corrompido é ignorado (começa vazio). Dados antigos sem `economias` carregam com lista vazia.
 
 ### Saldo
 
-- `saldo = totalEntradas - totalSaidas`
+- `saldo = totalEntradas - totalSaidas - totalEconomias`
 - Classes CSS no header:
   - `saldo-negativo`: saldo &lt; 0 (vermelho)
   - `saldo-alerta`: 0 ≤ saldo ≤ 100 (amarelo)
@@ -93,8 +94,9 @@ interface Lancamento {
 - Título na UI: **"Distribuição por categoria"**
 - **Agrupamento:** lançamentos com o **mesmo nome** (descrição, case-insensitive) são somados em uma fatia.
 - **Ganhos** (entradas): fatias em tons de **verde** (`coresGanhos`).
+- **Economias:** fatias com paleta **vibrante** (`coresEconomias` — magenta, ciano, amarelo elétrico, etc.).
 - **Gastos** (saídas): fatias com paleta variada (`coresGastos`).
-- Ordem das fatias: categorias de ganho (A–Z, `pt-BR`), depois categorias de gasto (A–Z).
+- Ordem das fatias: ganhos (A–Z), economias (A–Z), gastos (A–Z), todos com `pt-BR`.
 - Atualiza ao adicionar/remover lançamento; tooltip mostra `Nome: R$ valor`.
 - Canvas: `#pieChart` em `app.component.html`.
 
@@ -136,6 +138,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Feature | Seção **Economias**: CRUD, desconta do saldo, agrupamento no gráfico com cores vibrantes, persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
 | 2026-05-27 | Feature | Persistência em localStorage para entradas, saídas e nextId | `planilha-storage.service.ts`, `app.component.ts`, specs |
 | 2026-05-27 | Docs | README alinhado com gráfico por categoria e agrupamento de ganhos/gastos | `planilha-financeira/README.md` |
 | 2026-05-27 | Feature | Gráfico agrupa **gastos** por nome; cada categoria com cor distinta | `app.component.ts`, `app.component.html` |

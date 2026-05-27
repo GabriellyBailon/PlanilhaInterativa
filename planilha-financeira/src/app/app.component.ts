@@ -38,11 +38,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   entradas: Lancamento[] = [];
   saidas: Lancamento[] = [];
+  economias: Lancamento[] = [];
 
   descricaoEntrada = '';
   valorEntrada = 0;
   descricaoSaida = '';
   valorSaida = 0;
+  descricaoEconomia = '';
+  valorEconomia = 0;
 
   private nextId = 1;
   private chart?: Chart;
@@ -71,6 +74,18 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     '#0ea5e9',
     '#84cc16',
   ];
+  private readonly coresEconomias = [
+    '#ff00ff',
+    '#00e5ff',
+    '#ff1744',
+    '#ffea00',
+    '#d500f9',
+    '#00e676',
+    '#ff6d00',
+    '#304ffe',
+    '#f50057',
+    '#76ff03',
+  ];
 
   get totalEntradas(): number {
     return this.entradas.reduce((sum, item) => sum + item.valor, 0);
@@ -80,8 +95,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.saidas.reduce((sum, item) => sum + item.valor, 0);
   }
 
+  get totalEconomias(): number {
+    return this.economias.reduce((sum, item) => sum + item.valor, 0);
+  }
+
   get saldo(): number {
-    return this.totalEntradas - this.totalSaidas;
+    return this.totalEntradas - this.totalSaidas - this.totalEconomias;
   }
 
   get saldoClasse(): string {
@@ -140,6 +159,23 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.atualizarGrafico();
   }
 
+  adicionarEconomia(): void {
+    if (!this.podeAdicionar(this.valorEconomia)) {
+      return;
+    }
+
+    this.economias.push({
+      id: this.nextId++,
+      descricao: this.descricaoEconomia.trim() || 'Economia',
+      valor: this.asNumero(this.valorEconomia),
+    });
+
+    this.descricaoEconomia = '';
+    this.valorEconomia = 0;
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
   removerEntrada(id: number): void {
     this.entradas = this.entradas.filter((item) => item.id !== id);
     this.persistir();
@@ -152,6 +188,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.atualizarGrafico();
   }
 
+  removerEconomia(id: number): void {
+    this.economias = this.economias.filter((item) => item.id !== id);
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
   private carregarDados(): void {
     const estado = this.storage.carregar();
     if (!estado) {
@@ -160,6 +202,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.entradas = estado.entradas;
     this.saidas = estado.saidas;
+    this.economias = estado.economias;
     this.nextId = estado.nextId;
   }
 
@@ -167,6 +210,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.storage.salvar({
       entradas: this.entradas,
       saidas: this.saidas,
+      economias: this.economias,
       nextId: this.nextId,
     });
   }
@@ -209,11 +253,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     cores: string[];
   } {
     const ganhos = this.agruparPorCategoria(this.entradas, 'Entrada');
+    const economias = this.agruparPorCategoria(this.economias, 'Economia');
     const gastos = this.agruparPorCategoria(this.saidas, 'Saída');
-    const fatias = [...ganhos, ...gastos];
+    const fatias = [...ganhos, ...economias, ...gastos];
 
     const coresGanhos = ganhos.map(
       (_, i) => this.coresGanhos[i % this.coresGanhos.length],
+    );
+    const coresEconomias = economias.map(
+      (_, i) => this.coresEconomias[i % this.coresEconomias.length],
     );
     const coresGastos = gastos.map(
       (_, i) => this.coresGastos[i % this.coresGastos.length],
@@ -222,7 +270,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     return {
       labels: fatias.map((f) => f.label),
       dados: fatias.map((f) => f.valor),
-      cores: [...coresGanhos, ...coresGastos],
+      cores: [...coresGanhos, ...coresEconomias, ...coresGastos],
     };
   }
 

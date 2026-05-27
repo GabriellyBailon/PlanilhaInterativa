@@ -64,6 +64,34 @@ describe('AppComponent', () => {
     expect(dados.dados).toEqual([300, 2500]);
   });
 
+  it('should subtract economias from saldo like saidas', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 1000 }];
+    app.saidas = [{ id: 2, descricao: 'Aluguel', valor: 300 }];
+    app.economias = [{ id: 3, descricao: 'Reserva', valor: 200 }];
+
+    expect(app.saldo).toBe(500);
+  });
+
+  it('should group economias with the same name for the chart', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.economias = [
+      { id: 1, descricao: 'Reserva', valor: 100 },
+      { id: 2, descricao: 'reserva', valor: 50 },
+      { id: 3, descricao: 'Investimento', valor: 80 },
+    ];
+
+    const dados = (app as unknown as { obterDadosGrafico(): { labels: string[]; dados: number[] } })
+      .obterDadosGrafico();
+
+    expect(dados.labels).toEqual(['Investimento', 'Reserva']);
+    expect(dados.dados).toEqual([80, 150]);
+  });
+
   it('should persist lancamentos to localStorage and restore on init', () => {
     const fixture1 = TestBed.createComponent(AppComponent);
     const app1 = fixture1.componentInstance;
