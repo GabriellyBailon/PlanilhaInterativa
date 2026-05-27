@@ -17,7 +17,7 @@ Aplicação web **Planejador de Finanças** para registrar **entradas (ganhos)**
 | App Angular | `planilha-financeira/` |
 | Framework | Angular 19 (standalone components) |
 | Gráficos | Chart.js 4 (`chart.js/auto`) |
-| Persistência | Nenhuma (estado só em memória; recarregar a página zera os dados) |
+| Persistência | `localStorage` (chave `planilha-financeira:v1`) via `PlanilhaStorageService` |
 
 ---
 
@@ -44,7 +44,8 @@ PlanilhaInterativa/
 │   │   │   ├── app.component.ts/html/css   ← tela principal + gráfico
 │   │   │   ├── app.config.ts
 │   │   │   ├── directives/brl-currency.directive.ts
-│   │   │   └── pipes/brl.pipe.ts
+│   │   │   ├── pipes/brl.pipe.ts
+│   │   │   └── services/planilha-storage.service.ts
 │   │   ├── main.ts
 │   │   └── styles.css
 │   ├── angular.json
@@ -77,6 +78,7 @@ interface Lancamento {
 - Duas colunas: entradas e saídas, com formulário (descrição + valor) e lista com botão remover (×).
 - Valores monetários via diretiva `appBrlCurrency` e pipe `brl` (formato pt-BR, 2 casas decimais).
 - Não aceita valores ≤ 0 ao adicionar.
+- **Persistência local:** ao adicionar ou remover, o estado (`entradas`, `saídas`, `nextId`) é salvo em `localStorage`. Ao abrir a página, os dados são restaurados automaticamente. JSON inválido ou corrompido é ignorado (começa vazio).
 
 ### Saldo
 
@@ -102,7 +104,8 @@ interface Lancamento {
 
 | Arquivo | Responsabilidade |
 |---------|------------------|
-| `planilha-financeira/src/app/app.component.ts` | Estado, CRUD de lançamentos, agrupamento, Chart.js |
+| `planilha-financeira/src/app/app.component.ts` | Estado, CRUD de lançamentos, persistência, agrupamento, Chart.js |
+| `planilha-financeira/src/app/services/planilha-storage.service.ts` | Leitura/gravação e validação do estado em `localStorage` |
 | `planilha-financeira/src/app/app.component.html` | Layout, formulários, listas, canvas |
 | `planilha-financeira/src/app/app.component.css` | Estilos (saldo, colunas, gráfico) |
 | `planilha-financeira/src/app/directives/brl-currency.directive.ts` | Máscara/input BRL |
@@ -133,6 +136,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Feature | Persistência em localStorage para entradas, saídas e nextId | `planilha-storage.service.ts`, `app.component.ts`, specs |
 | 2026-05-27 | Docs | README alinhado com gráfico por categoria e agrupamento de ganhos/gastos | `planilha-financeira/README.md` |
 | 2026-05-27 | Feature | Gráfico agrupa **gastos** por nome; cada categoria com cor distinta | `app.component.ts`, `app.component.html` |
 | 2026-05-27 | Feature | Mesmo agrupamento por categoria aplicado aos **ganhos**; paleta verde para ganhos | `app.component.ts`, `app.component.spec.ts` |
@@ -142,7 +146,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 ## Pendências / ideias (não implementado)
 
-- Persistência (localStorage, API, etc.)
+- Sincronização com API / nuvem
 - Edição de lançamento existente
 - Filtro por período no gráfico
 - Separar gráficos de ganhos e gastos

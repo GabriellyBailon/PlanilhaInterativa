@@ -3,13 +3,16 @@ import {
   Component,
   ElementRef,
   OnDestroy,
+  OnInit,
   ViewChild,
+  inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgFor, NgIf } from '@angular/common';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import { BrlCurrencyDirective } from './directives/brl-currency.directive';
 import { BrlPipe } from './pipes/brl.pipe';
+import { PlanilhaStorageService } from './services/planilha-storage.service';
 
 interface Lancamento {
   id: number;
@@ -28,8 +31,10 @@ interface CategoriaGrafico {
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-export class AppComponent implements AfterViewInit, OnDestroy {
+export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('pieChart') pieChartRef!: ElementRef<HTMLCanvasElement>;
+
+  private readonly storage = inject(PlanilhaStorageService);
 
   entradas: Lancamento[] = [];
   saidas: Lancamento[] = [];
@@ -89,6 +94,10 @@ export class AppComponent implements AfterViewInit, OnDestroy {
     return 'saldo-alerta';
   }
 
+  ngOnInit(): void {
+    this.carregarDados();
+  }
+
   ngAfterViewInit(): void {
     this.criarGrafico();
   }
@@ -110,6 +119,7 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     this.descricaoEntrada = '';
     this.valorEntrada = 0;
+    this.persistir();
     this.atualizarGrafico();
   }
 
@@ -126,17 +136,39 @@ export class AppComponent implements AfterViewInit, OnDestroy {
 
     this.descricaoSaida = '';
     this.valorSaida = 0;
+    this.persistir();
     this.atualizarGrafico();
   }
 
   removerEntrada(id: number): void {
     this.entradas = this.entradas.filter((item) => item.id !== id);
+    this.persistir();
     this.atualizarGrafico();
   }
 
   removerSaida(id: number): void {
     this.saidas = this.saidas.filter((item) => item.id !== id);
+    this.persistir();
     this.atualizarGrafico();
+  }
+
+  private carregarDados(): void {
+    const estado = this.storage.carregar();
+    if (!estado) {
+      return;
+    }
+
+    this.entradas = estado.entradas;
+    this.saidas = estado.saidas;
+    this.nextId = estado.nextId;
+  }
+
+  private persistir(): void {
+    this.storage.salvar({
+      entradas: this.entradas,
+      saidas: this.saidas,
+      nextId: this.nextId,
+    });
   }
 
   private podeAdicionar(valor: number): boolean {

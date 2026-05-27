@@ -18,7 +18,7 @@ Aplicação Angular para controle de entradas (ganhos) e saídas (gastos), com f
   - Amarelo: saldo entre R$ 0,00 e R$ 100,00 (inclusive)
   - Vermelho: saldo negativo
 
-> Os dados ficam apenas em memória; ao recarregar a página, os lançamentos são perdidos.
+> Os lançamentos são **salvos automaticamente no navegador** (`localStorage`). Ao recarregar a página, entradas e saídas são restauradas no mesmo dispositivo.
 
 ## Como executar
 

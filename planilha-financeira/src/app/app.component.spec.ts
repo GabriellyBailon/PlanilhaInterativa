@@ -3,9 +3,14 @@ import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
+    localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [AppComponent],
     }).compileComponents();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
   });
 
   it('should create the app', () => {
@@ -57,5 +62,31 @@ describe('AppComponent', () => {
 
     expect(dados.labels).toEqual(['Freela', 'Salário']);
     expect(dados.dados).toEqual([300, 2500]);
+  });
+
+  it('should persist lancamentos to localStorage and restore on init', () => {
+    const fixture1 = TestBed.createComponent(AppComponent);
+    const app1 = fixture1.componentInstance;
+    fixture1.detectChanges();
+
+    app1.valorEntrada = 150;
+    app1.descricaoEntrada = 'Freela';
+    app1.adicionarEntrada();
+
+    app1.valorSaida = 50;
+    app1.descricaoSaida = 'Mercado';
+    app1.adicionarSaida();
+
+    const fixture2 = TestBed.createComponent(AppComponent);
+    fixture2.detectChanges();
+    const app2 = fixture2.componentInstance;
+
+    expect(app2.entradas).toEqual([
+      { id: 1, descricao: 'Freela', valor: 150 },
+    ]);
+    expect(app2.saidas).toEqual([
+      { id: 2, descricao: 'Mercado', valor: 50 },
+    ]);
+    expect(app2.saldo).toBe(100);
   });
 });
