@@ -1,0 +1,134 @@
+<main class="app">
+  <header class="header">
+    <h1>Planejador de Finanças</h1>
+    <p class="saldo" [class]="saldoClasse">
+      Saldo total:
+      <strong>{{ saldo | brl }}</strong>
+    </p>
+  </header>
+
+  <div class="colunas">
+    <section class="coluna coluna-entrada">
+      <h2>Entradas (Ganhos)</h2>
+
+      <form class="formulario" (ngSubmit)="adicionarEntrada()">
+        <label for="descricao-entrada">Descrição</label>
+        <input
+          id="descricao-entrada"
+          type="text"
+          [(ngModel)]="descricaoEntrada"
+          name="descricaoEntrada"
+          placeholder="Ex.: Salário"
+        />
+
+        <label for="valor-entrada">Valor</label>
+        <input
+          id="valor-entrada"
+          type="text"
+          appBrlCurrency
+          [(ngModel)]="valorEntrada"
+          name="valorEntrada"
+          placeholder="R$ 0,00"
+          inputmode="numeric"
+        />
+
+        <button type="submit" [disabled]="valorEntrada <= 0">
+          Adicionar ganho
+        </button>
+      </form>
+
+      <ul class="lista" *ngIf="entradas.length > 0; else vazioEntradas">
+        <li class="item" *ngFor="let item of entradas">
+          <span>{{ item.descricao }}</span>
+          <span class="valor entrada">
+            {{ item.valor | brl }}
+          </span>
+          <button
+            type="button"
+            class="remover"
+            (click)="removerEntrada(item.id)"
+            aria-label="Remover entrada"
+          >
+            ×
+          </button>
+        </li>
+      </ul>
+      <ng-template #vazioEntradas>
+        <p class="vazio">Nenhuma entrada registrada.</p>
+      </ng-template>
+
+      <p class="subtotal">
+        Total de ganhos:
+        <strong>{{ totalEntradas | brl }}</strong>
+      </p>
+    </section>
+
+    <section class="coluna coluna-saida">
+      <h2>Saídas (Gastos)</h2>
+
+      <form class="formulario" (ngSubmit)="adicionarSaida()">
+        <label for="descricao-saida">Descrição</label>
+        <input
+          id="descricao-saida"
+          type="text"
+          [(ngModel)]="descricaoSaida"
+          name="descricaoSaida"
+          placeholder="Ex.: Aluguel"
+        />
+
+        <label for="valor-saida">Valor</label>
+        <input
+          id="valor-saida"
+          type="text"
+          appBrlCurrency
+          [(ngModel)]="valorSaida"
+          name="valorSaida"
+          placeholder="R$ 0,00"
+          inputmode="numeric"
+        />
+
+        <button type="submit" [disabled]="valorSaida <= 0">
+          Adicionar gasto
+        </button>
+      </form>
+
+      <ul class="lista" *ngIf="saidas.length > 0; else vazioSaidas">
+        <li class="item" *ngFor="let item of saidas">
+          <span>{{ item.descricao }}</span>
+          <span class="valor saida">
+            {{ item.valor | brl }}
+          </span>
+          <button
+            type="button"
+            class="remover"
+            (click)="removerSaida(item.id)"
+            aria-label="Remover saída"
+          >
+            ×
+          </button>
+        </li>
+      </ul>
+      <ng-template #vazioSaidas>
+        <p class="vazio">Nenhuma saída registrada.</p>
+      </ng-template>
+
+      <p class="subtotal">
+        Total de gastos:
+        <strong>{{ totalSaidas | brl }}</strong>
+      </p>
+    </section>
+  </div>
+
+  <section class="grafico-secao">
+    <h2>Distribuição por categoria</h2>
+    <div class="grafico-container">
+      <canvas
+        #pieChart
+        aria-label="Gráfico de pizza com ganhos e gastos agrupados por categoria"
+      ></canvas>
+    </div>
+    <p class="grafico-legenda" *ngIf="totalEntradas === 0 && totalSaidas === 0">
+      Adicione entradas ou saídas para visualizar o gráfico.
+    </p>
+  </section>
+</main>

@@ -1,0 +1,31 @@
+---
+description: Manter CONTEXTO.md atualizado após features e ajustes
+alwaysApply: true
+---
+
+# Atualizar contexto do projeto
+
+Este repositório usa **`CONTEXTO.md`** na raiz do workspace como fonte de verdade para agentes.
+
+## Antes de implementar
+
+1. Leia `CONTEXTO.md` para entender estrutura, convenções e funcionalidades existentes.
+2. Não contradiga decisões documentadas sem atualizar o arquivo.
+
+## Depois de cada feature ou ajuste de comportamento
+
+Atualize `CONTEXTO.md` na **mesma sessão**, antes de encerrar a tarefa:
+
+1. **Última atualização** — data de hoje (`AAAA-MM-DD`).
+2. **Histórico de funcionalidades** — nova linha no topo da tabela: data, tipo (Feature / Fix / Refactor / Docs), descrição curta, arquivos principais.
+3. Se necessário, revise **Funcionalidades atuais**, **Arquivos-chave**, **Modelo de dados** ou **Pendências**.
+
+## O que não exige entrada no histórico
+
+- Correções de typo sem impacto em comportamento
+- Formatação pura
+- Dependências sem mudança de UX
+
+## Exemplo de linha no histórico
+
+`| 2026-06-01 | Feature | Persistência em localStorage para entradas e saídas | app.component.ts |`
