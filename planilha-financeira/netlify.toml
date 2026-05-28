@@ -1,40 +1,8 @@
-# Configuração de deployment do Netlify para Planilha Financeira
-
 [build]
-# Diretório raiz do projeto
-base = "planilha-financeira"
-# Comando de build
 command = "npm install && npm run build"
-# Diretório de saída
 publish = "dist/planilha-financeira/browser"
 
-# Configurações de headers para melhor cache e segurança
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-
-# Configurações específicas para Single Page Application (SPA)
-# Redirecionar todos os 404 para index.html para o Angular router funcionar
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-# Cache de arquivos com hash (build output do Angular)
-[[headers]]
-  for = "*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "index.html"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
