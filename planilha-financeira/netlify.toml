@@ -6,7 +6,7 @@ base = "."
 # Comando de build
 command = "npm install && npm run build"
 # Diretório de saída
-publish = "dist/planilha-financeira"
+publish = "dist/planilha-financeira/browser"
 
 # Configurações de headers para melhor cache e segurança
 [[headers]]
