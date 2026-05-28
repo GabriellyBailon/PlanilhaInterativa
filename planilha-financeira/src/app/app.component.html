@@ -227,36 +227,24 @@
 
       <aside
         class="resumo-percentuais"
-        *ngIf="totalMovimentado > 0"
+        *ngIf="totalEntradas > 0"
         aria-labelledby="resumo-percentuais-titulo"
       >
-        <h3 id="resumo-percentuais-titulo">Participação no valor total</h3>
+        <h3 id="resumo-percentuais-titulo">Em relação aos ganhos</h3>
         <p class="resumo-total">
-          Total movimentado:
-          <strong>{{ totalMovimentado | brl }}</strong>
+          Total de ganhos:
+          <strong>{{ totalEntradas | brl }}</strong>
         </p>
         <ul class="resumo-lista">
-          <li class="resumo-item resumo-ganhos">
-            <span class="resumo-rotulo">Ganhos</span>
-            <div
-              class="resumo-barra"
-              role="presentation"
-              [style.--fracao]="fracaoGanhosNoTotal"
-            ></div>
-            <span class="resumo-valores">
-              <strong>{{ formatarPercentual(fracaoGanhosNoTotal) }}</strong>
-              <span class="resumo-moeda">{{ totalEntradas | brl }}</span>
-            </span>
-          </li>
           <li class="resumo-item resumo-gastos">
             <span class="resumo-rotulo">Gastos</span>
             <div
               class="resumo-barra"
               role="presentation"
-              [style.--fracao]="fracaoGastosNoTotal"
+              [style.--fracao]="fracaoGastosDosGanhos"
             ></div>
             <span class="resumo-valores">
-              <strong>{{ formatarPercentual(fracaoGastosNoTotal) }}</strong>
+              <strong>{{ formatarPercentual(fracaoGastosDosGanhos) }}</strong>
               <span class="resumo-moeda">{{ totalSaidas | brl }}</span>
             </span>
           </li>
@@ -265,16 +253,16 @@
             <div
               class="resumo-barra"
               role="presentation"
-              [style.--fracao]="fracaoEconomiasNoTotal"
+              [style.--fracao]="fracaoEconomiasDosGanhos"
             ></div>
             <span class="resumo-valores">
-              <strong>{{ formatarPercentual(fracaoEconomiasNoTotal) }}</strong>
+              <strong>{{ formatarPercentual(fracaoEconomiasDosGanhos) }}</strong>
               <span class="resumo-moeda">{{ totalEconomias | brl }}</span>
             </span>
           </li>
         </ul>
         <p class="resumo-nota">
-          Percentuais sobre a soma de ganhos, gastos e economias (mesma base do gráfico).
+          Percentuais de gastos e economias sobre o total de ganhos.
         </p>
       </aside>
     </div>

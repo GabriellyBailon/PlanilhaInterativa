@@ -125,26 +125,21 @@ export class AppComponent implements OnInit, OnDestroy {
     return 'saldo-alerta';
   }
 
-  /** Soma de ganhos, gastos e economias — mesma base do gráfico de pizza. */
   get totalMovimentado(): number {
     return this.totalEntradas + this.totalSaidas + this.totalEconomias;
   }
 
-  get fracaoGanhosNoTotal(): number {
-    return this.fracaoDoTotal(this.totalEntradas);
+  get fracaoGastosDosGanhos(): number {
+    return this.fracaoDosGanhos(this.totalSaidas);
   }
 
-  get fracaoGastosNoTotal(): number {
-    return this.fracaoDoTotal(this.totalSaidas);
+  get fracaoEconomiasDosGanhos(): number {
+    return this.fracaoDosGanhos(this.totalEconomias);
   }
 
-  get fracaoEconomiasNoTotal(): number {
-    return this.fracaoDoTotal(this.totalEconomias);
-  }
-
-  private fracaoDoTotal(valor: number): number {
-    const total = this.totalMovimentado;
-    return total > 0 ? valor / total : 0;
+  private fracaoDosGanhos(valor: number): number {
+    const ganhos = this.totalEntradas;
+    return ganhos > 0 ? valor / ganhos : 0;
   }
 
   formatarPercentual(fracao: number): string {
