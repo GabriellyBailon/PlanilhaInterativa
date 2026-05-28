@@ -23,6 +23,8 @@ Aplicação web **Planejador de Finanças** para registrar **entradas (ganhos)**
 
 ## Como executar
 
+### Desenvolvimento local
+
 ```bash
 cd planilha-financeira
 npm install
@@ -31,16 +33,35 @@ npm test           # testes unitários (Karma + Jasmine)
 npm run build      # build de produção
 ```
 
+### Deploy no Netlify
+
+**Rápido:** Veja [GUIA-DEPLOY-NETLIFY.md](GUIA-DEPLOY-NETLIFY.md) para instruções completas.
+
+```bash
+# Opção 1: Deploy via Git (push automático)
+# Push para main → Netlify faz build e deploy automaticamente
+
+# Opção 2: Deploy manual
+cd planilha-financeira
+npm run build
+# Arrastar dist/planilha-financeira para Netlify ou usar CLI
+netlify deploy --prod --dir=dist/planilha-financeira
+```
+
 ---
 
 ## Estrutura de pastas
 
 ```
 PlanilhaInterativa/
-├── CONTEXTO.md                 ← este arquivo (manter atualizado)
+├── CONTEXTO.md                      ← este arquivo (manter atualizado)
+├── GUIA-DEPLOY-NETLIFY.md          ← instruções para publicação
 ├── docs/
 │   └── aprendizados-grafico-chartjs.md  ← fixes e armadilhas Chart.js + Angular
 ├── planilha-financeira/
+│   ├── netlify.toml                 ← configuração de build e headers
+│   ├── .netlifyignore               ← arquivos a ignorar no deploy
+│   ├── _redirects                   ← redireciona 404 para SPA
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── app.component.ts/html/css   ← tela principal + gráfico
@@ -165,6 +186,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Infra | Configuração de publicação via Netlify: netlify.toml, .netlifyignore, _redirects e guia de deploy | `netlify.toml`, `.netlifyignore`, `_redirects`, `GUIA-DEPLOY-NETLIFY.md` |
 | 2026-05-27 | Feature | Responsividade completa com media queries para mobile (480px), tablet (768px) e desktop (1024px+); ajustes de padding, font-size, gap e layouts | `app.component.css`, `styles.css` |
 | 2026-05-27 | Feature | Edição inline de lançamentos (descrição e valor) nas três colunas, com persistência | `app.component.ts/html/css`, `app.component.spec.ts` |
 | 2026-05-27 | Feature | Botão mostrar/ocultar resumo percentual ao lado do gráfico, com persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
