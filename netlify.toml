@@ -1,44 +1,12 @@
-# Configuração Netlify para Planilha Financeira
-
 [build]
-command = "npm run build"
-publish = "dist/planilha-financeira/browser"
-base = "planilha-financeira"
+  command = "cd planilha-financeira && npm install && npm run build"
+  publish = "planilha-financeira/dist/planilha-financeira/browser"
 
-# Node.js version e variáveis de ambiente
 [build.environment]
-NODE_VERSION = "18.20.0"
-NPM_VERSION = "10.5.0"
+  NODE_VERSION = "18"
 
-# Redireciona todas as rotas para index.html (necessário para Angular Router)
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
-# Headers para otimização de cache
-[[headers]]
-  for = "/"
-  [headers.values]
-    X-Frame-Options = "SAMEORIGIN"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-
-# Cache para assets estáticos (JS, CSS, etc)
-[[headers]]
-  for = "/assets/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Cache para bundle do Angular
-[[headers]]
-  for = "/*.bundle.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-# Cache menor para index.html (permite atualizações)
-[[headers]]
-  for = "/index.html"
-  [headers.values]
-    Cache-Control = "public, max-age=3600, must-revalidate"
