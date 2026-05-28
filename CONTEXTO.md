@@ -64,6 +64,7 @@ interface Lancamento {
   id: number;        // incremental em memória (nextId)
   descricao: string;
   valor: number;     // sempre > 0 ao adicionar
+  criadoEm?: string; // ISO 8601 — horário local no momento do lançamento (opcional em dados antigos)
 }
 
 interface EstadoPlanilha {
@@ -91,6 +92,7 @@ interface EstadoPlanilha {
 ### Lançamentos
 
 - Três colunas: entradas, economias e saídas, cada uma com formulário (descrição + valor) e lista com botão remover (×).
+- Cada lançamento na lista exibe **data e hora locais** ao lado do valor (ex.: `27/05/2026 20:56`), gravadas em `criadoEm` (ISO) ao adicionar. Lançamentos antigos sem data não mostram horário.
 - **Descrição e valor obrigatórios** (`required` no HTML + validação no componente); botão desabilitado se descrição vazia ou valor ≤ 0.
 - Valores monetários via diretiva `appBrlCurrency` e pipe `brl` (formato pt-BR, 2 casas decimais).
 - **Persistência local:** ao adicionar ou remover, o estado (`entradas`, `economias`, `saídas`, `nextId`) é salvo em `localStorage`. Ao abrir a página, os dados são restaurados automaticamente. JSON inválido ou corrompido é ignorado (começa vazio). Dados antigos sem `economias` carregam com lista vazia.
@@ -126,6 +128,7 @@ interface EstadoPlanilha {
 | `planilha-financeira/src/app/app.component.css` | Estilos (saldo, colunas, gráfico) |
 | `planilha-financeira/src/app/directives/brl-currency.directive.ts` | Máscara/input BRL |
 | `planilha-financeira/src/app/pipes/brl.pipe.ts` | Exibição BRL nas listas |
+| `planilha-financeira/src/app/pipes/data-hora-local.pipe.ts` | Formata `criadoEm` para `dd/MM/aaaa HH:mm` (pt-BR, fuso local) |
 | `planilha-financeira/src/app/app.component.spec.ts` | Testes (saldo, agrupamento no gráfico) |
 
 ### Métodos privados importantes (gráfico)
@@ -152,6 +155,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Feature | Data/hora local em cada lançamento (`criadoEm`), exibida na lista ao lado do valor | `app.component.ts/html/css`, `planilha-storage.service.ts`, `data-hora-local.pipe.ts`, specs |
 | 2026-05-27 | Feature | Inputs obrigatórios (descrição + valor); nome personalizado da planilha com persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
 | 2026-05-27 | Docs | Troubleshooting: erro `<path> attribute d` no console (extensão do navegador, não Chart.js) | `docs/aprendizados-grafico-chartjs.md` |
 | 2026-05-27 | Docs | Aprendizados e checklist do gráfico Chart.js + Angular | `docs/aprendizados-grafico-chartjs.md` |

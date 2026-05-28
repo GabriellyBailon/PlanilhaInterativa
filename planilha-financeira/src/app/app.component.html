@@ -55,10 +55,15 @@
 
       <ul class="lista" *ngIf="entradas.length > 0; else vazioEntradas">
         <li class="item" *ngFor="let item of entradas">
-          <span>{{ item.descricao }}</span>
-          <span class="valor entrada">
-            {{ item.valor | brl }}
-          </span>
+          <span class="item-descricao">{{ item.descricao }}</span>
+          <span class="valor entrada">{{ item.valor | brl }}</span>
+          <time
+            class="item-data"
+            *ngIf="item.criadoEm"
+            [attr.datetime]="item.criadoEm"
+          >
+            {{ item.criadoEm | dataHoraLocal }}
+          </time>
           <button
             type="button"
             class="remover"
@@ -115,10 +120,15 @@
 
       <ul class="lista" *ngIf="saidas.length > 0; else vazioSaidas">
         <li class="item" *ngFor="let item of saidas">
-          <span>{{ item.descricao }}</span>
-          <span class="valor saida">
-            {{ item.valor | brl }}
-          </span>
+          <span class="item-descricao">{{ item.descricao }}</span>
+          <span class="valor saida">{{ item.valor | brl }}</span>
+          <time
+            class="item-data"
+            *ngIf="item.criadoEm"
+            [attr.datetime]="item.criadoEm"
+          >
+            {{ item.criadoEm | dataHoraLocal }}
+          </time>
           <button
             type="button"
             class="remover"
@@ -175,10 +185,15 @@
 
       <ul class="lista" *ngIf="economias.length > 0; else vazioEconomias">
         <li class="item" *ngFor="let item of economias">
-          <span>{{ item.descricao }}</span>
-          <span class="valor economia">
-            {{ item.valor | brl }}
-          </span>
+          <span class="item-descricao">{{ item.descricao }}</span>
+          <span class="valor economia">{{ item.valor | brl }}</span>
+          <time
+            class="item-data"
+            *ngIf="item.criadoEm"
+            [attr.datetime]="item.criadoEm"
+          >
+            {{ item.criadoEm | dataHoraLocal }}
+          </time>
           <button
             type="button"
             class="remover"

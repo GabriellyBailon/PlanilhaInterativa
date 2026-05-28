@@ -98,6 +98,47 @@ describe('PlanilhaStorageService', () => {
     expect(service.carregar()?.nomePagina).toBeUndefined();
   });
 
+  it('should load lancamentos with criadoEm and reject invalid criadoEm', () => {
+    const iso = '2026-05-27T20:56:00.000Z';
+    localStorage.setItem(
+      'planilha-financeira:v1',
+      JSON.stringify({
+        entradas: [{ id: 1, descricao: 'Salário', valor: 500, criadoEm: iso }],
+        saidas: [],
+        economias: [],
+        nextId: 2,
+      }),
+    );
+
+    expect(service.carregar()?.entradas[0].criadoEm).toBe(iso);
+
+    localStorage.setItem(
+      'planilha-financeira:v1',
+      JSON.stringify({
+        entradas: [{ id: 1, descricao: 'Salário', valor: 500, criadoEm: 'nao-e-data' }],
+        saidas: [],
+        economias: [],
+        nextId: 2,
+      }),
+    );
+    expect(service.carregar()).toBeNull();
+  });
+
+  it('should load legacy lancamentos without criadoEm', () => {
+    localStorage.setItem(
+      'planilha-financeira:v1',
+      JSON.stringify({
+        entradas: [{ id: 1, descricao: 'Salário', valor: 500 }],
+        saidas: [],
+        economias: [],
+        nextId: 2,
+      }),
+    );
+
+    const entrada = service.carregar()?.entradas[0];
+    expect(entrada?.criadoEm).toBeUndefined();
+  });
+
   it('should reject lists with invalid lancamentos', () => {
     localStorage.setItem(
       'planilha-financeira:v1',

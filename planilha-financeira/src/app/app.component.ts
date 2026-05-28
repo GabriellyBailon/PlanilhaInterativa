@@ -12,13 +12,11 @@ import { NgFor, NgIf } from '@angular/common';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import { BrlCurrencyDirective } from './directives/brl-currency.directive';
 import { BrlPipe } from './pipes/brl.pipe';
-import { PlanilhaStorageService } from './services/planilha-storage.service';
-
-interface Lancamento {
-  id: number;
-  descricao: string;
-  valor: number;
-}
+import { DataHoraLocalPipe } from './pipes/data-hora-local.pipe';
+import {
+  LancamentoPersistido,
+  PlanilhaStorageService,
+} from './services/planilha-storage.service';
 
 interface CategoriaGrafico {
   label: string;
@@ -27,7 +25,14 @@ interface CategoriaGrafico {
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule, NgIf, NgFor, BrlCurrencyDirective, BrlPipe],
+  imports: [
+    FormsModule,
+    NgIf,
+    NgFor,
+    BrlCurrencyDirective,
+    BrlPipe,
+    DataHoraLocalPipe,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -37,9 +42,9 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly storage = inject(PlanilhaStorageService);
   private graficoInicializado = false;
 
-  entradas: Lancamento[] = [];
-  saidas: Lancamento[] = [];
-  economias: Lancamento[] = [];
+  entradas: LancamentoPersistido[] = [];
+  saidas: LancamentoPersistido[] = [];
+  economias: LancamentoPersistido[] = [];
 
   nomePagina = '';
   descricaoEntrada = '';
@@ -144,11 +149,7 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.entradas.push({
-      id: this.nextId++,
-      descricao: this.descricaoEntrada.trim(),
-      valor: this.asNumero(this.valorEntrada),
-    });
+    this.entradas.push(this.novoLancamento(this.descricaoEntrada, this.valorEntrada));
 
     this.descricaoEntrada = '';
     this.valorEntrada = 0;
@@ -161,11 +162,7 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.saidas.push({
-      id: this.nextId++,
-      descricao: this.descricaoSaida.trim(),
-      valor: this.asNumero(this.valorSaida),
-    });
+    this.saidas.push(this.novoLancamento(this.descricaoSaida, this.valorSaida));
 
     this.descricaoSaida = '';
     this.valorSaida = 0;
@@ -178,11 +175,9 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.economias.push({
-      id: this.nextId++,
-      descricao: this.descricaoEconomia.trim(),
-      valor: this.asNumero(this.valorEconomia),
-    });
+    this.economias.push(
+      this.novoLancamento(this.descricaoEconomia, this.valorEconomia),
+    );
 
     this.descricaoEconomia = '';
     this.valorEconomia = 0;
@@ -241,8 +236,17 @@ export class AppComponent implements OnInit, OnDestroy {
     return Number.isFinite(numero) && numero >= 0 ? numero : 0;
   }
 
+  private novoLancamento(descricao: string, valor: unknown): LancamentoPersistido {
+    return {
+      id: this.nextId++,
+      descricao: descricao.trim(),
+      valor: this.asNumero(valor),
+      criadoEm: new Date().toISOString(),
+    };
+  }
+
   private agruparPorCategoria(
-    lancamentos: Lancamento[],
+    lancamentos: LancamentoPersistido[],
     nomePadrao: string,
     prefixoLabel: string,
   ): CategoriaGrafico[] {

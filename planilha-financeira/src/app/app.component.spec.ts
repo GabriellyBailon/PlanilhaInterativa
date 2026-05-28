@@ -110,6 +110,8 @@ describe('AppComponent', () => {
     app.adicionarEntrada();
     expect(app.entradas.length).toBe(1);
     expect(app.entradas[0].descricao).toBe('Salário');
+    expect(app.entradas[0].criadoEm).toBeDefined();
+    expect(Date.parse(app.entradas[0].criadoEm!)).not.toBeNaN();
   });
 
   it('should persist and restore custom page name', () => {
@@ -149,12 +151,17 @@ describe('AppComponent', () => {
     fixture2.detectChanges();
     const app2 = fixture2.componentInstance;
 
-    expect(app2.entradas).toEqual([
-      { id: 1, descricao: 'Freela', valor: 150 },
-    ]);
-    expect(app2.saidas).toEqual([
-      { id: 2, descricao: 'Mercado', valor: 50 },
-    ]);
+    expect(app2.entradas.length).toBe(1);
+    expect(app2.entradas[0].id).toBe(1);
+    expect(app2.entradas[0].descricao).toBe('Freela');
+    expect(app2.entradas[0].valor).toBe(150);
+    expect(app2.entradas[0].criadoEm).toBe(app1.entradas[0].criadoEm);
+
+    expect(app2.saidas.length).toBe(1);
+    expect(app2.saidas[0].id).toBe(2);
+    expect(app2.saidas[0].descricao).toBe('Mercado');
+    expect(app2.saidas[0].valor).toBe(50);
+    expect(app2.saidas[0].criadoEm).toBe(app1.saidas[0].criadoEm);
     expect(app2.saldo).toBe(100);
   });
 });

@@ -4,6 +4,8 @@ export interface LancamentoPersistido {
   id: number;
   descricao: string;
   valor: number;
+  /** ISO 8601 — horário local do usuário no momento do lançamento */
+  criadoEm?: string;
 }
 
 export interface EstadoPlanilha {
@@ -134,13 +136,33 @@ export class PlanilhaStorageService {
         return null;
       }
 
+      const criadoEm = this.validarCriadoEm(registro['criadoEm']);
+      if (registro['criadoEm'] !== undefined && registro['criadoEm'] !== null && !criadoEm) {
+        return null;
+      }
+
       lista.push({
         id,
         descricao,
         valor: valorItem,
+        ...(criadoEm ? { criadoEm } : {}),
       });
     }
 
     return lista;
+  }
+
+  private validarCriadoEm(valor: unknown): string | undefined {
+    if (valor === undefined || valor === null) {
+      return undefined;
+    }
+    if (typeof valor !== 'string') {
+      return undefined;
+    }
+    const instante = Date.parse(valor);
+    if (!Number.isFinite(instante)) {
+      return undefined;
+    }
+    return valor;
   }
 }
