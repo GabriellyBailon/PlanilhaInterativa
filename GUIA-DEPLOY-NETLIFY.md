@@ -26,11 +26,13 @@ git push -u origin main
 
 ### 3. Configurar settings de build
 - **Base directory**: `planilha-financeira`
-- **Build command**: `npm install && npm run build`
-- **Publish directory**: `dist/planilha-financeira`
+- **Build command**: `npm run build`
+- **Publish directory**: `dist/planilha-financeira/browser`
 - Clique em **"Deploy site"**
 
 O Netlify construirá e publicará automaticamente a cada push na branch `main`.
+
+**Nota**: As configurações estão automatizadas no arquivo `netlify.toml` - não é necessário configurar manualmente.
 
 ---
 
@@ -108,6 +110,27 @@ Se precisar de variáveis (API keys, etc):
 2. **Add custom domain**
 3. Seguir instruções de DNS do seu provedor
 4. Certificado SSL é automático (Let's Encrypt)
+
+---
+
+## Otimizações de Performance ⚡
+
+O arquivo `netlify.toml` já contém configurações otimizadas:
+
+### Cache Headers
+- **Assets estáticos** (`/assets/*`): Cache de 1 ano (arquivos com hash imutável)
+- **Bundles JavaScript** (`*.bundle.js`): Cache de 1 ano
+- **index.html**: Cache de 1 hora (permite atualizações sem hard refresh)
+
+### Security Headers
+- **X-Frame-Options**: Previne clickjacking
+- **X-Content-Type-Options**: Bloqueia MIME sniffing
+- **X-XSS-Protection**: Proteção contra XSS
+- **Referrer-Policy**: Controla informações de referência
+
+### Versão Node.js
+- Node.js 18.20.0 (LTS estável e compatível com Angular 19)
+- npm 10.5.0
 
 ---
 
