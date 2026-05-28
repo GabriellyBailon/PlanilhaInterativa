@@ -1,12 +1,10 @@
 [build]
-  command = "cd planilha-financeira && npm install && npm run build"
-  publish = "planilha-financeira/dist/planilha-financeira/browser"
-
-[build.environment]
-  NODE_VERSION = "18"
+command = "cd planilha-financeira && npm run build"
+publish = "planilha-financeira/dist/planilha-financeira/browser"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+from = "/*"
+to = "/index.html"
+status = 200
+
 
