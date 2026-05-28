@@ -92,7 +92,8 @@ interface EstadoPlanilha {
 
 ### Lançamentos
 
-- Três colunas: entradas, economias e saídas, cada uma com formulário (descrição + valor) e lista com botão remover (×).
+- Três colunas: entradas, economias e saídas, cada uma com formulário (descrição + valor) e lista com botões **editar** (✎) e **remover** (×).
+- **Edição inline:** ao clicar em editar, descrição e valor viram campos editáveis (mesma validação do formulário: descrição não vazia, valor &gt; 0); **Salvar** persiste e atualiza gráfico/saldo; **Cancelar** descarta. Apenas um lançamento em edição por vez. `criadoEm` não é alterado na edição.
 - Cada lançamento na lista exibe **data e hora locais** ao lado do valor (ex.: `27/05/2026 20:56`), gravadas em `criadoEm` (ISO) ao adicionar. Lançamentos antigos sem data não mostram horário.
 - **Descrição e valor obrigatórios** (`required` no HTML + validação no componente); botão desabilitado se descrição vazia ou valor ≤ 0.
 - Valores monetários via diretiva `appBrlCurrency` e pipe `brl` (formato pt-BR, 2 casas decimais).
@@ -164,6 +165,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Feature | Edição inline de lançamentos (descrição e valor) nas três colunas, com persistência | `app.component.ts/html/css`, `app.component.spec.ts` |
 | 2026-05-27 | Feature | Botão mostrar/ocultar resumo percentual ao lado do gráfico, com persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
 | 2026-05-27 | Fix | Resumo percentual: gastos e economias calculados sobre o total de ganhos (não sobre movimentação total) | `app.component.ts/html/css`, `app.component.spec.ts` |
 | 2026-05-27 | Feature | Resumo percentual de gastos e economias ao lado do gráfico | `app.component.ts/html/css`, `app.component.spec.ts` |
@@ -184,7 +186,6 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 ## Pendências / ideias (não implementado)
 
 - Sincronização com API / nuvem
-- Edição de lançamento existente
 - Filtro por período no gráfico
 - Separar gráficos de ganhos e gastos
 

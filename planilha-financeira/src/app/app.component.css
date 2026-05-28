@@ -169,6 +169,14 @@
   border-bottom: 1px solid #e2e8f0;
 }
 
+.item-editando {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  padding: 0.625rem 0;
+  background: #fff;
+  border-radius: 0.375rem;
+}
+
 .item-descricao {
   flex: 1;
   min-width: 0;
@@ -203,6 +211,7 @@
   font-weight: 700;
 }
 
+.editar,
 .remover {
   width: 1.75rem;
   height: 1.75rem;
@@ -211,14 +220,102 @@
   border-radius: 50%;
   background: #f1f5f9;
   color: #64748b;
-  font-size: 1.25rem;
+  font-size: 1rem;
   line-height: 1;
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.editar {
+  font-size: 0.9375rem;
+}
+
+.editar:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.remover {
+  font-size: 1.25rem;
 }
 
 .remover:hover {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.item-edicao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.item-edicao-descricao {
+  flex: 1 1 8rem;
+  min-width: 0;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  font-size: 0.9375rem;
+}
+
+.item-edicao-valor {
+  flex: 0 1 7rem;
+  min-width: 5.5rem;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  font-size: 0.9375rem;
+}
+
+.item-edicao-descricao:focus,
+.item-edicao-valor:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 1px;
+  border-color: #3b82f6;
+}
+
+.item-edicao-acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  width: 100%;
+}
+
+.btn-salvar-edicao,
+.btn-cancelar-edicao {
+  padding: 0.375rem 0.625rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-salvar-edicao {
+  border: none;
+  background: #2563eb;
+  color: #fff;
+}
+
+.btn-salvar-edicao:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn-salvar-edicao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-cancelar-edicao {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+}
+
+.btn-cancelar-edicao:hover {
+  background: #f1f5f9;
 }
 
 .vazio {

@@ -170,6 +170,79 @@ describe('AppComponent', () => {
     expect(app.tituloPagina).toBe('Planejador de Finanças');
   });
 
+  it('should update lancamento on save and preserve criadoEm', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    const criadoEm = '2026-05-27T10:00:00.000Z';
+
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 500, criadoEm }];
+    app.iniciarEdicao('entrada', app.entradas[0]);
+    app.editDescricao = 'Salário ajustado';
+    app.editValor = 600;
+    app.salvarEdicao('entrada');
+
+    expect(app.editando).toBeNull();
+    expect(app.entradas[0].descricao).toBe('Salário ajustado');
+    expect(app.entradas[0].valor).toBe(600);
+    expect(app.entradas[0].criadoEm).toBe(criadoEm);
+    expect(app.totalEntradas).toBe(600);
+  });
+
+  it('should not save edit with empty description or zero value', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.saidas = [{ id: 1, descricao: 'Aluguel', valor: 200 }];
+    app.iniciarEdicao('saida', app.saidas[0]);
+    app.editDescricao = '  ';
+    app.editValor = 300;
+    app.salvarEdicao('saida');
+    expect(app.saidas[0].descricao).toBe('Aluguel');
+    expect(app.saidas[0].valor).toBe(200);
+
+    app.editDescricao = 'Condomínio';
+    app.editValor = 0;
+    app.salvarEdicao('saida');
+    expect(app.saidas[0].descricao).toBe('Aluguel');
+
+    app.editValor = 250;
+    app.salvarEdicao('saida');
+    expect(app.saidas[0].descricao).toBe('Condomínio');
+    expect(app.saidas[0].valor).toBe(250);
+  });
+
+  it('should cancel edit without changing lancamento', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.economias = [{ id: 1, descricao: 'Reserva', valor: 100 }];
+    app.iniciarEdicao('economia', app.economias[0]);
+    app.editDescricao = 'Outro nome';
+    app.editValor = 999;
+    app.cancelarEdicao();
+
+    expect(app.editando).toBeNull();
+    expect(app.economias[0].descricao).toBe('Reserva');
+    expect(app.economias[0].valor).toBe(100);
+  });
+
+  it('should persist edited lancamento to localStorage', () => {
+    const fixture1 = TestBed.createComponent(AppComponent);
+    const app1 = fixture1.componentInstance;
+    fixture1.detectChanges();
+
+    app1.descricaoEntrada = 'Freela';
+    app1.valorEntrada = 100;
+    app1.adicionarEntrada();
+    app1.iniciarEdicao('entrada', app1.entradas[0]);
+    app1.editValor = 150;
+    app1.salvarEdicao('entrada');
+
+    const fixture2 = TestBed.createComponent(AppComponent);
+    fixture2.detectChanges();
+    expect(fixture2.componentInstance.entradas[0].valor).toBe(150);
+  });
+
   it('should persist lancamentos to localStorage and restore on init', () => {
     const fixture1 = TestBed.createComponent(AppComponent);
     const app1 = fixture1.componentInstance;

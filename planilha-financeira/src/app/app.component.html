@@ -54,24 +54,75 @@
       </form>
 
       <ul class="lista" *ngIf="entradas.length > 0; else vazioEntradas">
-        <li class="item" *ngFor="let item of entradas">
-          <span class="item-descricao">{{ item.descricao }}</span>
-          <span class="valor entrada">{{ item.valor | brl }}</span>
-          <time
-            class="item-data"
-            *ngIf="item.criadoEm"
-            [attr.datetime]="item.criadoEm"
-          >
-            {{ item.criadoEm | dataHoraLocal }}
-          </time>
-          <button
-            type="button"
-            class="remover"
-            (click)="removerEntrada(item.id)"
-            aria-label="Remover entrada"
-          >
-            ×
-          </button>
+        <li
+          class="item"
+          *ngFor="let item of entradas"
+          [class.item-editando]="estaEditando('entrada', item.id)"
+        >
+          <ng-container *ngIf="!estaEditando('entrada', item.id); else editarEntrada">
+            <span class="item-descricao">{{ item.descricao }}</span>
+            <span class="valor entrada">{{ item.valor | brl }}</span>
+            <time
+              class="item-data"
+              *ngIf="item.criadoEm"
+              [attr.datetime]="item.criadoEm"
+            >
+              {{ item.criadoEm | dataHoraLocal }}
+            </time>
+            <button
+              type="button"
+              class="editar"
+              (click)="iniciarEdicao('entrada', item)"
+              aria-label="Editar entrada"
+            >
+              ✎
+            </button>
+            <button
+              type="button"
+              class="remover"
+              (click)="removerEntrada(item.id)"
+              aria-label="Remover entrada"
+            >
+              ×
+            </button>
+          </ng-container>
+          <ng-template #editarEntrada>
+            <div class="item-edicao">
+              <input
+                class="item-edicao-descricao"
+                type="text"
+                [(ngModel)]="editDescricao"
+                [name]="'edit-desc-entrada-' + item.id"
+                aria-label="Descrição da entrada"
+              />
+              <input
+                class="item-edicao-valor"
+                type="text"
+                appBrlCurrency
+                [(ngModel)]="editValor"
+                [name]="'edit-val-entrada-' + item.id"
+                inputmode="numeric"
+                aria-label="Valor da entrada"
+              />
+              <div class="item-edicao-acoes">
+                <button
+                  type="button"
+                  class="btn-salvar-edicao"
+                  (click)="salvarEdicao('entrada')"
+                  [disabled]="!editDescricao.trim() || editValor <= 0"
+                >
+                  Salvar
+                </button>
+                <button
+                  type="button"
+                  class="btn-cancelar-edicao"
+                  (click)="cancelarEdicao()"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </ng-template>
         </li>
       </ul>
       <ng-template #vazioEntradas>
@@ -119,24 +170,75 @@
       </form>
 
       <ul class="lista" *ngIf="saidas.length > 0; else vazioSaidas">
-        <li class="item" *ngFor="let item of saidas">
-          <span class="item-descricao">{{ item.descricao }}</span>
-          <span class="valor saida">{{ item.valor | brl }}</span>
-          <time
-            class="item-data"
-            *ngIf="item.criadoEm"
-            [attr.datetime]="item.criadoEm"
-          >
-            {{ item.criadoEm | dataHoraLocal }}
-          </time>
-          <button
-            type="button"
-            class="remover"
-            (click)="removerSaida(item.id)"
-            aria-label="Remover saída"
-          >
-            ×
-          </button>
+        <li
+          class="item"
+          *ngFor="let item of saidas"
+          [class.item-editando]="estaEditando('saida', item.id)"
+        >
+          <ng-container *ngIf="!estaEditando('saida', item.id); else editarSaida">
+            <span class="item-descricao">{{ item.descricao }}</span>
+            <span class="valor saida">{{ item.valor | brl }}</span>
+            <time
+              class="item-data"
+              *ngIf="item.criadoEm"
+              [attr.datetime]="item.criadoEm"
+            >
+              {{ item.criadoEm | dataHoraLocal }}
+            </time>
+            <button
+              type="button"
+              class="editar"
+              (click)="iniciarEdicao('saida', item)"
+              aria-label="Editar saída"
+            >
+              ✎
+            </button>
+            <button
+              type="button"
+              class="remover"
+              (click)="removerSaida(item.id)"
+              aria-label="Remover saída"
+            >
+              ×
+            </button>
+          </ng-container>
+          <ng-template #editarSaida>
+            <div class="item-edicao">
+              <input
+                class="item-edicao-descricao"
+                type="text"
+                [(ngModel)]="editDescricao"
+                [name]="'edit-desc-saida-' + item.id"
+                aria-label="Descrição da saída"
+              />
+              <input
+                class="item-edicao-valor"
+                type="text"
+                appBrlCurrency
+                [(ngModel)]="editValor"
+                [name]="'edit-val-saida-' + item.id"
+                inputmode="numeric"
+                aria-label="Valor da saída"
+              />
+              <div class="item-edicao-acoes">
+                <button
+                  type="button"
+                  class="btn-salvar-edicao"
+                  (click)="salvarEdicao('saida')"
+                  [disabled]="!editDescricao.trim() || editValor <= 0"
+                >
+                  Salvar
+                </button>
+                <button
+                  type="button"
+                  class="btn-cancelar-edicao"
+                  (click)="cancelarEdicao()"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </ng-template>
         </li>
       </ul>
       <ng-template #vazioSaidas>
@@ -184,24 +286,75 @@
       </form>
 
       <ul class="lista" *ngIf="economias.length > 0; else vazioEconomias">
-        <li class="item" *ngFor="let item of economias">
-          <span class="item-descricao">{{ item.descricao }}</span>
-          <span class="valor economia">{{ item.valor | brl }}</span>
-          <time
-            class="item-data"
-            *ngIf="item.criadoEm"
-            [attr.datetime]="item.criadoEm"
-          >
-            {{ item.criadoEm | dataHoraLocal }}
-          </time>
-          <button
-            type="button"
-            class="remover"
-            (click)="removerEconomia(item.id)"
-            aria-label="Remover economia"
-          >
-            ×
-          </button>
+        <li
+          class="item"
+          *ngFor="let item of economias"
+          [class.item-editando]="estaEditando('economia', item.id)"
+        >
+          <ng-container *ngIf="!estaEditando('economia', item.id); else editarEconomia">
+            <span class="item-descricao">{{ item.descricao }}</span>
+            <span class="valor economia">{{ item.valor | brl }}</span>
+            <time
+              class="item-data"
+              *ngIf="item.criadoEm"
+              [attr.datetime]="item.criadoEm"
+            >
+              {{ item.criadoEm | dataHoraLocal }}
+            </time>
+            <button
+              type="button"
+              class="editar"
+              (click)="iniciarEdicao('economia', item)"
+              aria-label="Editar economia"
+            >
+              ✎
+            </button>
+            <button
+              type="button"
+              class="remover"
+              (click)="removerEconomia(item.id)"
+              aria-label="Remover economia"
+            >
+              ×
+            </button>
+          </ng-container>
+          <ng-template #editarEconomia>
+            <div class="item-edicao">
+              <input
+                class="item-edicao-descricao"
+                type="text"
+                [(ngModel)]="editDescricao"
+                [name]="'edit-desc-economia-' + item.id"
+                aria-label="Descrição da economia"
+              />
+              <input
+                class="item-edicao-valor"
+                type="text"
+                appBrlCurrency
+                [(ngModel)]="editValor"
+                [name]="'edit-val-economia-' + item.id"
+                inputmode="numeric"
+                aria-label="Valor da economia"
+              />
+              <div class="item-edicao-acoes">
+                <button
+                  type="button"
+                  class="btn-salvar-edicao"
+                  (click)="salvarEdicao('economia')"
+                  [disabled]="!editDescricao.trim() || editValor <= 0"
+                >
+                  Salvar
+                </button>
+                <button
+                  type="button"
+                  class="btn-cancelar-edicao"
+                  (click)="cancelarEdicao()"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </ng-template>
         </li>
       </ul>
       <ng-template #vazioEconomias>

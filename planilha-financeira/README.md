@@ -4,7 +4,7 @@ Aplicação Angular para controle de entradas (ganhos) e saídas (gastos), com f
 
 ## Funcionalidades
 
-- Colunas separadas para **entradas** e **saídas**, com lista e remoção de itens
+- Colunas para **entradas**, **economias** e **saídas**, com lista, **edição** (✎) e remoção de itens
 - Valores em **R$** com duas casas decimais (formato pt-BR)
 - Bloqueio de valores negativos ou zero nos campos monetários
 - **Gráfico de pizza — distribuição por categoria**

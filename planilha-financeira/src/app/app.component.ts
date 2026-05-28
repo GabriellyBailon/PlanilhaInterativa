@@ -23,6 +23,13 @@ interface CategoriaGrafico {
   valor: number;
 }
 
+type TipoLancamento = 'entrada' | 'saida' | 'economia';
+
+interface EdicaoAtiva {
+  tipo: TipoLancamento;
+  id: number;
+}
+
 @Component({
   selector: 'app-root',
   imports: [
@@ -54,6 +61,10 @@ export class AppComponent implements OnInit, OnDestroy {
   valorSaida = 0;
   descricaoEconomia = '';
   valorEconomia = 0;
+
+  editando: EdicaoAtiva | null = null;
+  editDescricao = '';
+  editValor = 0;
 
   private nextId = 1;
   private chart?: Chart;
@@ -216,22 +227,81 @@ export class AppComponent implements OnInit, OnDestroy {
     this.atualizarGrafico();
   }
 
+  iniciarEdicao(tipo: TipoLancamento, item: LancamentoPersistido): void {
+    this.editando = { tipo, id: item.id };
+    this.editDescricao = item.descricao;
+    this.editValor = item.valor;
+  }
+
+  cancelarEdicao(): void {
+    this.editando = null;
+    this.editDescricao = '';
+    this.editValor = 0;
+  }
+
+  estaEditando(tipo: TipoLancamento, id: number): boolean {
+    return this.editando?.tipo === tipo && this.editando.id === id;
+  }
+
+  salvarEdicao(tipo: TipoLancamento): void {
+    if (!this.editando || this.editando.tipo !== tipo) {
+      return;
+    }
+
+    if (!this.podeAdicionar(this.editDescricao, this.editValor)) {
+      return;
+    }
+
+    const lista = this.obterLista(tipo);
+    const item = lista.find((l) => l.id === this.editando!.id);
+    if (!item) {
+      this.cancelarEdicao();
+      return;
+    }
+
+    item.descricao = this.editDescricao.trim();
+    item.valor = this.asNumero(this.editValor);
+    this.cancelarEdicao();
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
   removerEntrada(id: number): void {
+    if (this.estaEditando('entrada', id)) {
+      this.cancelarEdicao();
+    }
     this.entradas = this.entradas.filter((item) => item.id !== id);
     this.persistir();
     this.atualizarGrafico();
   }
 
   removerSaida(id: number): void {
+    if (this.estaEditando('saida', id)) {
+      this.cancelarEdicao();
+    }
     this.saidas = this.saidas.filter((item) => item.id !== id);
     this.persistir();
     this.atualizarGrafico();
   }
 
   removerEconomia(id: number): void {
+    if (this.estaEditando('economia', id)) {
+      this.cancelarEdicao();
+    }
     this.economias = this.economias.filter((item) => item.id !== id);
     this.persistir();
     this.atualizarGrafico();
+  }
+
+  private obterLista(tipo: TipoLancamento): LancamentoPersistido[] {
+    switch (tipo) {
+      case 'entrada':
+        return this.entradas;
+      case 'saida':
+        return this.saidas;
+      case 'economia':
+        return this.economias;
+    }
   }
 
   private carregarDados(): void {
