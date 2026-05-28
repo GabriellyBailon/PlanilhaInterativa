@@ -1,6 +1,9 @@
 [build]
-command = "npm install && npm run build"
+command = "npm run build"
 publish = "dist/planilha-financeira/browser"
+
+[build.environment]
+NETLIFY_SKIP_ANGULAR_RUNTIME = "true"
 
 [[redirects]]
   from = "/*"
