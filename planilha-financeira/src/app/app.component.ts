@@ -47,6 +47,7 @@ export class AppComponent implements OnInit, OnDestroy {
   economias: LancamentoPersistido[] = [];
 
   nomePagina = '';
+  mostrarResumoPercentuais = true;
   descricaoEntrada = '';
   valorEntrada = 0;
   descricaoSaida = '';
@@ -169,6 +170,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.persistir();
   }
 
+  alternarResumoPercentuais(): void {
+    this.mostrarResumoPercentuais = !this.mostrarResumoPercentuais;
+    this.persistir();
+  }
+
   adicionarEntrada(): void {
     if (!this.podeAdicionar(this.descricaoEntrada, this.valorEntrada)) {
       return;
@@ -239,6 +245,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.economias = estado.economias ?? [];
     this.nextId = estado.nextId;
     this.nomePagina = estado.nomePagina ?? '';
+    this.mostrarResumoPercentuais = estado.mostrarResumoPercentuais !== false;
   }
 
   private persistir(): void {
@@ -249,6 +256,7 @@ export class AppComponent implements OnInit, OnDestroy {
       economias: this.economias,
       nextId: this.nextId,
       nomePagina: nome || undefined,
+      ...(this.mostrarResumoPercentuais ? {} : { mostrarResumoPercentuais: false }),
     });
   }
 

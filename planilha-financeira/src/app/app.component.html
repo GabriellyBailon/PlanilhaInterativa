@@ -216,7 +216,22 @@
   </div>
 
   <section class="grafico-secao">
-    <h2>Distribuição por categoria</h2>
+    <div class="grafico-secao-cabecalho">
+      <h2>Distribuição por categoria</h2>
+      <button
+        type="button"
+        class="btn-resumo-toggle"
+        (click)="alternarResumoPercentuais()"
+        [attr.aria-pressed]="mostrarResumoPercentuais"
+        [attr.aria-label]="
+          mostrarResumoPercentuais
+            ? 'Ocultar resumo percentual em relação aos ganhos'
+            : 'Mostrar resumo percentual em relação aos ganhos'
+        "
+      >
+        {{ mostrarResumoPercentuais ? 'Ocultar percentuais' : 'Mostrar percentuais' }}
+      </button>
+    </div>
     <div class="grafico-layout">
       <div class="grafico-container">
         <canvas
@@ -227,7 +242,7 @@
 
       <aside
         class="resumo-percentuais"
-        *ngIf="totalEntradas > 0"
+        *ngIf="mostrarResumoPercentuais && totalEntradas > 0"
         aria-labelledby="resumo-percentuais-titulo"
       >
         <h3 id="resumo-percentuais-titulo">Em relação aos ganhos</h3>

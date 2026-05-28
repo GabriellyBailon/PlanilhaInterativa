@@ -70,6 +70,34 @@ describe('PlanilhaStorageService', () => {
     expect(service.carregar()).toBeNull();
   });
 
+  it('should save and load mostrarResumoPercentuais false', () => {
+    const estado = {
+      entradas: [],
+      saidas: [],
+      economias: [],
+      nextId: 1,
+      mostrarResumoPercentuais: false,
+    };
+
+    service.salvar(estado);
+    expect(service.carregar()).toEqual(estado);
+  });
+
+  it('should ignore invalid mostrarResumoPercentuais', () => {
+    localStorage.setItem(
+      'planilha-financeira:v1',
+      JSON.stringify({
+        entradas: [{ id: 1, descricao: 'Salário', valor: 500 }],
+        saidas: [],
+        economias: [],
+        nextId: 2,
+        mostrarResumoPercentuais: 'nao',
+      }),
+    );
+
+    expect(service.carregar()?.mostrarResumoPercentuais).toBeUndefined();
+  });
+
   it('should save and load nomePagina', () => {
     const estado = {
       entradas: [],

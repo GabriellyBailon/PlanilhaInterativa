@@ -136,6 +136,20 @@ describe('AppComponent', () => {
     expect(Date.parse(app.entradas[0].criadoEm!)).not.toBeNaN();
   });
 
+  it('should toggle and persist resumo percentuais visibility', () => {
+    const fixture1 = TestBed.createComponent(AppComponent);
+    const app1 = fixture1.componentInstance;
+    fixture1.detectChanges();
+
+    expect(app1.mostrarResumoPercentuais).toBe(true);
+    app1.alternarResumoPercentuais();
+    expect(app1.mostrarResumoPercentuais).toBe(false);
+
+    const fixture2 = TestBed.createComponent(AppComponent);
+    fixture2.detectChanges();
+    expect(fixture2.componentInstance.mostrarResumoPercentuais).toBe(false);
+  });
+
   it('should persist and restore custom page name', () => {
     const fixture1 = TestBed.createComponent(AppComponent);
     const app1 = fixture1.componentInstance;

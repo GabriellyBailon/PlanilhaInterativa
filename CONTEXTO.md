@@ -73,6 +73,7 @@ interface EstadoPlanilha {
   economias: Lancamento[];
   nextId: number;
   nomePagina?: string;  // opcional, até 80 caracteres (ex.: "Maio 2026")
+  mostrarResumoPercentuais?: boolean;  // false = usuário ocultou o resumo percentual
 }
 ```
 
@@ -108,9 +109,10 @@ interface EstadoPlanilha {
 ### Resumo percentual (ao lado do gráfico)
 
 - Seção **"Em relação aos ganhos"** na mesma área do gráfico, **sem alterar** o Chart.js.
+- Botão **Mostrar percentuais** / **Ocultar percentuais** no cabeçalho da seção do gráfico; preferência salva em `localStorage` (`mostrarResumoPercentuais: false` quando oculto; padrão visível).
 - Base do cálculo: **total de ganhos** (`totalEntradas`).
 - Exibe **percentual e valor em R$** apenas para **gastos** e **economias** (quanto representam dos ganhos), com barras de progresso.
-- Oculta o resumo quando não há ganhos registrados (mesmo que existam gastos ou economias).
+- Oculta o resumo quando o usuário desativou a exibição ou quando não há ganhos registrados (mesmo que existam gastos ou economias).
 
 ### Gráfico de pizza (`app.component.ts`)
 
@@ -162,6 +164,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Feature | Botão mostrar/ocultar resumo percentual ao lado do gráfico, com persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
 | 2026-05-27 | Fix | Resumo percentual: gastos e economias calculados sobre o total de ganhos (não sobre movimentação total) | `app.component.ts/html/css`, `app.component.spec.ts` |
 | 2026-05-27 | Feature | Resumo percentual de gastos e economias ao lado do gráfico | `app.component.ts/html/css`, `app.component.spec.ts` |
 | 2026-05-27 | Feature | Data/hora local em cada lançamento (`criadoEm`), exibida na lista ao lado do valor | `app.component.ts/html/css`, `planilha-storage.service.ts`, `data-hora-local.pipe.ts`, specs |

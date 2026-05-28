@@ -14,6 +14,8 @@ export interface EstadoPlanilha {
   economias: LancamentoPersistido[];
   nextId: number;
   nomePagina?: string;
+  /** `false` quando o usuário ocultou o resumo; omitido ou `true` = visível */
+  mostrarResumoPercentuais?: boolean;
 }
 
 const STORAGE_KEY = 'planilha-financeira:v1';
@@ -87,10 +89,28 @@ export class PlanilhaStorageService {
     }
 
     const nomePagina = this.validarNomePagina(obj['nomePagina']);
+    const mostrarResumoPercentuais = this.validarMostrarResumoPercentuais(
+      obj['mostrarResumoPercentuais'],
+    );
 
-    return nomePagina
-      ? { entradas, saidas, economias, nextId, nomePagina }
-      : { entradas, saidas, economias, nextId };
+    return {
+      entradas,
+      saidas,
+      economias,
+      nextId,
+      ...(nomePagina ? { nomePagina } : {}),
+      ...(mostrarResumoPercentuais === false ? { mostrarResumoPercentuais: false } : {}),
+    };
+  }
+
+  private validarMostrarResumoPercentuais(valor: unknown): boolean | undefined {
+    if (valor === undefined || valor === null) {
+      return undefined;
+    }
+    if (typeof valor !== 'boolean') {
+      return undefined;
+    }
+    return valor;
   }
 
   private validarNomePagina(valor: unknown): string | undefined {
