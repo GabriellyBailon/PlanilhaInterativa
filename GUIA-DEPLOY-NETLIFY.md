@@ -134,6 +134,23 @@ O arquivo `netlify.toml` já contém configurações otimizadas:
 
 ---
 
+## Documentação Detalhada
+
+Para um guia completo sobre o processo de correção do deploy, problemas enfrentados e soluções implementadas, consulte: [DOCUMENTACAO-DEPLOY-CORRECAO.md](DOCUMENTACAO-DEPLOY-CORRECAO.md)
+
+---
+
+## Checklist Rápido para Deploy Bem-Sucedido
+
+- [ ] `netlify.toml` está na **raiz** (não em `planilha-financeira/`)
+- [ ] Repositório é **público** no GitHub
+- [ ] `package-lock.json` está commitado
+- [ ] `_redirects` existe em `planilha-financeira/public/`
+- [ ] Build funciona localmente: `npm ci && npm run build`
+- [ ] Arquivos estão em `dist/planilha-financeira/browser/browser/`
+
+---
+
 ## Próximos passos
 
 - Ativar **branch deploys** em **Site settings** para testar PRs
