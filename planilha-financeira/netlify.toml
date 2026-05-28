@@ -2,7 +2,7 @@
 
 [build]
 # Diretório raiz do projeto
-base = "."
+base = "planilha-financeira"
 # Comando de build
 command = "npm install && npm run build"
 # Diretório de saída
