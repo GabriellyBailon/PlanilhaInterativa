@@ -64,6 +64,30 @@ describe('AppComponent', () => {
     expect(dados.dados).toEqual([300, 2500]);
   });
 
+  it('should calculate percentage shares of gastos and economias over total movimentado', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 5000 }];
+    app.saidas = [{ id: 2, descricao: 'Aluguel', valor: 3000 }];
+    app.economias = [{ id: 3, descricao: 'Reserva', valor: 2000 }];
+
+    expect(app.totalMovimentado).toBe(10000);
+    expect(app.fracaoGastosNoTotal).toBe(0.3);
+    expect(app.fracaoEconomiasNoTotal).toBe(0.2);
+    expect(app.fracaoGanhosNoTotal).toBe(0.5);
+    expect(app.formatarPercentual(0.3)).toBe('30%');
+  });
+
+  it('should return zero fractions when nothing was recorded', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    expect(app.totalMovimentado).toBe(0);
+    expect(app.fracaoGastosNoTotal).toBe(0);
+    expect(app.fracaoEconomiasNoTotal).toBe(0);
+  });
+
   it('should subtract economias from saldo like saidas', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;

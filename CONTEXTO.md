@@ -105,6 +105,13 @@ interface EstadoPlanilha {
   - `saldo-alerta`: 0 ≤ saldo ≤ 100 (amarelo)
   - `saldo-positivo`: saldo &gt; 100 (verde)
 
+### Resumo percentual (ao lado do gráfico)
+
+- Seção **"Participação no valor total"** na mesma área do gráfico, **sem alterar** o Chart.js.
+- **Total movimentado** = soma de ganhos + gastos + economias (mesma base das fatias do gráfico).
+- Exibe **percentual e valor em R$** para ganhos, gastos e economias, com barras de progresso nas cores das colunas.
+- Oculta o resumo quando não há lançamentos; nota explicativa na UI sobre a base do cálculo.
+
 ### Gráfico de pizza (`app.component.ts`)
 
 - Título na UI: **"Distribuição por categoria"**
@@ -155,6 +162,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Feature | Resumo percentual de ganhos, gastos e economias sobre o total movimentado (ao lado do gráfico) | `app.component.ts/html/css`, `app.component.spec.ts` |
 | 2026-05-27 | Feature | Data/hora local em cada lançamento (`criadoEm`), exibida na lista ao lado do valor | `app.component.ts/html/css`, `planilha-storage.service.ts`, `data-hora-local.pipe.ts`, specs |
 | 2026-05-27 | Feature | Inputs obrigatórios (descrição + valor); nome personalizado da planilha com persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
 | 2026-05-27 | Docs | Troubleshooting: erro `<path> attribute d` no console (extensão do navegador, não Chart.js) | `docs/aprendizados-grafico-chartjs.md` |

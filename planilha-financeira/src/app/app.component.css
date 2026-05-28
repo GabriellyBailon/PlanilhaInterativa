@@ -248,11 +248,131 @@
   font-size: 1.125rem;
 }
 
+.grafico-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2rem;
+}
+
 .grafico-container {
   position: relative;
   height: 320px;
+  width: 100%;
   max-width: 400px;
+  flex: 1 1 280px;
+}
+
+.resumo-percentuais {
+  flex: 1 1 260px;
+  max-width: 360px;
   margin: 0 auto;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+}
+
+.resumo-percentuais h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.resumo-total {
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.resumo-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.resumo-item {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr auto;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.resumo-rotulo {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.resumo-ganhos .resumo-rotulo {
+  color: #166534;
+}
+
+.resumo-gastos .resumo-rotulo {
+  color: #991b1b;
+}
+
+.resumo-economias .resumo-rotulo {
+  color: #7c3aed;
+}
+
+.resumo-barra {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.resumo-barra::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: calc(var(--fracao, 0) * 100%);
+  border-radius: inherit;
+  transition: width 0.25s ease;
+}
+
+.resumo-ganhos .resumo-barra::after {
+  background: #22c55e;
+}
+
+.resumo-gastos .resumo-barra::after {
+  background: #ef4444;
+}
+
+.resumo-economias .resumo-barra::after {
+  background: #d500f9;
+}
+
+.resumo-valores {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.125rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.resumo-valores strong {
+  font-size: 1rem;
+}
+
+.resumo-moeda {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.resumo-nota {
+  margin: 1rem 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  line-height: 1.4;
 }
 
 .grafico-legenda {

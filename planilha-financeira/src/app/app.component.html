@@ -217,15 +217,71 @@
 
   <section class="grafico-secao">
     <h2>Distribuição por categoria</h2>
-    <div class="grafico-container">
-      <canvas
-        #pieChart
-        aria-label="Gráfico de pizza com ganhos, economias e gastos agrupados por categoria"
-      ></canvas>
+    <div class="grafico-layout">
+      <div class="grafico-container">
+        <canvas
+          #pieChart
+          aria-label="Gráfico de pizza com ganhos, economias e gastos agrupados por categoria"
+        ></canvas>
+      </div>
+
+      <aside
+        class="resumo-percentuais"
+        *ngIf="totalMovimentado > 0"
+        aria-labelledby="resumo-percentuais-titulo"
+      >
+        <h3 id="resumo-percentuais-titulo">Participação no valor total</h3>
+        <p class="resumo-total">
+          Total movimentado:
+          <strong>{{ totalMovimentado | brl }}</strong>
+        </p>
+        <ul class="resumo-lista">
+          <li class="resumo-item resumo-ganhos">
+            <span class="resumo-rotulo">Ganhos</span>
+            <div
+              class="resumo-barra"
+              role="presentation"
+              [style.--fracao]="fracaoGanhosNoTotal"
+            ></div>
+            <span class="resumo-valores">
+              <strong>{{ formatarPercentual(fracaoGanhosNoTotal) }}</strong>
+              <span class="resumo-moeda">{{ totalEntradas | brl }}</span>
+            </span>
+          </li>
+          <li class="resumo-item resumo-gastos">
+            <span class="resumo-rotulo">Gastos</span>
+            <div
+              class="resumo-barra"
+              role="presentation"
+              [style.--fracao]="fracaoGastosNoTotal"
+            ></div>
+            <span class="resumo-valores">
+              <strong>{{ formatarPercentual(fracaoGastosNoTotal) }}</strong>
+              <span class="resumo-moeda">{{ totalSaidas | brl }}</span>
+            </span>
+          </li>
+          <li class="resumo-item resumo-economias">
+            <span class="resumo-rotulo">Economias</span>
+            <div
+              class="resumo-barra"
+              role="presentation"
+              [style.--fracao]="fracaoEconomiasNoTotal"
+            ></div>
+            <span class="resumo-valores">
+              <strong>{{ formatarPercentual(fracaoEconomiasNoTotal) }}</strong>
+              <span class="resumo-moeda">{{ totalEconomias | brl }}</span>
+            </span>
+          </li>
+        </ul>
+        <p class="resumo-nota">
+          Percentuais sobre a soma de ganhos, gastos e economias (mesma base do gráfico).
+        </p>
+      </aside>
     </div>
+
     <p
       class="grafico-legenda"
-      *ngIf="totalEntradas === 0 && totalSaidas === 0 && totalEconomias === 0"
+      *ngIf="totalMovimentado === 0"
     >
       Adicione entradas, economias ou saídas para visualizar o gráfico.
     </p>
