@@ -1,6 +1,6 @@
 [build]
 command = "cd planilha-financeira && npm ci && npm run build"
-publish = "planilha-financeira/dist/planilha-financeira/browser"
+publish = "planilha-financeira/dist/planilha-financeira/browser/browser"
 
 [[redirects]]
 from = "/*"
