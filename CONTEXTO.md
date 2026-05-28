@@ -165,6 +165,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-05-27 | Feature | Responsividade completa com media queries para mobile (480px), tablet (768px) e desktop (1024px+); ajustes de padding, font-size, gap e layouts | `app.component.css`, `styles.css` |
 | 2026-05-27 | Feature | Edição inline de lançamentos (descrição e valor) nas três colunas, com persistência | `app.component.ts/html/css`, `app.component.spec.ts` |
 | 2026-05-27 | Feature | Botão mostrar/ocultar resumo percentual ao lado do gráfico, com persistência | `app.component.ts/html/css`, `planilha-storage.service.ts`, specs |
 | 2026-05-27 | Fix | Resumo percentual: gastos e economias calculados sobre o total de ganhos (não sobre movimentação total) | `app.component.ts/html/css`, `app.component.spec.ts` |
@@ -193,7 +194,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 ## Checklist do agente (ao finalizar uma tarefa)
 
-- [ ] Código compila e testes passam (`npm test` em `planilha-financeira/`)
-- [ ] **Histórico de funcionalidades** atualizado com data e resumo
-- [ ] **Funcionalidades atuais** / **Arquivos-chave** revisados se o comportamento mudou
-- [ ] Campo **Última atualização** no topo deste arquivo atualizado
+- [x] Código compila e testes passam (`npm test` em `planilha-financeira/`)
+- [x] **Histórico de funcionalidades** atualizado com data e resumo
+- [x] **Funcionalidades atuais** / **Arquivos-chave** revisados se o comportamento mudou
+- [x] Campo **Última atualização** no topo deste arquivo atualizado
