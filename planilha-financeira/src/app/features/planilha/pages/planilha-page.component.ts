@@ -10,11 +10,11 @@ import { FormsModule } from '@angular/forms';
 import { BrlPipe } from '../../../shared/pipes/brl.pipe';
 import { GraficoCategoriasComponent } from '../components/grafico-categorias/grafico-categorias.component';
 import {
-  CategoriaLancamentoConfig,
   EdicaoAtiva,
   LancamentoCategoriaComponent,
   NovoLancamento,
 } from '../components/lancamento-categoria/lancamento-categoria.component';
+import { categoriasLancamentoConfig, paletaGraficoPadrao } from '../planilha-ui.config';
 import {
   calcularFracao,
   obterDadosGrafico,
@@ -23,7 +23,6 @@ import {
 import {
   DadosGrafico,
   LancamentoPersistido,
-  PaletaGrafico,
   TipoLancamento,
 } from '../domain/planilha.model';
 import { PlanilhaCsvService } from '../data-access/planilha-csv.service';
@@ -69,38 +68,7 @@ export class PlanilhaPageComponent implements OnInit {
   saidas: LancamentoPersistido[] = [];
   economias: LancamentoPersistido[] = [];
 
-  readonly categorias: CategoriaLancamentoConfig[] = [
-    {
-      tipo: 'entrada',
-      titulo: 'Ganhos',
-      rotulo: 'entrada',
-      acaoAdicionar: 'Adicionar ganho',
-      placeholderDescricao: 'Ex.: Salário',
-      mensagemVazia: 'Nenhuma entrada registrada.',
-      rotuloTotal: 'Total de ganhos',
-      acaoLimpar: 'Limpar todos os ganhos',
-    },
-    {
-      tipo: 'saida',
-      titulo: 'Gastos',
-      rotulo: 'saída',
-      acaoAdicionar: 'Adicionar gasto',
-      placeholderDescricao: 'Ex.: Aluguel',
-      mensagemVazia: 'Nenhuma saída registrada.',
-      rotuloTotal: 'Total de gastos',
-      acaoLimpar: 'Limpar todos os gastos',
-    },
-    {
-      tipo: 'economia',
-      titulo: 'Economias',
-      rotulo: 'economia',
-      acaoAdicionar: 'Adicionar economia',
-      placeholderDescricao: 'Ex.: Reserva de emergência',
-      mensagemVazia: 'Nenhuma economia registrada.',
-      rotuloTotal: 'Total de economias',
-      acaoLimpar: 'Limpar todas as economias',
-    },
-  ];
+  readonly categorias = categoriasLancamentoConfig;
 
   nomePagina = '';
   mostrarResumoPercentuais = true;
@@ -117,43 +85,6 @@ export class PlanilhaPageComponent implements OnInit {
   erroPersistencia = '';
   mensagemConfirmacao = '';
   private acaoConfirmada: (() => void) | null = null;
-
-  private readonly coresGanhos = [
-    '#22c55e',
-    '#16a34a',
-    '#4ade80',
-    '#15803d',
-    '#86efac',
-    '#14532d',
-    '#a3e635',
-    '#65a30d',
-  ];
-  private readonly coresGastos = [
-    '#ef4444',
-    '#f97316',
-    '#eab308',
-    '#8b5cf6',
-    '#06b6d4',
-    '#ec4899',
-    '#14b8a6',
-    '#a855f7',
-    '#f43f5e',
-    '#64748b',
-    '#0ea5e9',
-    '#84cc16',
-  ];
-  private readonly coresEconomias = [
-    '#ff00ff',
-    '#00e5ff',
-    '#ff1744',
-    '#ffea00',
-    '#d500f9',
-    '#00e676',
-    '#ff6d00',
-    '#304ffe',
-    '#f50057',
-    '#76ff03',
-  ];
 
   get totalEntradas(): number {
     return somarLancamentos(this.entradas);
@@ -572,16 +503,11 @@ export class PlanilhaPageComponent implements OnInit {
 
   get dadosGrafico(): DadosGrafico {
     if (this.dadosGraficoEmCache === null) {
-      const paleta: PaletaGrafico = {
-        ganhos: this.coresGanhos,
-        gastos: this.coresGastos,
-        economias: this.coresEconomias,
-      };
       this.dadosGraficoEmCache = obterDadosGrafico(
         this.entradas,
         this.economias ?? [],
         this.saidas,
-        paleta,
+        paletaGraficoPadrao,
       );
     }
     return this.dadosGraficoEmCache;
