@@ -44,20 +44,66 @@
       Saldo total:
       <strong>{{ saldo | brl }}</strong>
     </p>
-    <div *ngIf="csvErro" class="mensagem-erro" role="alert" aria-live="assertive">
-      <span class="mensagem-erro-icone" aria-hidden="true">!</span>
-      <span>{{ csvErro }}</span>
-    </div>
-    <div
-      *ngIf="erroPersistencia"
-      class="mensagem-erro mensagem-erro-persistencia"
-      role="alert"
-      aria-live="assertive"
-    >
-      <span class="mensagem-erro-icone" aria-hidden="true">!</span>
-      <span>{{ erroPersistencia }}</span>
-    </div>
   </header>
+
+  <dialog
+    *ngIf="csvErro || erroPersistencia"
+    #modalAviso
+    class="modal-aviso"
+    role="alertdialog"
+    aria-labelledby="modal-aviso-titulo"
+    aria-describedby="modal-aviso-mensagem"
+    (close)="fecharAvisos()"
+  >
+    <h2 id="modal-aviso-titulo">Aviso</h2>
+    <div id="modal-aviso-mensagem">
+      <div *ngIf="csvErro" class="mensagem-erro">
+        <span class="mensagem-erro-icone" aria-hidden="true">!</span>
+        <span>{{ csvErro }}</span>
+      </div>
+      <div
+        *ngIf="erroPersistencia"
+        class="mensagem-erro mensagem-erro-persistencia"
+      >
+        <span class="mensagem-erro-icone" aria-hidden="true">!</span>
+        <span>{{ erroPersistencia }}</span>
+      </div>
+    </div>
+    <button type="button" class="btn-fechar-aviso" (click)="fecharAvisos()" autofocus>
+      Fechar
+    </button>
+  </dialog>
+
+  <dialog
+    *ngIf="mensagemConfirmacao"
+    #modalConfirmacao
+    class="modal-confirmacao"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="modal-confirmacao-titulo"
+    aria-describedby="modal-confirmacao-mensagem"
+    (close)="cancelarConfirmacao()"
+  >
+    <h2 id="modal-confirmacao-titulo">Confirmar ação</h2>
+    <p id="modal-confirmacao-mensagem">{{ mensagemConfirmacao }}</p>
+    <div class="acoes-confirmacao">
+      <button
+        type="button"
+        class="btn-cancelar-confirmacao"
+        (click)="cancelarConfirmacao()"
+        autofocus
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="btn-confirmar-confirmacao"
+        (click)="confirmarAcao()"
+      >
+        Confirmar
+      </button>
+    </div>
+  </dialog>
 
   <div class="colunas">
     <app-lancamento-categoria
