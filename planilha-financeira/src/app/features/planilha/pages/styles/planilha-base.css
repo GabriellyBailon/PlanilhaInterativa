@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: var(--color-text);
+  color: #1e293b;
 }
 
 @media (max-width: 768px) {
@@ -11,6 +11,7 @@
     padding: 1rem 1rem 2rem;
   }
 }
+
 
 .header {
   text-align: center;
@@ -23,12 +24,13 @@
   }
 }
 
+
 .titulo-pagina-label {
   display: block;
   margin-bottom: 0.35rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-text-muted);
+  color: #64748b;
 }
 
 .titulo-pagina {
@@ -40,10 +42,11 @@
   font-size: 1.75rem;
   font-weight: 700;
   text-align: center;
-  color: var(--color-text);
+  color: #1e293b;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 0.5rem;
+  transition: border-color 0.2s, background-color 0.2s;
 }
 
 @media (max-width: 768px) {
@@ -54,15 +57,16 @@
   }
 }
 
+
 .titulo-pagina:hover,
 .titulo-pagina:focus {
-  border-color: var(--color-border-strong);
-  background: var(--color-surface);
+  border-color: #cbd5e1;
+  background: #fff;
   outline: none;
 }
 
 .titulo-pagina::placeholder {
-  color: var(--color-text-muted);
+  color: #94a3b8;
   font-weight: 600;
 }
 
@@ -87,7 +91,7 @@
 .info-csv {
   margin: -0.5rem auto 1rem;
   max-width: 42rem;
-  color: var(--color-text-soft);
+  color: #475569;
   font-size: 0.875rem;
   text-align: center;
   line-height: 1.5;
@@ -102,22 +106,23 @@
   font-weight: 700;
   font-size: 0.95rem;
   cursor: pointer;
-  box-shadow: var(--shadow-soft);
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
 }
 
 .btn-exportar {
-  background: linear-gradient(135deg, var(--color-success), var(--color-success-strong));
-  color: var(--color-surface);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
 }
 
 .btn-importar,
 .btn-limpar-tudo {
-  background: linear-gradient(135deg, var(--color-text), #0f172a);
-  color: var(--color-surface);
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #fff;
 }
 
 .btn-limpar-tudo {
-  background: linear-gradient(135deg, var(--color-danger), var(--color-danger-strong));
+  background: linear-gradient(135deg, #dc2626, #991b1b);
 }
 
 .btn-exportar:hover:not(:disabled),
@@ -137,127 +142,21 @@
   display: none;
 }
 
-.modal-aviso {
-  width: min(100%, 34rem);
-  max-height: calc(100vh - 2rem);
-  overflow: auto;
-  padding: 1.5rem;
-  border: 1px solid #fecaca;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-strong);
-  text-align: center;
-}
-
-.modal-aviso::backdrop {
-  background: rgba(15, 23, 42, 0.6);
-}
-
-.modal-confirmacao {
-  width: min(100%, 34rem);
-  max-height: calc(100vh - 2rem);
-  overflow: auto;
-  padding: 1.5rem;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-strong);
-  color: var(--color-text);
-  text-align: center;
-}
-
-.modal-confirmacao::backdrop {
-  background: rgba(15, 23, 42, 0.6);
-}
-
-.modal-aviso h2 {
-  margin: 0 0 1rem;
-  color: var(--color-danger-strong);
-  font-size: 1.25rem;
-}
-
-.modal-confirmacao h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1.25rem;
-}
-
-.modal-confirmacao p {
-  margin: 0;
-  line-height: 1.5;
-}
-
-.acoes-confirmacao {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.btn-cancelar-confirmacao,
-.btn-confirmar-confirmacao {
-  min-width: 7rem;
-  padding: 0.65rem 1.25rem;
-  border: 0;
-  border-radius: 0.65rem;
-  color: var(--color-surface);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.btn-cancelar-confirmacao {
-  background: var(--color-text-soft);
-}
-
-.btn-cancelar-confirmacao:hover {
-  background: #334155;
-}
-
-.btn-confirmar-confirmacao {
-  background: #b91c1c;
-}
-
-.btn-confirmar-confirmacao:hover {
-  background: var(--color-danger-strong);
-}
-
 .mensagem-erro {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   max-width: 42rem;
-  margin: 0 auto 0.75rem;
+  margin: 0 auto 1rem;
   padding: 0.8rem 1rem;
   border-radius: 0.75rem;
   background: #fef2f2;
-  color: var(--color-danger-strong);
+  color: #991b1b;
   border: 1px solid #fecaca;
   font-weight: 600;
   line-height: 1.4;
   text-align: center;
-}
-
-.btn-fechar-aviso {
-  min-width: 7rem;
-  margin-top: 0.5rem;
-  padding: 0.65rem 1.25rem;
-  border: 0;
-  border-radius: 0.65rem;
-  background: var(--color-danger-strong);
-  color: var(--color-surface);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.btn-fechar-aviso:hover {
-  background: #7f1d1d;
-}
-
-.btn-fechar-aviso:focus-visible {
-  outline: 3px solid #fca5a5;
-  outline-offset: 3px;
 }
 
 .mensagem-erro-icone {

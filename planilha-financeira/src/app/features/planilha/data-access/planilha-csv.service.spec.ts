@@ -80,7 +80,7 @@ describe('PlanilhaCsvService', () => {
       ].join('\n');
 
       expect(() => service.importarCsvTexto(csv, 1)).toThrowError(
-        'Não foi possível importar os dados. Confira a célula D2 e tente novamente.',
+        'Ops! Os dados da planilha estão em formato incorreto. Verifique a célula d2',
       );
     }
 
@@ -94,9 +94,9 @@ describe('PlanilhaCsvService', () => {
     );
   });
 
-  it('points to the relevant cell when import data is invalid', () => {
-    expect(service.formatarErro('A', 1)).toBe(
-      'Não foi possível importar os dados. Confira a célula A1 e tente novamente.',
+  it('adds a page-name hint to errors in cell A1', () => {
+    expect(service.formatarErro('A', 1)).toContain(
+      'Confira o nome da Planilha e preencha-o caso esteja vazio',
     );
   });
 
@@ -108,7 +108,7 @@ describe('PlanilhaCsvService', () => {
     ].join('\n');
 
     expect(() => service.importarCsvTexto(csv, 10)).toThrowError(
-      'Não foi possível importar os dados. Confira a célula A3 e tente novamente.',
+      'Ops! Os dados da planilha estão em formato incorreto. Verifique a célula a3',
     );
   });
 });

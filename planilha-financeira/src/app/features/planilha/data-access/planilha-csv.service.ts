@@ -502,6 +502,9 @@ export class PlanilhaCsvService {
   }
 
   formatarErro(coluna: string, linha: number): string {
-    return `Não foi possível importar os dados. Confira a célula ${coluna.toUpperCase()}${linha} e tente novamente.`;
+    const mensagem = `Ops! Os dados da planilha estão em formato incorreto. Verifique a célula ${coluna.toLowerCase()}${linha}`;
+    return coluna.toLowerCase() === 'a' && linha === 1
+      ? `${mensagem}. Confira o nome da Planilha e preencha-o caso esteja vazio.`
+      : mensagem;
   }
 }

@@ -1,8 +1,6 @@
 import {
   Component,
-  ElementRef,
   OnInit,
-  ViewChild,
   inject,
 } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
@@ -10,11 +8,11 @@ import { FormsModule } from '@angular/forms';
 import { BrlPipe } from '../../../shared/pipes/brl.pipe';
 import { GraficoCategoriasComponent } from '../components/grafico-categorias/grafico-categorias.component';
 import {
+  CategoriaLancamentoConfig,
   EdicaoAtiva,
   LancamentoCategoriaComponent,
   NovoLancamento,
 } from '../components/lancamento-categoria/lancamento-categoria.component';
-import { categoriasLancamentoConfig, paletaGraficoPadrao } from '../planilha-ui.config';
 import {
   calcularFracao,
   obterDadosGrafico,
@@ -23,12 +21,11 @@ import {
 import {
   DadosGrafico,
   LancamentoPersistido,
+  PaletaGrafico,
   TipoLancamento,
 } from '../domain/planilha.model';
 import { PlanilhaCsvService } from '../data-access/planilha-csv.service';
-import { PlanilhaLancamentoService } from '../data-access/planilha-lancamento.service';
 import { PlanilhaStorageService } from '../data-access/planilha-storage.service';
-import { PlanilhaUiService } from '../data-access/planilha-ui.service';
 
 @Component({
   selector: 'app-planilha-page',
@@ -51,28 +48,43 @@ import { PlanilhaUiService } from '../data-access/planilha-ui.service';
 export class PlanilhaPageComponent implements OnInit {
   private readonly storage = inject(PlanilhaStorageService);
   private readonly csvService = inject(PlanilhaCsvService);
-  private readonly lancamentoService = inject(PlanilhaLancamentoService);
-  private readonly uiService = inject(PlanilhaUiService);
-
-  @ViewChild('modalAviso')
-  set modalAviso(dialogo: ElementRef<HTMLDialogElement> | undefined) {
-    if (dialogo && !dialogo.nativeElement.open) {
-      dialogo.nativeElement.showModal();
-    }
-  }
-
-  @ViewChild('modalConfirmacao')
-  set modalConfirmacao(dialogo: ElementRef<HTMLDialogElement> | undefined) {
-    if (dialogo && !dialogo.nativeElement.open) {
-      dialogo.nativeElement.showModal();
-    }
-  }
 
   entradas: LancamentoPersistido[] = [];
   saidas: LancamentoPersistido[] = [];
   economias: LancamentoPersistido[] = [];
 
-  readonly categorias = categoriasLancamentoConfig;
+  readonly categorias: CategoriaLancamentoConfig[] = [
+    {
+      tipo: 'entrada',
+      titulo: 'Entradas (Ganhos)',
+      rotulo: 'entrada',
+      acaoAdicionar: 'Adicionar ganho',
+      placeholderDescricao: 'Ex.: Salário',
+      mensagemVazia: 'Nenhuma entrada registrada.',
+      rotuloTotal: 'Total de ganhos',
+      acaoLimpar: 'Limpar todas as Entradas',
+    },
+    {
+      tipo: 'saida',
+      titulo: 'Saídas (Gastos)',
+      rotulo: 'saída',
+      acaoAdicionar: 'Adicionar gasto',
+      placeholderDescricao: 'Ex.: Aluguel',
+      mensagemVazia: 'Nenhuma saída registrada.',
+      rotuloTotal: 'Total de gastos',
+      acaoLimpar: 'Limpar todas as Saídas',
+    },
+    {
+      tipo: 'economia',
+      titulo: 'Economias',
+      rotulo: 'economia',
+      acaoAdicionar: 'Adicionar economia',
+      placeholderDescricao: 'Ex.: Reserva de emergência',
+      mensagemVazia: 'Nenhuma economia registrada.',
+      rotuloTotal: 'Total de economias',
+      acaoLimpar: 'Limpar todas as Economias',
+    },
+  ];
 
   nomePagina = '';
   mostrarResumoPercentuais = true;
@@ -87,8 +99,43 @@ export class PlanilhaPageComponent implements OnInit {
   private dadosGraficoEmCache: DadosGrafico | null = null;
   csvErro = '';
   erroPersistencia = '';
-  mensagemConfirmacao = '';
-  private acaoConfirmada: (() => void) | null = null;
+
+  private readonly coresGanhos = [
+    '#22c55e',
+    '#16a34a',
+    '#4ade80',
+    '#15803d',
+    '#86efac',
+    '#14532d',
+    '#a3e635',
+    '#65a30d',
+  ];
+  private readonly coresGastos = [
+    '#ef4444',
+    '#f97316',
+    '#eab308',
+    '#8b5cf6',
+    '#06b6d4',
+    '#ec4899',
+    '#14b8a6',
+    '#a855f7',
+    '#f43f5e',
+    '#64748b',
+    '#0ea5e9',
+    '#84cc16',
+  ];
+  private readonly coresEconomias = [
+    '#ff00ff',
+    '#00e5ff',
+    '#ff1744',
+    '#ffea00',
+    '#d500f9',
+    '#00e676',
+    '#ff6d00',
+    '#304ffe',
+    '#f50057',
+    '#76ff03',
+  ];
 
   get totalEntradas(): number {
     return somarLancamentos(this.entradas);
@@ -172,50 +219,42 @@ export class PlanilhaPageComponent implements OnInit {
     this.persistir();
   }
 
-  fecharAvisos(): void {
-    this.csvErro = '';
-    this.erroPersistencia = '';
-  }
-
   apagarCategoria(tipo: TipoLancamento): void {
-    this.solicitarConfirmacao(this.uiService.confirmacaoCategoria(tipo), () => {
-      this.atribuirLista(tipo, []);
-      if (this.editando?.tipo === tipo) {
-        this.cancelarEdicao();
-      }
-      this.persistir();
-    });
+    const confirmacoes: Record<TipoLancamento, string> = {
+      entrada: 'Deseja apagar todos os registros de Entradas? Esta ação não pode ser desfeita.',
+      saida: 'Deseja apagar todos os registros de Saídas? Esta ação não pode ser desfeita.',
+      economia: 'Deseja apagar todos os registros de Economias? Esta ação não pode ser desfeita.',
+    };
+
+    if (!window.confirm(confirmacoes[tipo])) {
+      return;
+    }
+
+    this.atribuirLista(tipo, []);
+    if (this.editando?.tipo === tipo) {
+      this.cancelarEdicao();
+    }
+    this.persistir();
   }
 
   limparTudo(): void {
-    this.solicitarConfirmacao(this.uiService.confirmacaoLimparTudo(), () => {
-      this.entradas = [];
-      this.saidas = [];
-      this.economias = [];
-      this.nomePagina = '';
-      this.nextId = 1;
-      this.cancelarEdicao();
-      this.versaoResetFormularios += 1;
-      this.persistir();
-    });
-  }
-
-  confirmarAcao(): void {
-    const acao = this.acaoConfirmada;
-    this.cancelarConfirmacao();
-    if (acao) {
-      acao();
+    if (!window.confirm('Deseja apagar todos os registros e o nome da planilha? Esta ação não pode ser desfeita.')) {
+      return;
     }
-  }
 
-  cancelarConfirmacao(): void {
-    this.mensagemConfirmacao = '';
-    this.acaoConfirmada = null;
+    this.entradas = [];
+    this.saidas = [];
+    this.economias = [];
+    this.nomePagina = '';
+    this.nextId = 1;
+    this.cancelarEdicao();
+    this.versaoResetFormularios += 1;
+    this.persistir();
   }
 
   exportarCsv(): void {
     if (!this.nomePagina.trim()) {
-      this.csvErro = 'Dê um nome à planilha antes de baixar a cópia.';
+      this.csvErro = 'Para exportar o arquivo, informe um nome para a Planilha.';
       return;
     }
 
@@ -223,7 +262,18 @@ export class PlanilhaPageComponent implements OnInit {
       return;
     }
 
-    this.uiService.baixarCsv(this.gerarCsv(), this.nomeArquivoExportacao);
+    const csv = this.gerarCsv();
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = this.nomeArquivoExportacao;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
     this.csvErro = '';
   }
 
@@ -236,30 +286,36 @@ export class PlanilhaPageComponent implements OnInit {
       return;
     }
 
-    if (!this.uiService.arquivoCsvValido(arquivo)) {
-      this.mostrarErroCsv('Selecione um arquivo .csv para importar os dados.');
+    if (!this.aceitarArquivoCsv(arquivo)) {
+      this.mostrarErroCsv(this.csvService.formatarErro('a', 1));
       return;
     }
 
-    this.solicitarConfirmacao(this.uiService.confirmacaoImportacao(), () => {
-      arquivo
-        .text()
-        .then((conteudo) => {
-          this.importarCsvTexto(conteudo);
-          this.csvErro = '';
-        })
-        .catch((erro: unknown) => {
-          this.mostrarErroCsv(
-            erro instanceof Error
-              ? erro.message
-              : this.csvService.formatarErro('a', 1),
-          );
-        });
-    });
+    const confirmar = window.confirm(
+      'Ao importar uma planilha, os dados atuais do site serão substituídos. Deseja continuar?',
+    );
+    if (!confirmar) {
+      return;
+    }
+
+    arquivo
+      .text()
+      .then((conteudo) => {
+        this.importarCsvTexto(conteudo);
+        this.csvErro = '';
+      })
+      .catch((erro: unknown) => {
+        this.mostrarErroCsv(
+          erro instanceof Error
+            ? erro.message
+            : this.csvService.formatarErro('a', 1),
+        );
+      });
   }
 
   abrirSeletorCsv(): void {
-    this.uiService.abrirSeletorCsv('arquivo-csv-importacao');
+    const input = document.getElementById('arquivo-csv-importacao') as HTMLInputElement | null;
+    input?.click();
   }
 
   alternarResumoPercentuais(): void {
@@ -268,15 +324,11 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   adicionarLancamento(tipo: TipoLancamento, novo: NovoLancamento): void {
-    if (!this.lancamentoService.validarNovoLancamento(novo.descricao, novo.valor)) {
+    if (!this.podeAdicionar(novo.descricao, novo.valor)) {
       return;
     }
 
-    const lista = this.obterLista(tipo);
-    lista.push(
-      this.lancamentoService.criarLancamento(novo.descricao, novo.valor, this.nextId),
-    );
-    this.nextId += 1;
+    this.obterLista(tipo).push(this.novoLancamento(novo.descricao, novo.valor));
     this.persistir();
   }
 
@@ -284,7 +336,7 @@ export class PlanilhaPageComponent implements OnInit {
     this.editando = { tipo, id: item.id };
     this.editDescricao = item.descricao;
     this.editValor = item.valor;
-    this.editDataHora = this.lancamentoService.formatarDataHoraParaEdicao(item.criadoEm);
+    this.editDataHora = this.formatarDataHoraParaEdicao(item.criadoEm);
   }
 
   cancelarEdicao(): void {
@@ -299,11 +351,11 @@ export class PlanilhaPageComponent implements OnInit {
       return;
     }
 
-    if (!this.lancamentoService.validarNovoLancamento(this.editDescricao, this.editValor)) {
+    if (!this.podeAdicionar(this.editDescricao, this.editValor)) {
       return;
     }
 
-    const criadoEm = this.lancamentoService.converterDataHoraLocalParaIso(this.editDataHora);
+    const criadoEm = this.converterDataHoraLocalParaIso(this.editDataHora);
     if (!criadoEm) {
       return;
     }
@@ -316,7 +368,7 @@ export class PlanilhaPageComponent implements OnInit {
     }
 
     item.descricao = this.editDescricao.trim();
-    item.valor = this.lancamentoService.asNumero(this.editValor);
+    item.valor = this.asNumero(this.editValor);
     item.criadoEm = criadoEm;
     this.cancelarEdicao();
     this.persistir();
@@ -393,7 +445,7 @@ export class PlanilhaPageComponent implements OnInit {
     });
     this.erroPersistencia = salvo
       ? ''
-      : 'Não foi possível salvar seus dados neste navegador. Baixe uma cópia para evitar perder suas alterações.';
+      : 'Não foi possível salvar os dados neste navegador. Exporte um CSV para evitar perder suas alterações.';
   }
 
   gerarCsv(): string {
@@ -405,13 +457,12 @@ export class PlanilhaPageComponent implements OnInit {
     });
   }
 
-  private mostrarErroCsv(mensagem: string): void {
-    this.csvErro = mensagem;
+  private aceitarArquivoCsv(arquivo: File): boolean {
+    return arquivo && arquivo.name.toLowerCase().endsWith('.csv');
   }
 
-  private solicitarConfirmacao(mensagem: string, acao: () => void): void {
-    this.mensagemConfirmacao = mensagem;
-    this.acaoConfirmada = acao;
+  private mostrarErroCsv(mensagem: string): void {
+    this.csvErro = mensagem;
   }
 
   private importarCsvTexto(texto: string): void {
@@ -424,13 +475,75 @@ export class PlanilhaPageComponent implements OnInit {
     this.persistir();
   }
 
+  private formatarDataHoraParaEdicao(data?: string): string {
+    const valor = data ? new Date(data) : new Date();
+    if (Number.isNaN(valor.getTime())) {
+      return '';
+    }
+
+    return [
+      `${String(valor.getFullYear()).padStart(4, '0')}-${String(valor.getMonth() + 1).padStart(2, '0')}-${String(valor.getDate()).padStart(2, '0')}`,
+      `${String(valor.getHours()).padStart(2, '0')}:${String(valor.getMinutes()).padStart(2, '0')}:${String(valor.getSeconds()).padStart(2, '0')}`,
+    ].join('T');
+  }
+
+  private converterDataHoraLocalParaIso(valor: string): string | null {
+    const correspondencia = valor.match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/,
+    );
+    if (!correspondencia) {
+      return null;
+    }
+
+    const [, anoTexto, mesTexto, diaTexto, horaTexto, minutoTexto, segundoTexto = '0'] = correspondencia;
+    const partes = [anoTexto, mesTexto, diaTexto, horaTexto, minutoTexto, segundoTexto].map(Number);
+    const data = new Date(partes[0], partes[1] - 1, partes[2], partes[3], partes[4], partes[5]);
+
+    if (
+      data.getFullYear() !== partes[0] ||
+      data.getMonth() !== partes[1] - 1 ||
+      data.getDate() !== partes[2] ||
+      data.getHours() !== partes[3] ||
+      data.getMinutes() !== partes[4] ||
+      data.getSeconds() !== partes[5]
+    ) {
+      return null;
+    }
+
+    return data.toISOString();
+  }
+
+
+  private podeAdicionar(descricao: string, valor: number): boolean {
+    return descricao.trim().length > 0 && this.asNumero(valor) > 0;
+  }
+
+  private asNumero(valor: unknown): number {
+    const numero = typeof valor === 'number' ? valor : Number(valor);
+    return Number.isFinite(numero) && numero >= 0 ? numero : 0;
+  }
+
+  private novoLancamento(descricao: string, valor: unknown): LancamentoPersistido {
+    return {
+      id: this.nextId++,
+      descricao: descricao.trim(),
+      valor: this.asNumero(valor),
+      criadoEm: new Date().toISOString(),
+    };
+  }
+
   get dadosGrafico(): DadosGrafico {
     if (this.dadosGraficoEmCache === null) {
+      const paleta: PaletaGrafico = {
+        ganhos: this.coresGanhos,
+        gastos: this.coresGastos,
+        economias: this.coresEconomias,
+      };
       this.dadosGraficoEmCache = obterDadosGrafico(
         this.entradas,
         this.economias ?? [],
         this.saidas,
-        paletaGraficoPadrao,
+        paleta,
       );
     }
     return this.dadosGraficoEmCache;

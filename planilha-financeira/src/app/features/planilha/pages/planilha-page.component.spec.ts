@@ -27,21 +27,6 @@ describe('PlanilhaPageComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should use user-friendly labels for file actions', () => {
-    const fixture = TestBed.createComponent(PlanilhaPageComponent);
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('.btn-exportar').textContent).toContain(
-      'Baixar planilha',
-    );
-    expect(fixture.nativeElement.querySelector('.btn-importar').textContent).toContain(
-      'Importar planilha',
-    );
-    expect(fixture.nativeElement.querySelector('.info-csv').textContent).toContain(
-      'planilha compatível (.csv)',
-    );
-  });
-
   it('should identify edit and remove actions by lancamento', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     fixture.componentInstance.entradas = [
@@ -77,16 +62,10 @@ describe('PlanilhaPageComponent', () => {
     app.adicionarLancamento('entrada', { descricao: 'Salário', valor: 500 });
     fixture.detectChanges();
 
-    expect(app.erroPersistencia).toContain('Não foi possível salvar seus dados');
-    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeTruthy();
+    expect(app.erroPersistencia).toContain('Não foi possível salvar os dados');
     expect(
       fixture.nativeElement.querySelector('.mensagem-erro-persistencia').textContent,
-    ).toContain('Baixe uma cópia');
-
-    fixture.nativeElement.querySelector('.btn-fechar-aviso').click();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeNull();
-    expect(app.erroPersistencia).toBe('');
+    ).toContain('Exporte um CSV');
   });
 
   it('should calculate saldo from entradas and saidas', () => {
@@ -255,19 +234,12 @@ describe('PlanilhaPageComponent', () => {
     app.economias = [{ id: 3, descricao: 'Reserva', valor: 100 }];
     app.salvarNomePagina();
 
+    spyOn(window, 'confirm').and.returnValue(false);
     app.apagarCategoria('saida');
-    fixture.detectChanges();
-    expect(app.saidas.length).toBe(1);
-    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeTruthy();
-
-    fixture.nativeElement.querySelector('.btn-cancelar-confirmacao').click();
-    fixture.detectChanges();
     expect(app.saidas.length).toBe(1);
 
+    (window.confirm as jasmine.Spy).and.returnValue(true);
     app.apagarCategoria('saida');
-    fixture.detectChanges();
-    fixture.nativeElement.querySelector('.btn-confirmar-confirmacao').click();
-    fixture.detectChanges();
     expect(app.saidas).toEqual([]);
     expect(app.entradas.length).toBe(1);
     expect(app.economias.length).toBe(1);
@@ -289,19 +261,13 @@ describe('PlanilhaPageComponent', () => {
     app.economias = [{ id: 3, descricao: 'Reserva', valor: 100 }];
     app.salvarNomePagina();
 
+    spyOn(window, 'confirm').and.returnValue(false);
     app.limparTudo();
-    fixture.detectChanges();
     expect(app.nomePagina).toBe('Meu orçamento');
     expect(app.totalMovimentado).toBe(650);
 
-    fixture.nativeElement.querySelector('.btn-cancelar-confirmacao').click();
-    fixture.detectChanges();
-    expect(app.nomePagina).toBe('Meu orçamento');
-
+    (window.confirm as jasmine.Spy).and.returnValue(true);
     app.limparTudo();
-    fixture.detectChanges();
-    fixture.nativeElement.querySelector('.btn-confirmar-confirmacao').click();
-    fixture.detectChanges();
     expect(app.entradas).toEqual([]);
     expect(app.saidas).toEqual([]);
     expect(app.economias).toEqual([]);
@@ -490,49 +456,9 @@ describe('PlanilhaPageComponent', () => {
     fixture.detectChanges();
 
     expect(app.csvErro).toBe(
-      'Dê um nome à planilha antes de baixar a cópia.',
+      'Para exportar o arquivo, informe um nome para a Planilha.',
     );
-    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain(app.csvErro);
-  });
-
-  it('should import CSV only after modal confirmation', async () => {
-    const fixture = TestBed.createComponent(PlanilhaPageComponent);
-    const app = fixture.componentInstance;
-    app.entradas = [{ id: 1, descricao: 'Existente', valor: 100 }];
-    fixture.detectChanges();
-
-    const csv = [
-      'Maio 2026;;;;;;;;;;',
-      ';Entradas;;;;Saídas;;;;Economias;',
-      'Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração',
-      ';Freela;R$ 150,00;15/11/2026 09:30:45;;Supermercado;R$ 45,00;16/11/2026 18:20:10;;Reserva;R$ 50,00;17/11/2026 07:05:30',
-    ].join('\n');
-    const arquivo = new File([csv], 'backup.csv', { type: 'text/csv' });
-    const arquivos = new DataTransfer();
-    arquivos.items.add(arquivo);
-
-    const input = fixture.nativeElement.querySelector(
-      '#arquivo-csv-importacao',
-    ) as HTMLInputElement;
-    input.files = arquivos.files;
-    input.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-
-    expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeTruthy();
-    expect(fixture.nativeElement.textContent).toContain(
-      'substituirá todos os dados atuais desta planilha',
-    );
-    expect(app.entradas[0].descricao).toBe('Existente');
-
-    fixture.nativeElement.querySelector('.btn-confirmar-confirmacao').click();
-    fixture.detectChanges();
-    await arquivo.text();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    expect(app.entradas[0].descricao).toBe('Freela');
-    expect(app.entradas[0].valor).toBe(150);
   });
 
   it('should reject invalid CSV content and point to the offending cell', () => {
@@ -548,7 +474,7 @@ describe('PlanilhaPageComponent', () => {
     ].join('\n');
 
     expect(() => (app as any).importarCsvTexto(csv)).toThrowError(
-      'Não foi possível importar os dados. Confira a célula C5 e tente novamente.',
+      'Ops! Os dados da planilha estão em formato incorreto. Verifique a célula c5',
     );
   });
 
