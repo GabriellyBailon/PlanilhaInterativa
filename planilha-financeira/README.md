@@ -107,3 +107,4 @@ npm run build
 
 - [Arquitetura da aplicação](docs/arquitetura.md): camadas, responsabilidades e principais fluxos de dados.
 - Contexto técnico e histórico de mudanças para agentes de IA: [`../CONTEXTO.md`](../CONTEXTO.md) (na raiz do workspace).
+- Skill para auditar e atualizar a documentação comparando-a com o código: [`../.github/skills/verificar-documentacao/SKILL.md`](../.github/skills/verificar-documentacao/SKILL.md).

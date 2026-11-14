@@ -16,6 +16,19 @@ main.ts
 
 O estado da aplicação é mantido na página da planilha. Serviços isolam persistência e CSV; funções puras de domínio calculam totais e dados do gráfico.
 
+## Referência do código
+
+Esta descrição foi conferida com base no último commit que alterou o código da aplicação (`planilha-financeira/src/`) na data da revisão:
+
+- **Commit:** [`5c1042c671b9429cce81f27ca958a5aeda3d128e`](https://github.com/GabriellyBailon/PlanilhaInterativa/commit/5c1042c671b9429cce81f27ca958a5aeda3d128e)
+- **Data e mensagem:** 2026-11-14 — `Validação, nome obrigatório.`
+
+Esse SHA identifica a referência do código documentado, não uma versão publicada. Para comparar mudanças posteriores no código da aplicação:
+
+```bash
+git diff 5c1042c671b9429cce81f27ca958a5aeda3d128e..HEAD -- planilha-financeira/src
+```
+
 ## Organização do código
 
 | Área | Responsabilidade |
