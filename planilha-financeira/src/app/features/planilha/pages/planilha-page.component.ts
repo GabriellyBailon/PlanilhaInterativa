@@ -1,6 +1,8 @@
 import {
   Component,
+  ElementRef,
   OnInit,
+  ViewChild,
   inject,
 } from '@angular/core';
 import { NgFor, NgIf } from '@angular/common';
@@ -48,6 +50,20 @@ import { PlanilhaStorageService } from '../data-access/planilha-storage.service'
 export class PlanilhaPageComponent implements OnInit {
   private readonly storage = inject(PlanilhaStorageService);
   private readonly csvService = inject(PlanilhaCsvService);
+
+  @ViewChild('modalAviso')
+  set modalAviso(dialogo: ElementRef<HTMLDialogElement> | undefined) {
+    if (dialogo && !dialogo.nativeElement.open) {
+      dialogo.nativeElement.showModal();
+    }
+  }
+
+  @ViewChild('modalConfirmacao')
+  set modalConfirmacao(dialogo: ElementRef<HTMLDialogElement> | undefined) {
+    if (dialogo && !dialogo.nativeElement.open) {
+      dialogo.nativeElement.showModal();
+    }
+  }
 
   entradas: LancamentoPersistido[] = [];
   saidas: LancamentoPersistido[] = [];
@@ -99,6 +115,8 @@ export class PlanilhaPageComponent implements OnInit {
   private dadosGraficoEmCache: DadosGrafico | null = null;
   csvErro = '';
   erroPersistencia = '';
+  mensagemConfirmacao = '';
+  private acaoConfirmada: (() => void) | null = null;
 
   private readonly coresGanhos = [
     '#22c55e',
@@ -219,6 +237,11 @@ export class PlanilhaPageComponent implements OnInit {
     this.persistir();
   }
 
+  fecharAvisos(): void {
+    this.csvErro = '';
+    this.erroPersistencia = '';
+  }
+
   apagarCategoria(tipo: TipoLancamento): void {
     const confirmacoes: Record<TipoLancamento, string> = {
       entrada: 'Deseja apagar todos os registros de Entradas? Esta ação não pode ser desfeita.',
@@ -226,30 +249,42 @@ export class PlanilhaPageComponent implements OnInit {
       economia: 'Deseja apagar todos os registros de Economias? Esta ação não pode ser desfeita.',
     };
 
-    if (!window.confirm(confirmacoes[tipo])) {
-      return;
-    }
-
-    this.atribuirLista(tipo, []);
-    if (this.editando?.tipo === tipo) {
-      this.cancelarEdicao();
-    }
-    this.persistir();
+    this.solicitarConfirmacao(confirmacoes[tipo], () => {
+      this.atribuirLista(tipo, []);
+      if (this.editando?.tipo === tipo) {
+        this.cancelarEdicao();
+      }
+      this.persistir();
+    });
   }
 
   limparTudo(): void {
-    if (!window.confirm('Deseja apagar todos os registros e o nome da planilha? Esta ação não pode ser desfeita.')) {
-      return;
-    }
+    this.solicitarConfirmacao(
+      'Deseja apagar todos os registros e o nome da planilha? Esta ação não pode ser desfeita.',
+      () => {
+        this.entradas = [];
+        this.saidas = [];
+        this.economias = [];
+        this.nomePagina = '';
+        this.nextId = 1;
+        this.cancelarEdicao();
+        this.versaoResetFormularios += 1;
+        this.persistir();
+      },
+    );
+  }
 
-    this.entradas = [];
-    this.saidas = [];
-    this.economias = [];
-    this.nomePagina = '';
-    this.nextId = 1;
-    this.cancelarEdicao();
-    this.versaoResetFormularios += 1;
-    this.persistir();
+  confirmarAcao(): void {
+    const acao = this.acaoConfirmada;
+    this.cancelarConfirmacao();
+    if (acao) {
+      acao();
+    }
+  }
+
+  cancelarConfirmacao(): void {
+    this.mensagemConfirmacao = '';
+    this.acaoConfirmada = null;
   }
 
   exportarCsv(): void {
@@ -291,26 +326,24 @@ export class PlanilhaPageComponent implements OnInit {
       return;
     }
 
-    const confirmar = window.confirm(
+    this.solicitarConfirmacao(
       'Ao importar uma planilha, os dados atuais do site serão substituídos. Deseja continuar?',
+      () => {
+        arquivo
+          .text()
+          .then((conteudo) => {
+            this.importarCsvTexto(conteudo);
+            this.csvErro = '';
+          })
+          .catch((erro: unknown) => {
+            this.mostrarErroCsv(
+              erro instanceof Error
+                ? erro.message
+                : this.csvService.formatarErro('a', 1),
+            );
+          });
+      },
     );
-    if (!confirmar) {
-      return;
-    }
-
-    arquivo
-      .text()
-      .then((conteudo) => {
-        this.importarCsvTexto(conteudo);
-        this.csvErro = '';
-      })
-      .catch((erro: unknown) => {
-        this.mostrarErroCsv(
-          erro instanceof Error
-            ? erro.message
-            : this.csvService.formatarErro('a', 1),
-        );
-      });
   }
 
   abrirSeletorCsv(): void {
@@ -463,6 +496,11 @@ export class PlanilhaPageComponent implements OnInit {
 
   private mostrarErroCsv(mensagem: string): void {
     this.csvErro = mensagem;
+  }
+
+  private solicitarConfirmacao(mensagem: string, acao: () => void): void {
+    this.mensagemConfirmacao = mensagem;
+    this.acaoConfirmada = acao;
   }
 
   private importarCsvTexto(texto: string): void {

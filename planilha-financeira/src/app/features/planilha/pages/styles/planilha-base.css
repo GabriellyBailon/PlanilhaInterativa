@@ -142,13 +142,97 @@
   display: none;
 }
 
+.modal-aviso {
+  width: min(100%, 34rem);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: 1.5rem;
+  border: 1px solid #fecaca;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  text-align: center;
+}
+
+.modal-aviso::backdrop {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.modal-confirmacao {
+  width: min(100%, 34rem);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: 1.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  color: #1e293b;
+  text-align: center;
+}
+
+.modal-confirmacao::backdrop {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.modal-aviso h2 {
+  margin: 0 0 1rem;
+  color: #991b1b;
+  font-size: 1.25rem;
+}
+
+.modal-confirmacao h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.25rem;
+}
+
+.modal-confirmacao p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.acoes-confirmacao {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.btn-cancelar-confirmacao,
+.btn-confirmar-confirmacao {
+  min-width: 7rem;
+  padding: 0.65rem 1.25rem;
+  border: 0;
+  border-radius: 0.65rem;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-cancelar-confirmacao {
+  background: #475569;
+}
+
+.btn-cancelar-confirmacao:hover {
+  background: #334155;
+}
+
+.btn-confirmar-confirmacao {
+  background: #b91c1c;
+}
+
+.btn-confirmar-confirmacao:hover {
+  background: #991b1b;
+}
+
 .mensagem-erro {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   max-width: 42rem;
-  margin: 0 auto 1rem;
+  margin: 0 auto 0.75rem;
   padding: 0.8rem 1rem;
   border-radius: 0.75rem;
   background: #fef2f2;
@@ -157,6 +241,28 @@
   font-weight: 600;
   line-height: 1.4;
   text-align: center;
+}
+
+.btn-fechar-aviso {
+  min-width: 7rem;
+  margin-top: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: #991b1b;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-fechar-aviso:hover {
+  background: #7f1d1d;
+}
+
+.btn-fechar-aviso:focus-visible {
+  outline: 3px solid #fca5a5;
+  outline-offset: 3px;
 }
 
 .mensagem-erro-icone {
