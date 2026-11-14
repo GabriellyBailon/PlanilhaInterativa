@@ -49,7 +49,9 @@
           type="button"
           class="editar"
           (click)="iniciarEdicao.emit(item)"
-          [attr.aria-label]="'Editar ' + categoria.rotulo"
+          [attr.aria-label]="
+            'Editar ' + categoria.rotulo + ': ' + item.descricao + ', ' + (item.valor | brl)
+          "
         >
           ✎
         </button>
@@ -57,7 +59,9 @@
           type="button"
           class="remover"
           (click)="remover.emit(item.id)"
-          [attr.aria-label]="'Remover ' + categoria.rotulo"
+          [attr.aria-label]="
+            'Remover ' + categoria.rotulo + ': ' + item.descricao + ', ' + (item.valor | brl)
+          "
         >
           ×
         </button>

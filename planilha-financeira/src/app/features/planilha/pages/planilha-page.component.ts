@@ -96,6 +96,7 @@ export class PlanilhaPageComponent implements OnInit {
   editDataHora = '';
 
   private nextId = 1;
+  private dadosGraficoEmCache: DadosGrafico | null = null;
   csvErro = '';
   erroPersistencia = '';
 
@@ -432,6 +433,7 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   private persistir(): void {
+    this.dadosGraficoEmCache = null;
     const nome = this.nomePagina.trim();
     const salvo = this.storage.salvar({
       entradas: this.entradas,
@@ -531,16 +533,19 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   get dadosGrafico(): DadosGrafico {
-    const paleta: PaletaGrafico = {
-      ganhos: this.coresGanhos,
-      gastos: this.coresGastos,
-      economias: this.coresEconomias,
-    };
-    return obterDadosGrafico(
-      this.entradas,
-      this.economias ?? [],
-      this.saidas,
-      paleta,
-    );
+    if (this.dadosGraficoEmCache === null) {
+      const paleta: PaletaGrafico = {
+        ganhos: this.coresGanhos,
+        gastos: this.coresGastos,
+        economias: this.coresEconomias,
+      };
+      this.dadosGraficoEmCache = obterDadosGrafico(
+        this.entradas,
+        this.economias ?? [],
+        this.saidas,
+        paleta,
+      );
+    }
+    return this.dadosGraficoEmCache;
   }
 }

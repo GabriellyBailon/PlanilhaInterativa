@@ -27,6 +27,33 @@ describe('PlanilhaPageComponent', () => {
     expect(app).toBeTruthy();
   });
 
+  it('should identify edit and remove actions by lancamento', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    fixture.componentInstance.entradas = [
+      { id: 1, descricao: 'Salário', valor: 500 },
+      { id: 2, descricao: 'Salário', valor: 600 },
+    ];
+    fixture.detectChanges();
+
+    const editButtons = fixture.nativeElement.querySelectorAll(
+      '.coluna-entrada .editar',
+    ) as NodeListOf<HTMLButtonElement>;
+    const removeButtons = fixture.nativeElement.querySelectorAll(
+      '.coluna-entrada .remover',
+    ) as NodeListOf<HTMLButtonElement>;
+    const editLabels = Array.from(editButtons, (button) =>
+      button.getAttribute('aria-label'),
+    );
+    const removeLabels = Array.from(removeButtons, (button) =>
+      button.getAttribute('aria-label'),
+    );
+
+    expect(editLabels[0]).toContain('Salário');
+    expect(editLabels[0]).not.toBe(editLabels[1]);
+    expect(removeLabels[0]).toContain('Salário');
+    expect(removeLabels[0]).not.toBe(removeLabels[1]);
+  });
+
   it('should show a warning when changes cannot be persisted', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
@@ -50,6 +77,21 @@ describe('PlanilhaPageComponent', () => {
 
     expect(app.saldo).toBe(300);
     expect(app.saldoClasse).toBe('saldo-positivo');
+  });
+
+  it('should reuse chart data until a persisted change invalidates it', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    const dadosIniciais = app.dadosGrafico;
+
+    expect(app.dadosGrafico).toBe(dadosIniciais);
+
+    app.adicionarLancamento('entrada', { descricao: 'Salário', valor: 500 });
+    const dadosAtualizados = app.dadosGrafico;
+
+    expect(dadosAtualizados).not.toBe(dadosIniciais);
+    expect(dadosAtualizados.dados).toEqual([500]);
+    expect(app.dadosGrafico).toBe(dadosAtualizados);
   });
 
   it('should group saidas with the same name for the chart', () => {

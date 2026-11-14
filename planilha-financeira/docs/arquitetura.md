@@ -91,6 +91,8 @@ Na exportação, a página exige nome e ao menos um lançamento; o serviço seri
 
 `PlanilhaPageComponent` fornece ao gráfico dados calculados por `obterDadosGrafico()` em `domain/planilha-calculos.ts`. As categorias são agrupadas separadamente por tipo, descrições iguais ignorando maiúsculas/minúsculas são somadas e os rótulos recebem prefixos para distinguir ganho, economia e gasto. A página também fornece as paletas de cores.
 
+O resultado derivado é mantido em cache entre verificações de mudanças e recalculado após operações da página que persistem o estado. Assim, o componente do gráfico só recebe uma nova referência quando os dados são invalidados.
+
 `GraficoCategoriasComponent` cria e atualiza o gráfico, formata os valores do tooltip em BRL e destrói a instância ao desmontar. A inicialização inicial ocorre após a renderização; atualizações de dados atualizam a instância existente.
 
 ## Limites e convenções
