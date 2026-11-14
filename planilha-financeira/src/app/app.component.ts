@@ -204,6 +204,66 @@ export class AppComponent implements OnInit, OnDestroy {
     this.persistir();
   }
 
+  apagarEntradas(): void {
+    if (!window.confirm('Deseja apagar todos os registros de Entradas? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    this.entradas = [];
+    if (this.editando?.tipo === 'entrada') {
+      this.cancelarEdicao();
+    }
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
+  apagarSaidas(): void {
+    if (!window.confirm('Deseja apagar todos os registros de Saídas? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    this.saidas = [];
+    if (this.editando?.tipo === 'saida') {
+      this.cancelarEdicao();
+    }
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
+  apagarEconomias(): void {
+    if (!window.confirm('Deseja apagar todos os registros de Economias? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    this.economias = [];
+    if (this.editando?.tipo === 'economia') {
+      this.cancelarEdicao();
+    }
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
+  limparTudo(): void {
+    if (!window.confirm('Deseja apagar todos os registros e o nome da planilha? Esta ação não pode ser desfeita.')) {
+      return;
+    }
+
+    this.entradas = [];
+    this.saidas = [];
+    this.economias = [];
+    this.nomePagina = '';
+    this.nextId = 1;
+    this.cancelarEdicao();
+    this.descricaoEntrada = '';
+    this.valorEntrada = 0;
+    this.descricaoSaida = '';
+    this.valorSaida = 0;
+    this.descricaoEconomia = '';
+    this.valorEconomia = 0;
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
   exportarCsv(): void {
     if (!this.temDadosParaExportar) {
       return;

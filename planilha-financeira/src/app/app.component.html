@@ -25,6 +25,9 @@
       <button type="button" class="btn-importar" (click)="abrirSeletorCsv()">
         Importar CSV
       </button>
+      <button type="button" class="btn-limpar-tudo" (click)="limparTudo()">
+        Limpar tudo
+      </button>
       <input
         id="arquivo-csv-importacao"
         type="file"
@@ -171,6 +174,14 @@
         Total de ganhos:
         <strong>{{ totalEntradas | brl }}</strong>
       </p>
+      <button
+        type="button"
+        class="btn-cancelar-edicao btn-apagar-categoria"
+        (click)="apagarEntradas()"
+        [disabled]="entradas.length === 0"
+      >
+        Limpar todas as Entradas
+      </button>
     </section>
 
     <section class="coluna coluna-saida">
@@ -296,6 +307,14 @@
         Total de gastos:
         <strong>{{ totalSaidas | brl }}</strong>
       </p>
+      <button
+        type="button"
+        class="btn-cancelar-edicao btn-apagar-categoria"
+        (click)="apagarSaidas()"
+        [disabled]="saidas.length === 0"
+      >
+        Limpar todas as Saídas
+      </button>
     </section>
 
     <section class="coluna coluna-economia">
@@ -421,6 +440,14 @@
         Total de economias:
         <strong>{{ totalEconomias | brl }}</strong>
       </p>
+      <button
+        type="button"
+        class="btn-cancelar-edicao btn-apagar-categoria"
+        (click)="apagarEconomias()"
+        [disabled]="economias.length === 0"
+      >
+        Limpar todas as Economias
+      </button>
     </section>
   </div>
 

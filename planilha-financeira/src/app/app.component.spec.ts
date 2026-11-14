@@ -170,6 +170,64 @@ describe('AppComponent', () => {
     expect(app.tituloPagina).toBe('Planejador de Finanças');
   });
 
+  it('should only delete a category after confirmation', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 500 }];
+    app.saidas = [{ id: 2, descricao: 'Mercado', valor: 50 }];
+    app.economias = [{ id: 3, descricao: 'Reserva', valor: 100 }];
+    app.salvarNomePagina();
+
+    spyOn(window, 'confirm').and.returnValue(false);
+    app.apagarSaidas();
+    expect(app.saidas.length).toBe(1);
+
+    (window.confirm as jasmine.Spy).and.returnValue(true);
+    app.apagarSaidas();
+    expect(app.saidas).toEqual([]);
+    expect(app.entradas.length).toBe(1);
+    expect(app.economias.length).toBe(1);
+
+    const reloadedFixture = TestBed.createComponent(AppComponent);
+    reloadedFixture.detectChanges();
+    const reloaded = reloadedFixture.componentInstance;
+    expect(reloaded.saidas).toEqual([]);
+    expect(reloaded.entradas.length).toBe(1);
+    expect(reloaded.economias.length).toBe(1);
+  });
+
+  it('should clear all records and the sheet name only after confirmation', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    app.nomePagina = 'Meu orçamento';
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 500 }];
+    app.saidas = [{ id: 2, descricao: 'Mercado', valor: 50 }];
+    app.economias = [{ id: 3, descricao: 'Reserva', valor: 100 }];
+    app.salvarNomePagina();
+
+    spyOn(window, 'confirm').and.returnValue(false);
+    app.limparTudo();
+    expect(app.nomePagina).toBe('Meu orçamento');
+    expect(app.totalMovimentado).toBe(650);
+
+    (window.confirm as jasmine.Spy).and.returnValue(true);
+    app.limparTudo();
+    expect(app.entradas).toEqual([]);
+    expect(app.saidas).toEqual([]);
+    expect(app.economias).toEqual([]);
+    expect(app.nomePagina).toBe('');
+    expect(app.tituloPagina).toBe('Planejador de Finanças');
+    expect(app.totalMovimentado).toBe(0);
+
+    const reloadedFixture = TestBed.createComponent(AppComponent);
+    reloadedFixture.detectChanges();
+    const reloaded = reloadedFixture.componentInstance;
+    expect(reloaded.entradas).toEqual([]);
+    expect(reloaded.saidas).toEqual([]);
+    expect(reloaded.economias).toEqual([]);
+    expect(reloaded.nomePagina).toBe('');
+  });
+
   it('should update lancamento on save and preserve criadoEm', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;

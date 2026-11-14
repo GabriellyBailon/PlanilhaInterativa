@@ -12,11 +12,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .app {
-    padding: 0.75rem 0.75rem 1.5rem;
-  }
-}
 
 .header {
   text-align: center;
@@ -29,11 +24,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .header {
-    margin-bottom: 1rem;
-  }
-}
 
 .titulo-pagina-label {
   display: block;
@@ -67,13 +57,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .titulo-pagina {
-    font-size: 1.25rem;
-    padding: 0.4rem 0.5rem;
-    margin: 0 auto 0.5rem;
-  }
-}
 
 .titulo-pagina:hover,
 .titulo-pagina:focus {
@@ -115,7 +98,8 @@
 }
 
 .btn-exportar,
-.btn-importar {
+.btn-importar,
+.btn-limpar-tudo {
   padding: 0.75rem 1.25rem;
   border: none;
   border-radius: 0.75rem;
@@ -131,13 +115,19 @@
   color: #fff;
 }
 
-.btn-importar {
+.btn-importar,
+.btn-limpar-tudo {
   background: linear-gradient(135deg, #1e293b, #0f172a);
   color: #fff;
 }
 
+.btn-limpar-tudo {
+  background: linear-gradient(135deg, #dc2626, #991b1b);
+}
+
 .btn-exportar:hover:not(:disabled),
-.btn-importar:hover {
+.btn-importar:hover,
+.btn-limpar-tudo:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
 }
@@ -193,21 +183,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .saldo {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.9rem;
-  }
-
-  .acoes-planilha {
-    flex-direction: column;
-  }
-
-  .btn-exportar,
-  .btn-importar {
-    width: 100%;
-  }
-}
 
 .saldo-positivo {
   background-color: #dcfce7;
@@ -245,12 +220,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .colunas {
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-}
 
 .coluna {
   background: #f8fafc;
@@ -266,11 +235,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .coluna {
-    padding: 0.75rem;
-  }
-}
 
 .coluna h2 {
   margin: 0 0 1rem;
@@ -284,12 +248,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .coluna h2 {
-    font-size: 0.95rem;
-    margin: 0 0 0.5rem;
-  }
-}
 
 .coluna-entrada h2 {
   color: #166534;
@@ -310,12 +268,6 @@
   margin-bottom: 1rem;
 }
 
-@media (max-width: 480px) {
-  .formulario {
-    gap: 0.35rem;
-    margin-bottom: 0.75rem;
-  }
-}
 
 .formulario label {
   font-size: 0.875rem;
@@ -323,11 +275,6 @@
   color: #475569;
 }
 
-@media (max-width: 480px) {
-  .formulario label {
-    font-size: 0.8rem;
-  }
-}
 
 .formulario input {
   padding: 0.5rem 0.75rem;
@@ -336,12 +283,6 @@
   font-size: 1rem;
 }
 
-@media (max-width: 480px) {
-  .formulario input {
-    padding: 0.45rem 0.6rem;
-    font-size: 0.95rem;
-  }
-}
 
 .formulario input:focus {
   outline: 2px solid #3b82f6;
@@ -361,13 +302,6 @@
   cursor: pointer;
 }
 
-@media (max-width: 480px) {
-  .formulario button[type='submit'] {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
-    margin-top: 0.15rem;
-  }
-}
 
 .formulario button[type='submit']:hover:not(:disabled) {
   background: #1d4ed8;
@@ -399,13 +333,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .item {
-    gap: 0.25rem;
-    padding: 0.35rem 0;
-    flex-wrap: wrap;
-  }
-}
 
 .item-editando {
   flex-wrap: wrap;
@@ -427,12 +354,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .item-descricao {
-    font-size: 0.8rem;
-    flex: 1 1 100%;
-  }
-}
 
 .valor {
   flex-shrink: 0;
@@ -447,11 +368,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .valor {
-    font-size: 0.8rem;
-  }
-}
 
 .item-data {
   flex-shrink: 0;
@@ -461,12 +377,6 @@
   white-space: nowrap;
 }
 
-@media (max-width: 480px) {
-  .item-data {
-    font-size: 0.7rem;
-    flex: 1 1 100%;
-  }
-}
 
 .valor.entrada {
   color: #166534;
@@ -496,14 +406,6 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 480px) {
-  .editar,
-  .remover {
-    width: 1.5rem;
-    height: 1.5rem;
-    font-size: 0.85rem;
-  }
-}
 
 .editar {
   font-size: 0.9375rem;
@@ -531,11 +433,6 @@
   width: 100%;
 }
 
-@media (max-width: 480px) {
-  .item-edicao {
-    gap: 0.35rem;
-  }
-}
 
 .item-edicao-descricao {
   flex: 1 1 8rem;
@@ -546,13 +443,6 @@
   font-size: 0.9375rem;
 }
 
-@media (max-width: 480px) {
-  .item-edicao-descricao {
-    flex: 1 1 100%;
-    font-size: 0.8rem;
-    padding: 0.35rem 0.4rem;
-  }
-}
 
 .item-edicao-valor,
 .item-edicao-data {
@@ -572,22 +462,6 @@
   min-width: 0;
 }
 
-@media (max-width: 480px) {
-  .item-edicao-valor {
-    flex: 0 1 5rem;
-  }
-
-  .item-edicao-valor,
-  .item-edicao-data {
-    font-size: 0.8rem;
-    padding: 0.35rem 0.4rem;
-  }
-
-  .item-edicao-data {
-    flex: 1 1 100%;
-    min-width: 0;
-  }
-}
 
 .item-edicao-descricao:focus,
 .item-edicao-valor:focus,
@@ -604,11 +478,6 @@
   width: 100%;
 }
 
-@media (max-width: 480px) {
-  .item-edicao-acoes {
-    gap: 0.25rem;
-  }
-}
 
 .btn-salvar-edicao,
 .btn-cancelar-edicao {
@@ -619,15 +488,6 @@
   cursor: pointer;
 }
 
-@media (max-width: 480px) {
-  .btn-salvar-edicao,
-  .btn-cancelar-edicao {
-    padding: 0.3rem 0.5rem;
-    font-size: 0.75rem;
-    flex: 1 1 auto;
-    min-width: 4rem;
-  }
-}
 
 .btn-salvar-edicao {
   border: none;
@@ -668,6 +528,21 @@
   font-size: 0.9375rem;
 }
 
+.btn-apagar-categoria {
+  margin-top: 0.75rem;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.btn-apagar-categoria:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
+.btn-apagar-categoria:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 @media (max-width: 768px) {
   .subtotal {
     margin: 0.75rem 0 0;
@@ -676,13 +551,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .subtotal {
-    margin: 0.5rem 0 0;
-    padding-top: 0.35rem;
-    font-size: 0.8rem;
-  }
-}
 
 .grafico-secao {
   background: #fff;
@@ -699,11 +567,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .grafico-secao {
-    padding: 0.75rem;
-  }
-}
 
 .grafico-secao-cabecalho {
   display: flex;
@@ -721,12 +584,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .grafico-secao-cabecalho {
-    justify-content: center;
-    gap: 0.5rem;
-  }
-}
 
 .grafico-secao h2 {
   margin: 0;
@@ -739,12 +596,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .grafico-secao h2 {
-    font-size: 0.95rem;
-    flex: 1 1 100%;
-  }
-}
 
 .btn-resumo-toggle {
   padding: 0.5rem 0.875rem;
@@ -758,12 +609,6 @@
   white-space: nowrap;
 }
 
-@media (max-width: 480px) {
-  .btn-resumo-toggle {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8rem;
-  }
-}
 
 .btn-resumo-toggle:hover {
   background: #f1f5f9;
@@ -790,11 +635,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .grafico-layout {
-    gap: 1rem;
-  }
-}
 
 .grafico-container {
   position: relative;
@@ -812,13 +652,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .grafico-container {
-    height: 240px;
-    max-width: 100%;
-    flex: 1 1 100%;
-  }
-}
 
 .resumo-percentuais {
   flex: 1 1 260px;
@@ -839,11 +672,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .resumo-percentuais {
-    padding: 0.75rem 0.75rem;
-  }
-}
 
 .resumo-percentuais h3 {
   margin: 0 0 0.5rem;
@@ -859,11 +687,6 @@
   }
 }
 
-@media (max-width: 480px) {
-  .resumo-percentuais h3 {
-    font-size: 0.9rem;
-  }
-}
 
 .resumo-total {
   margin: 0 0 1rem;
@@ -871,12 +694,6 @@
   color: #64748b;
 }
 
-@media (max-width: 480px) {
-  .resumo-total {
-    font-size: 0.8rem;
-    margin: 0 0 0.75rem;
-  }
-}
 
 .resumo-total-valor {
   color: #166534;
@@ -887,12 +704,6 @@
   border-radius: 0.375rem;
 }
 
-@media (max-width: 480px) {
-  .resumo-total-valor {
-    font-size: 1rem;
-    padding: 0.15rem 0.4rem;
-  }
-}
 
 .resumo-lista {
   list-style: none;
@@ -903,11 +714,6 @@
   gap: 0.875rem;
 }
 
-@media (max-width: 480px) {
-  .resumo-lista {
-    gap: 0.65rem;
-  }
-}
 
 .resumo-item {
   display: grid;
@@ -923,23 +729,12 @@
   }
 }
 
-@media (max-width: 480px) {
-  .resumo-item {
-    grid-template-columns: 4.5rem 1fr auto;
-    gap: 0.35rem 0.4rem;
-  }
-}
 
 .resumo-rotulo {
   font-size: 0.875rem;
   font-weight: 500;
 }
 
-@media (max-width: 480px) {
-  .resumo-rotulo {
-    font-size: 0.8rem;
-  }
-}
 
 .resumo-gastos .resumo-rotulo {
   color: #991b1b;
@@ -982,11 +777,6 @@
   white-space: nowrap;
 }
 
-@media (max-width: 480px) {
-  .resumo-valores {
-    font-size: 0.8rem;
-  }
-}
 
 .resumo-valores strong {
   font-size: 1rem;
@@ -998,11 +788,6 @@
   color: #64748b;
 }
 
-@media (max-width: 480px) {
-  .resumo-moeda {
-    font-size: 0.7rem;
-  }
-}
 
 .resumo-nota {
   margin: 1rem 0 0;
@@ -1015,4 +800,207 @@
   margin: 0.75rem 0 0;
   font-size: 0.875rem;
   color: #94a3b8;
+}
+
+@media (max-width: 480px) {
+.app {
+    padding: 0.75rem 0.75rem 1.5rem;
+  }
+
+.header {
+    margin-bottom: 1rem;
+  }
+
+.titulo-pagina {
+    font-size: 1.25rem;
+    padding: 0.4rem 0.5rem;
+    margin: 0 auto 0.5rem;
+  }
+
+.saldo {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .acoes-planilha {
+    flex-direction: column;
+  }
+
+  .btn-exportar,
+  .btn-importar,
+  .btn-limpar-tudo {
+    width: 100%;
+  }
+
+.colunas {
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+.coluna {
+    padding: 0.75rem;
+  }
+
+.coluna h2 {
+    font-size: 0.95rem;
+    margin: 0 0 0.5rem;
+  }
+
+.formulario {
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+  }
+
+.formulario label {
+    font-size: 0.8rem;
+  }
+
+.formulario input {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.95rem;
+  }
+
+.formulario button[type='submit'] {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    margin-top: 0.15rem;
+  }
+
+.item {
+    gap: 0.25rem;
+    padding: 0.35rem 0;
+    flex-wrap: wrap;
+  }
+
+.item-descricao {
+    font-size: 0.8rem;
+    flex: 1 1 100%;
+  }
+
+.valor {
+    font-size: 0.8rem;
+  }
+
+.item-data {
+    font-size: 0.7rem;
+    flex: 1 1 100%;
+  }
+
+.editar,
+  .remover {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+.item-edicao {
+    gap: 0.35rem;
+  }
+
+.item-edicao-descricao {
+    flex: 1 1 100%;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.4rem;
+  }
+
+.item-edicao-valor {
+    flex: 0 1 5rem;
+  }
+
+  .item-edicao-valor,
+  .item-edicao-data {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.4rem;
+  }
+
+  .item-edicao-data {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+.item-edicao-acoes {
+    gap: 0.25rem;
+  }
+
+.btn-salvar-edicao,
+  .btn-cancelar-edicao {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+    flex: 1 1 auto;
+    min-width: 4rem;
+  }
+
+.subtotal {
+    margin: 0.5rem 0 0;
+    padding-top: 0.35rem;
+    font-size: 0.8rem;
+  }
+
+.grafico-secao {
+    padding: 0.75rem;
+  }
+
+.grafico-secao-cabecalho {
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+.grafico-secao h2 {
+    font-size: 0.95rem;
+    flex: 1 1 100%;
+  }
+
+.btn-resumo-toggle {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+  }
+
+.grafico-layout {
+    gap: 1rem;
+  }
+
+.grafico-container {
+    height: 240px;
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+
+.resumo-percentuais {
+    padding: 0.75rem 0.75rem;
+  }
+
+.resumo-percentuais h3 {
+    font-size: 0.9rem;
+  }
+
+.resumo-total {
+    font-size: 0.8rem;
+    margin: 0 0 0.75rem;
+  }
+
+.resumo-total-valor {
+    font-size: 1rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+.resumo-lista {
+    gap: 0.65rem;
+  }
+
+.resumo-item {
+    grid-template-columns: 4.5rem 1fr auto;
+    gap: 0.35rem 0.4rem;
+  }
+
+.resumo-rotulo {
+    font-size: 0.8rem;
+  }
+
+.resumo-valores {
+    font-size: 0.8rem;
+  }
+
+.resumo-moeda {
+    font-size: 0.7rem;
+  }
 }
