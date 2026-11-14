@@ -61,6 +61,7 @@ PlanilhaInterativa/
 ├── planilha-financeira/
 │   ├── docs/
 │   │   ├── arquitetura.md              ← camadas, responsabilidades e fluxos de dados
+│   │   ├── padroes-de-testes.md        ← cobertura mínima e idioma dos testes
 │   │   └── exemplo-planilha.csv        ← exemplo de importação/exportação
 │   ├── netlify.toml                 ← configuração de build e headers
 │   ├── .netlifyignore               ← arquivos a ignorar no deploy
@@ -181,6 +182,7 @@ interface EstadoPlanilha {
 | `planilha-financeira/src/app/shared/directives/brl-currency.directive.ts` | Máscara/input BRL |
 | `planilha-financeira/src/app/shared/pipes/brl.pipe.ts` | Exibição de valores em BRL |
 | `planilha-financeira/src/app/shared/pipes/data-hora-local.pipe.ts` | Formata `criadoEm` para `dd/MM/aaaa HH:mm` (pt-BR, fuso local) |
+| `planilha-financeira/docs/padroes-de-testes.md` | Cobertura mínima, idioma e revisão final dos testes |
 | `planilha-financeira/src/app/features/planilha/pages/planilha-page.component.spec.ts` | Testes da tela e dos fluxos da planilha |
 
 ### Cálculos do gráfico
@@ -197,6 +199,7 @@ interface EstadoPlanilha {
 - Preferir mudanças mínimas; reutilizar `obterDadosGrafico()`, `brl` e `appBrlCurrency`.
 - Regras financeiras e agrupamentos devem permanecer em funções puras de `domain/`; acesso a `localStorage` e arquivos fica em `data-access/`.
 - Novos comportamentos do gráfico: ajustar `domain/planilha-calculos.ts` e seus testes. Consultar **`docs/aprendizados-grafico-chartjs.md`** antes de alterar ciclo de vida do Chart.js ou persistência.
+- Os testes devem seguir **`planilha-financeira/docs/padroes-de-testes.md`**: cobertura mínima de 90% em cada métrica e nomes de suítes/casos em português do Brasil. Leia esse guia ao concluir implementações e quando solicitado.
 - Não commitar `node_modules/`, `dist/`, `.angular/cache/`.
 - Após mudanças de comportamento: **atualizar este `CONTEXTO.md`** e manter `planilha-financeira/README.md` alinhado (visão do usuário).
 
@@ -208,6 +211,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-11-14 | Testes/Docs | Ampliação da suíte para 103 testes; cobertura registrada em 99,4% de instruções, 95,37% de ramificações, 100% de funções e 99,38% de linhas; definição de mínimo de 90% por métrica e testes em pt-BR | `planilha-financeira/docs/padroes-de-testes.md`, `src/app/**/*.spec.ts`, `planilha-financeira/README.md`, `CONTEXTO.md` |
 | 2026-11-14 | Docs | Criação da documentação de arquitetura com camadas, responsabilidades, fluxos de dados, persistência, CSV e gráfico | `planilha-financeira/docs/arquitetura.md`, `planilha-financeira/README.md`, `CONTEXTO.md` |
 | 2026-11-14 | Docs | README e contexto técnico alinhados às funcionalidades atuais e às validações dos formulários e CSV; correção da regra de edição da data/hora | `planilha-financeira/README.md`, `CONTEXTO.md` |
 | 2026-11-14 | Refactor | Separação da página da planilha, componentes por responsabilidade, domínio, acesso a dados e estilos; importação CSV tabular passou a ser reconhecida e a validação não altera IDs/dados parcialmente | `src/app/app.component.ts/html/spec.ts`, `src/app/features/planilha/`, `src/app/shared/`, `README.md`, `CONTEXTO.md` |
@@ -244,4 +248,5 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 - [x] Código compila e testes passam (`npm test` em `planilha-financeira/`)
 - [x] **Histórico de funcionalidades** atualizado com data e resumo
 - [x] **Funcionalidades atuais** / **Arquivos-chave** revisados se o comportamento mudou
+- [x] Ler `planilha-financeira/docs/padroes-de-testes.md`; confirmar idioma pt-BR e cobertura mínima de 90% em cada métrica
 - [x] Campo **Última atualização** no topo deste arquivo atualizado

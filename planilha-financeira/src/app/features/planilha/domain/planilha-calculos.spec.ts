@@ -1,14 +1,14 @@
 import { calcularFracao, obterDadosGrafico, somarLancamentos } from './planilha-calculos';
 import { LancamentoPersistido, PaletaGrafico } from './planilha.model';
 
-describe('planilha-calculos', () => {
+describe('Cálculos da planilha', () => {
   const paleta: PaletaGrafico = {
     ganhos: ['green'],
     gastos: ['red'],
     economias: ['purple'],
   };
 
-  it('sums entries and returns zero fractions when the base is zero', () => {
+  it('soma lançamentos e retorna fração zero quando a base é zero', () => {
     const lancamentos: LancamentoPersistido[] = [
       { id: 1, descricao: 'Salário', valor: 500 },
       { id: 2, descricao: 'Freela', valor: 250 },
@@ -19,7 +19,7 @@ describe('planilha-calculos', () => {
     expect(calcularFracao(25, 0)).toBe(0);
   });
 
-  it('groups matching descriptions and keeps category ordering and palettes', () => {
+  it('agrupa descrições iguais e mantém a ordenação e as cores por categoria', () => {
     const dados = obterDadosGrafico(
       [
         { id: 1, descricao: 'salário', valor: 500 },

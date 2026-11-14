@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { PlanilhaPageComponent } from './planilha-page.component';
 import { obterDadosGrafico } from '../domain/planilha-calculos';
 import { PlanilhaStorageService } from '../data-access/planilha-storage.service';
+import { PlanilhaFacade } from '../data-access/planilha.facade';
 
 const paletaGrafico = {
   ganhos: ['green'],
@@ -9,7 +10,7 @@ const paletaGrafico = {
   economias: ['purple'],
 };
 
-describe('PlanilhaPageComponent', () => {
+describe('Página da planilha financeira', () => {
   beforeEach(async () => {
     localStorage.clear();
     await TestBed.configureTestingModule({
@@ -21,13 +22,13 @@ describe('PlanilhaPageComponent', () => {
     localStorage.clear();
   });
 
-  it('should create the app', () => {
+  it('cria a página da planilha', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
-  it('should use clear labels for planilha file actions', () => {
+  it('exibe rótulos claros para importar e exportar a planilha', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     fixture.detectChanges();
 
@@ -42,7 +43,7 @@ describe('PlanilhaPageComponent', () => {
     );
   });
 
-  it('should identify edit and remove actions by lancamento', () => {
+  it('distingue as ações de edição e remoção de cada lançamento', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     fixture.componentInstance.entradas = [
       { id: 1, descricao: 'Salário', valor: 500 },
@@ -69,7 +70,7 @@ describe('PlanilhaPageComponent', () => {
     expect(removeLabels[0]).not.toBe(removeLabels[1]);
   });
 
-  it('should update the OnPush list and expose labels while editing', () => {
+  it('atualiza a lista e apresenta rótulos acessíveis durante a edição', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     fixture.detectChanges();
@@ -100,7 +101,7 @@ describe('PlanilhaPageComponent', () => {
     ).toContain('Salário atualizado');
   });
 
-  it('should show a warning when changes cannot be persisted', () => {
+  it('exibe um aviso quando não é possível salvar as alterações', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     spyOn(TestBed.inject(PlanilhaStorageService), 'salvar').and.returnValue(false);
@@ -120,7 +121,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.erroPersistencia).toBe('');
   });
 
-  it('should calculate saldo from entradas and saidas', () => {
+  it('calcula o saldo a partir das entradas e saídas', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -131,7 +132,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.saldoClasse).toBe('saldo-positivo');
   });
 
-  it('should reuse chart data until a persisted change invalidates it', () => {
+  it('reutiliza os dados do gráfico até que uma alteração os invalide', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     const dadosIniciais = app.dadosGrafico;
@@ -146,7 +147,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.dadosGrafico).toBe(dadosAtualizados);
   });
 
-  it('should group saidas with the same name for the chart', () => {
+  it('agrupa saídas com a mesma descrição no gráfico', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -162,7 +163,7 @@ describe('PlanilhaPageComponent', () => {
     expect(dados.dados).toEqual([150, 80]);
   });
 
-  it('should group entradas with the same name for the chart', () => {
+  it('agrupa entradas com a mesma descrição no gráfico', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -178,7 +179,7 @@ describe('PlanilhaPageComponent', () => {
     expect(dados.dados).toEqual([300, 2500]);
   });
 
-  it('should calculate percentage shares of gastos and economias over ganhos', () => {
+  it('calcula os percentuais de gastos e economias sobre os ganhos', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -191,7 +192,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.formatarPercentual(0.6)).toBe('60%');
   });
 
-  it('should return zero fractions when there are no ganhos', () => {
+  it('retorna frações iguais a zero quando não há ganhos', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -200,7 +201,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.fracaoEconomiasDosGanhos).toBe(0);
   });
 
-  it('should subtract economias from saldo like saidas', () => {
+  it('subtrai as economias do saldo assim como as saídas', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -211,7 +212,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.saldo).toBe(500);
   });
 
-  it('should group economias with the same name for the chart', () => {
+  it('agrupa economias com a mesma descrição no gráfico', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -227,7 +228,7 @@ describe('PlanilhaPageComponent', () => {
     expect(dados.dados).toEqual([80, 150]);
   });
 
-  it('should not add entrada without description and positive value', () => {
+  it('não adiciona entradas sem descrição ou com valor não positivo', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -244,7 +245,7 @@ describe('PlanilhaPageComponent', () => {
     expect(Date.parse(app.entradas[0].criadoEm!)).not.toBeNaN();
   });
 
-  it('should toggle and persist resumo percentuais visibility', () => {
+  it('alterna e persiste a visibilidade dos percentuais', () => {
     const fixture1 = TestBed.createComponent(PlanilhaPageComponent);
     const app1 = fixture1.componentInstance;
     fixture1.detectChanges();
@@ -252,13 +253,16 @@ describe('PlanilhaPageComponent', () => {
     expect(app1.mostrarResumoPercentuais).toBe(true);
     app1.alternarResumoPercentuais();
     expect(app1.mostrarResumoPercentuais).toBe(false);
+    app1.mostrarResumoPercentuais = true;
+    expect(app1.mostrarResumoPercentuais).toBeTrue();
+    app1.mostrarResumoPercentuais = false;
 
     const fixture2 = TestBed.createComponent(PlanilhaPageComponent);
     fixture2.detectChanges();
     expect(fixture2.componentInstance.mostrarResumoPercentuais).toBe(false);
   });
 
-  it('should persist and restore custom page name', () => {
+  it('persiste e restaura o nome personalizado da página', () => {
     const fixture1 = TestBed.createComponent(PlanilhaPageComponent);
     const app1 = fixture1.componentInstance;
     fixture1.detectChanges();
@@ -272,13 +276,13 @@ describe('PlanilhaPageComponent', () => {
     expect(fixture2.componentInstance.tituloPagina).toBe('Maio 2026');
   });
 
-  it('should use default title when page name is empty', () => {
+  it('usa o título padrão quando o nome da página está vazio', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     expect(app.tituloPagina).toBe('Planejador de Finanças');
   });
 
-  it('should only delete a category after confirmation', () => {
+  it('apaga uma categoria somente após a confirmação', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     app.entradas = [{ id: 1, descricao: 'Salário', valor: 500 }];
@@ -311,7 +315,7 @@ describe('PlanilhaPageComponent', () => {
     expect(reloaded.economias.length).toBe(1);
   });
 
-  it('should clear all records and the sheet name only after confirmation', () => {
+  it('limpa os registros e o nome da planilha somente após confirmação', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     app.nomePagina = 'Meu orçamento';
@@ -349,7 +353,7 @@ describe('PlanilhaPageComponent', () => {
     expect(reloaded.nomePagina).toBe('');
   });
 
-  it('should update lancamento on save and preserve criadoEm', () => {
+  it('atualiza um lançamento ao salvar e preserva sua data de criação', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     const criadoEm = '2026-05-27T10:00:00.000Z';
@@ -367,7 +371,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.totalEntradas).toBe(600);
   });
 
-  it('should allow changing the date and time of an imported lancamento', () => {
+  it('permite alterar a data e a hora de um lançamento importado', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -392,7 +396,7 @@ describe('PlanilhaPageComponent', () => {
     );
   });
 
-  it('should not save edit with empty description or zero value', () => {
+  it('não salva uma edição sem descrição ou com valor zero', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -415,7 +419,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.saidas[0].valor).toBe(250);
   });
 
-  it('should cancel edit without changing lancamento', () => {
+  it('cancela a edição sem alterar o lançamento', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -430,7 +434,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.economias[0].valor).toBe(100);
   });
 
-  it('should persist edited lancamento to localStorage', () => {
+  it('persiste o lançamento editado no armazenamento local', () => {
     const fixture1 = TestBed.createComponent(PlanilhaPageComponent);
     const app1 = fixture1.componentInstance;
     fixture1.detectChanges();
@@ -445,7 +449,7 @@ describe('PlanilhaPageComponent', () => {
     expect(fixture2.componentInstance.entradas[0].valor).toBe(150);
   });
 
-  it('should persist lancamentos to localStorage and restore on init', () => {
+  it('persiste os lançamentos e os restaura ao iniciar', () => {
     const fixture1 = TestBed.createComponent(PlanilhaPageComponent);
     const app1 = fixture1.componentInstance;
     fixture1.detectChanges();
@@ -472,7 +476,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app2.saldo).toBe(100);
   });
 
-  it('should export CSV with all three areas and entries only when there is data', () => {
+  it('exporta as três categorias quando existem dados para exportação', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -507,7 +511,7 @@ describe('PlanilhaPageComponent', () => {
     expect(csv).toContain('Poupança');
   });
 
-  it('should ask for a page name when exporting without one', () => {
+  it('solicita o nome da planilha antes de exportar', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     app.entradas = [{ id: 1, descricao: 'Salário', valor: 2000 }];
@@ -527,7 +531,7 @@ describe('PlanilhaPageComponent', () => {
     expect(fixture.nativeElement.textContent).toContain(app.csvErro);
   });
 
-  it('should import CSV only after modal confirmation', async () => {
+  it('importa o CSV somente após confirmação na janela', async () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     app.entradas = [{ id: 1, descricao: 'Existente', valor: 100 }];
@@ -566,7 +570,7 @@ describe('PlanilhaPageComponent', () => {
     expect(app.entradas[0].valor).toBe(150);
   });
 
-  it('should reject invalid CSV content and point to the offending cell', () => {
+  it('rejeita CSV inválido e indica a célula com erro', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -583,7 +587,7 @@ describe('PlanilhaPageComponent', () => {
     );
   });
 
-  it('should preserve current data and ids when CSV parsing fails', () => {
+  it('preserva os dados atuais e os identificadores quando o CSV é inválido', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     app.entradas = [{ id: 8, descricao: 'Existente', valor: 100 }];
@@ -599,7 +603,7 @@ describe('PlanilhaPageComponent', () => {
     expect((app as any).nextId).toBe(9);
   });
 
-  it('should import valid grouped CSV and replace current data', () => {
+  it('importa CSV agrupado válido e substitui os dados atuais', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
@@ -639,5 +643,180 @@ describe('PlanilhaPageComponent', () => {
         criadoEm: new Date(2026, 10, 17, 7, 5, 30).toISOString(),
       }),
     ]);
+  });
+
+  it('gera um nome de arquivo seguro e baixa o CSV quando há dados', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    app.nomePagina = 'Meu orçamento / 2026!';
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 500 }];
+    fixture.detectChanges();
+
+    expect(app.nomeArquivoExportacao).toMatch(/^Meu oramento  2026_\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-\d{2}\.csv$/);
+
+    const criarUrl = spyOn(URL, 'createObjectURL').and.returnValue('blob:planilha');
+    const revogarUrl = spyOn(URL, 'revokeObjectURL');
+    const clicar = spyOn(HTMLAnchorElement.prototype, 'click');
+    app.exportarCsv();
+
+    expect(criarUrl).toHaveBeenCalled();
+    expect(clicar).toHaveBeenCalled();
+    expect(revogarUrl).toHaveBeenCalledOnceWith('blob:planilha');
+    expect(app.csvErro).toBe('');
+  });
+
+  it('não baixa CSV sem dados e usa um nome padrão quando a planilha não tem nome', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    fixture.detectChanges();
+    const criarUrl = spyOn(URL, 'createObjectURL');
+
+    expect(app.nomeArquivoExportacao).toMatch(/^planilha-financeira_\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-\d{2}\.csv$/);
+    app.nomePagina = '!!!';
+    expect(app.nomeArquivoExportacao).toMatch(/^planilha-financeira_\d{2}-\d{2}-\d{4}-\d{2}-\d{2}-\d{2}\.csv$/);
+
+    app.nomePagina = 'Sem dados';
+    app.exportarCsv();
+    expect(criarUrl).not.toHaveBeenCalled();
+  });
+
+  it('limpa avisos, encaminha ações do seletor e ignora arquivo ausente', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    fixture.detectChanges();
+    const input = fixture.nativeElement.querySelector(
+      '#arquivo-csv-importacao',
+    ) as HTMLInputElement;
+    const clicar = spyOn(input, 'click');
+    app.abrirSeletorCsv();
+    expect(clicar).toHaveBeenCalled();
+
+    spyOn(document, 'getElementById').and.returnValue(null);
+    expect(() => app.abrirSeletorCsv()).not.toThrow();
+
+    const evento = { target: { files: [], value: 'arquivo.csv' } } as unknown as Event;
+    app.aoSelecionarArquivoCsv(evento);
+    expect((evento.target as HTMLInputElement).value).toBe('');
+    expect(app.csvErro).toBe('');
+
+    app.csvErro = 'Erro CSV';
+    fixture.debugElement.injector.get(PlanilhaFacade).erroPersistencia = 'Erro ao salvar';
+    app.fecharAvisos();
+    expect(app.csvErro).toBe('');
+    expect(app.erroPersistencia).toBe('');
+  });
+
+  it('rejeita extensões diferentes de CSV e permite fechar o aviso', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    fixture.detectChanges();
+    const arquivo = new File(['conteúdo'], 'dados.txt', { type: 'text/plain' });
+    const evento = { target: { files: [arquivo], value: 'dados.txt' } } as unknown as Event;
+
+    app.aoSelecionarArquivoCsv(evento);
+
+    expect(app.csvErro).toBe('Selecione um arquivo .csv para importar os dados.');
+    expect(app.mensagemConfirmacao).toBe('');
+    app.fecharAvisos();
+    expect(app.csvErro).toBe('');
+  });
+
+  it('exibe o erro de leitura retornado pelo arquivo CSV', async () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    fixture.detectChanges();
+    const arquivo = new File(['conteúdo'], 'dados.csv', { type: 'text/csv' });
+    spyOn(arquivo, 'text').and.returnValue(Promise.reject(new Error('Falha ao ler arquivo')));
+    const arquivos = new DataTransfer();
+    arquivos.items.add(arquivo);
+    const input = fixture.nativeElement.querySelector(
+      '#arquivo-csv-importacao',
+    ) as HTMLInputElement;
+    input.files = arquivos.files;
+    input.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.btn-confirmar-confirmacao').click();
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(app.csvErro).toBe('Falha ao ler arquivo');
+  });
+
+  it('usa uma mensagem padrão quando a leitura do arquivo falha sem um objeto de erro', async () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    fixture.detectChanges();
+    const arquivo = new File(['conteúdo'], 'dados.csv', { type: 'text/csv' });
+    spyOn(arquivo, 'text').and.returnValue(Promise.reject('falha desconhecida'));
+    const arquivos = new DataTransfer();
+    arquivos.items.add(arquivo);
+    const input = fixture.nativeElement.querySelector(
+      '#arquivo-csv-importacao',
+    ) as HTMLInputElement;
+    input.files = arquivos.files;
+    input.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.btn-confirmar-confirmacao').click();
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(app.csvErro).toBe(
+      'Não foi possível importar os dados. Confira a célula A1 e tente novamente.',
+    );
+  });
+
+  it('cancela edições ao remover o lançamento correspondente ou limpar a categoria', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 500 }];
+    app.saidas = [{ id: 2, descricao: 'Aluguel', valor: 200 }];
+
+    app.iniciarEdicao('entrada', app.entradas[0]);
+    app.removerLancamento('entrada', 1);
+    expect(app.editando).toBeNull();
+    expect(app.entradas).toEqual([]);
+
+    app.iniciarEdicao('saida', app.saidas[0]);
+    app.apagarCategoria('entrada');
+    app.confirmarAcao();
+    expect(app.editando?.tipo).toBe('saida');
+
+    app.apagarCategoria('saida');
+    app.confirmarAcao();
+    expect(app.editando).toBeNull();
+    expect(app.saidas).toEqual([]);
+  });
+
+  it('cancela uma edição inválida removida antes de salvar e ignora ações incompatíveis', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    const fachada = fixture.debugElement.injector.get(PlanilhaFacade);
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 500 }];
+
+    app.salvarEdicao('entrada');
+    app.iniciarEdicao('entrada', app.entradas[0]);
+    app.salvarEdicao('saida');
+    expect(app.editando?.id).toBe(1);
+
+    spyOn(fachada, 'salvarEdicao').and.returnValue(false);
+    spyOn(fachada, 'temLancamento').and.returnValue(false);
+    app.editDescricao = 'Salário';
+    app.editValor = 600;
+    app.salvarEdicao('entrada');
+    expect(app.editando).toBeNull();
+  });
+
+  it('cancela a confirmação sem executar a ação pendente', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 500 }];
+
+    app.apagarCategoria('entrada');
+    app.cancelarConfirmacao();
+
+    expect(app.entradas.length).toBe(1);
+    expect(app.mensagemConfirmacao).toBe('');
   });
 });

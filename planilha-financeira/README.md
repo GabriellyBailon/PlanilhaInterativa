@@ -107,5 +107,6 @@ npm run build
 ## Documentação para desenvolvedores
 
 - [Arquitetura da aplicação](docs/arquitetura.md): camadas, responsabilidades e principais fluxos de dados.
+- [Padrões de testes](docs/padroes-de-testes.md): cobertura mínima de 90% por métrica, idioma pt-BR e revisão ao concluir implementações.
 - Contexto técnico e histórico de mudanças para agentes de IA: [`../CONTEXTO.md`](../CONTEXTO.md) (na raiz do workspace).
 - Skill para auditar e atualizar a documentação comparando-a com o código: [`../.github/skills/verificar-documentacao/SKILL.md`](../.github/skills/verificar-documentacao/SKILL.md).

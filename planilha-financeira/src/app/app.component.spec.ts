@@ -5,8 +5,8 @@ import { AppComponent } from './app.component';
 import { routes } from './app.routes';
 import { PlanilhaPageComponent } from './features/planilha/pages/planilha-page.component';
 
-describe('AppComponent', () => {
-  it('should create the application shell', async () => {
+describe('Aplicação principal', () => {
+  it('cria a estrutura principal da aplicação', async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
       providers: [provideRouter(routes)],
@@ -18,7 +18,7 @@ describe('AppComponent', () => {
     expect(fixture.nativeElement.querySelector('router-outlet')).toBeTruthy();
   });
 
-  it('should lazy-load the planilha on the default route', async () => {
+  it('carrega a planilha ao acessar a rota inicial', async () => {
     await TestBed.configureTestingModule({
       providers: [provideRouter(routes)],
     }).compileComponents();
