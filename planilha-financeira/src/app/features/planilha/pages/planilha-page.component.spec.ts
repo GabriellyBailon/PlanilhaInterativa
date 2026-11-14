@@ -385,6 +385,25 @@ describe('PlanilhaPageComponent', () => {
     expect(csv).toContain('Poupança');
   });
 
+  it('should ask for a page name when exporting without one', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 2000 }];
+    fixture.detectChanges();
+
+    const botaoExportar: HTMLButtonElement =
+      fixture.nativeElement.querySelector('.btn-exportar');
+    expect(botaoExportar.disabled).toBeFalse();
+
+    botaoExportar.click();
+    fixture.detectChanges();
+
+    expect(app.csvErro).toBe(
+      'Para exportar o arquivo, informe um nome para a Planilha.',
+    );
+    expect(fixture.nativeElement.textContent).toContain(app.csvErro);
+  });
+
   it('should reject invalid CSV content and point to the offending cell', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
@@ -422,6 +441,7 @@ describe('PlanilhaPageComponent', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
 
+    app.nomePagina = 'Planilha anterior';
     app.entradas = [{ id: 9, descricao: 'Antigo', valor: 100, criadoEm: '2026-01-01T00:00:00.000Z' }];
     app.saidas = [{ id: 10, descricao: 'Antigo gasto', valor: 40, criadoEm: '2026-01-02T00:00:00.000Z' }];
     app.economias = [{ id: 11, descricao: 'Antiga reserva', valor: 15, criadoEm: '2026-01-03T00:00:00.000Z' }];
@@ -435,6 +455,7 @@ describe('PlanilhaPageComponent', () => {
 
     (app as any).importarCsvTexto(csv);
 
+    expect(app.nomePagina).toBe('Maio 2026');
     expect(app.entradas).toEqual([
       jasmine.objectContaining({
         descricao: 'Freela',

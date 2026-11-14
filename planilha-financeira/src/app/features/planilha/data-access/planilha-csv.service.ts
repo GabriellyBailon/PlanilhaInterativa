@@ -11,7 +11,7 @@ type DadosPlanilhaCsv = Pick<
 
 export type ResultadoImportacaoCsv = Pick<
   EstadoPlanilha,
-  'entradas' | 'saidas' | 'economias' | 'nextId'
+  'entradas' | 'saidas' | 'economias' | 'nextId' | 'nomePagina'
 >;
 
 interface ContextoImportacao {
@@ -87,17 +87,22 @@ export class PlanilhaCsvService {
     }
 
     const contexto: ContextoImportacao = { nextId };
-    const dados = this.ehFormatoAgrupado(linhas)
+    const formatoAgrupado = this.ehFormatoAgrupado(linhas);
+    const dados = formatoAgrupado
       ? this.importarCsvAgrupado(linhas, contexto)
       : this.importarCsvPorRegistro(linhas, contexto);
 
-    return { ...dados, nextId: contexto.nextId };
+    return {
+      ...dados,
+      nomePagina: formatoAgrupado ? this.parsearNomePagina(linhas[0][0]) : '',
+      nextId: contexto.nextId,
+    };
   }
 
   private importarCsvPorRegistro(
     linhas: string[][],
     contexto: ContextoImportacao,
-  ): Omit<ResultadoImportacaoCsv, 'nextId'> {
+  ): Omit<ResultadoImportacaoCsv, 'nextId' | 'nomePagina'> {
     const cabecalho = linhas[0].map((valor) => this.normalizarCampo(valor));
     const cabecalhoEsperado = this.cabecalhoCsv.map((valor) => this.normalizarCampo(valor));
 
@@ -161,7 +166,7 @@ export class PlanilhaCsvService {
   private importarCsvAgrupado(
     linhas: string[][],
     contexto: ContextoImportacao,
-  ): Omit<ResultadoImportacaoCsv, 'nextId'> {
+  ): Omit<ResultadoImportacaoCsv, 'nextId' | 'nomePagina'> {
     const indicesSecoes = this.obterIndicesSecoes(linhas[1]);
     const entradas: LancamentoPersistido[] = [];
     const saidas: LancamentoPersistido[] = [];
@@ -379,6 +384,12 @@ export class PlanilhaCsvService {
     return (valor ?? '').replace(/\r/g, '').trim();
   }
 
+  private parsearNomePagina(valor: string | undefined): string {
+    const nome = this.normalizarCampo(valor);
+    const formula = nome.match(/^="([\s\S]*)"$/);
+    return (formula ? formula[1].replace(/""/g, '"') : nome).trim();
+  }
+
   private parsearValor(valor: string | undefined, linha: number): number {
     const valorNormalizado = this.normalizarCampo(valor)
       .replace(/R\$/gi, '')
@@ -432,6 +443,9 @@ export class PlanilhaCsvService {
   }
 
   formatarErro(coluna: string, linha: number): string {
-    return `Ops! Os dados da planilha estão em formato incorreto. Verifique a célula ${coluna.toLowerCase()}${linha}`;
+    const mensagem = `Ops! Os dados da planilha estão em formato incorreto. Verifique a célula ${coluna.toLowerCase()}${linha}`;
+    return coluna.toLowerCase() === 'a' && linha === 1
+      ? `${mensagem}. Confira o nome da Planilha e preencha-o caso esteja vazio.`
+      : mensagem;
   }
 }

@@ -30,6 +30,33 @@ describe('PlanilhaCsvService', () => {
     expect(resultado.nextId).toBe(13);
   });
 
+  it('preserves the page name when exporting and importing grouped CSV', () => {
+    const nomePagina = 'Meu "orçamento"';
+    const csv = service.gerarCsv({
+      nomePagina,
+      entradas: [
+        {
+          id: 1,
+          descricao: 'Salário',
+          valor: 200,
+          criadoEm: '2026-10-15T12:30:45.000Z',
+        },
+      ],
+      saidas: [],
+      economias: [],
+    });
+
+    const resultado = service.importarCsvTexto(csv, 10);
+
+    expect(resultado.nomePagina).toBe(nomePagina);
+  });
+
+  it('adds a page-name hint to errors in cell A1', () => {
+    expect(service.formatarErro('A', 1)).toContain(
+      'Confira o nome da Planilha e preencha-o caso esteja vazio',
+    );
+  });
+
   it('does not expose a partially parsed result when a later row is invalid', () => {
     const csv = [
       'Area;Descricao;Valor;DataAlteracao',

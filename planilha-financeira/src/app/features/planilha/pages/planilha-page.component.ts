@@ -251,6 +251,11 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   exportarCsv(): void {
+    if (!this.nomePagina.trim()) {
+      this.csvErro = 'Para exportar o arquivo, informe um nome para a Planilha.';
+      return;
+    }
+
     if (!this.temDadosParaExportar) {
       return;
     }
@@ -297,8 +302,12 @@ export class PlanilhaPageComponent implements OnInit {
         this.importarCsvTexto(conteudo);
         this.csvErro = '';
       })
-      .catch(() => {
-        this.mostrarErroCsv(this.csvService.formatarErro('a', 1));
+      .catch((erro: unknown) => {
+        this.mostrarErroCsv(
+          erro instanceof Error
+            ? erro.message
+            : this.csvService.formatarErro('a', 1),
+        );
       });
   }
 
@@ -455,6 +464,7 @@ export class PlanilhaPageComponent implements OnInit {
     this.entradas = estado.entradas;
     this.saidas = estado.saidas;
     this.economias = estado.economias;
+    this.nomePagina = estado.nomePagina ?? '';
     this.nextId = estado.nextId;
     this.persistir();
   }
