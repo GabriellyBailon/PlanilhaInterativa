@@ -1,5 +1,6 @@
 <main class="app">
   <header class="header">
+    <h1 class="visually-hidden">{{ tituloPagina }}</h1>
     <label class="titulo-pagina-label" for="nome-pagina">Nome da planilha</label>
     <input
       id="nome-pagina"
@@ -12,7 +13,7 @@
       maxlength="80"
       aria-label="Nome da planilha"
     />
-    <div class="acoes-planilha" aria-label="Ações da planilha">
+    <div class="acoes-planilha" role="group" aria-label="Ações da planilha">
       <button
         type="button"
         class="btn-exportar"
@@ -106,7 +107,7 @@
 
   <div class="colunas">
     <app-lancamento-categoria
-      *ngFor="let categoria of categorias"
+      *ngFor="let categoria of categorias; trackBy: trackByCategoria"
       [categoria]="categoria"
       [lancamentos]="obterLancamentos(categoria.tipo)"
       [total]="totalDaCategoria(categoria.tipo)"

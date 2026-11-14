@@ -1,5 +1,6 @@
 import {
   afterNextRender,
+  ChangeDetectionStrategy,
   Component,
   ElementRef,
   Input,
@@ -14,6 +15,7 @@ import { DadosGrafico } from '../../domain/planilha.model';
   selector: 'app-grafico-categorias',
   templateUrl: './grafico-categorias.component.html',
   styleUrl: './grafico-categorias.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GraficoCategoriasComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) dados: DadosGrafico = {

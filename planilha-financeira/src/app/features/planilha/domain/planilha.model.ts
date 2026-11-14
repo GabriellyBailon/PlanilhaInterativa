@@ -32,3 +32,13 @@ export interface PaletaGrafico {
 }
 
 export type TipoLancamento = 'entrada' | 'saida' | 'economia';
+
+export interface EdicaoAtiva {
+  tipo: TipoLancamento;
+  id: number;
+}
+
+export interface NovoLancamento {
+  descricao: string;
+  valor: number;
+}

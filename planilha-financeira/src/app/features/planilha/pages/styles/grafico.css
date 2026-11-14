@@ -1,9 +1,10 @@
 .grafico-secao {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
   padding: 1.25rem;
   text-align: center;
+  box-shadow: var(--shadow-card);
 }
 
 @media (max-width: 768px) {
@@ -45,10 +46,10 @@
 
 .btn-resumo-toggle {
   padding: 0.5rem 0.875rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.375rem;
-  background: #fff;
-  color: #334155;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-text);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -57,14 +58,14 @@
 
 
 .btn-resumo-toggle:hover {
-  background: #f1f5f9;
-  border-color: #94a3b8;
+  background: var(--color-neutral-hover);
+  border-color: var(--color-text-subtle);
 }
 
 .btn-resumo-toggle[aria-pressed='true'] {
-  background: #eff6ff;
-  border-color: #93c5fd;
-  color: #1d4ed8;
+  background: color-mix(in srgb, var(--color-primary) 8%, white);
+  border-color: color-mix(in srgb, var(--color-primary) 35%, white);
+  color: var(--color-primary-hover);
 }
 
 .grafico-layout {
@@ -105,9 +106,9 @@
   margin: 0 auto;
   padding: 1rem 1.25rem;
   text-align: left;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
 }
 
 @media (max-width: 768px) {
@@ -123,7 +124,7 @@
   margin: 0 0 0.5rem;
   font-size: 1rem;
   font-weight: 600;
-  color: #334155;
+  color: var(--color-text);
 }
 
 @media (max-width: 768px) {
@@ -137,15 +138,15 @@
 .resumo-total {
   margin: 0 0 1rem;
   font-size: 0.875rem;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 
 .resumo-total-valor {
-  color: #166534;
+  color: var(--color-success);
   font-size: 1.0625rem;
   font-weight: 700;
-  background: #dcfce7;
+  background: var(--color-success-surface);
   padding: 0.2rem 0.5rem;
   border-radius: 0.375rem;
 }
@@ -183,17 +184,17 @@
 
 
 .resumo-gastos .resumo-rotulo {
-  color: #991b1b;
+  color: var(--color-danger);
 }
 
 .resumo-economias .resumo-rotulo {
-  color: #7c3aed;
+  color: var(--color-economy);
 }
 
 .resumo-barra {
   height: 0.5rem;
   border-radius: 9999px;
-  background: #e2e8f0;
+  background: var(--color-border);
   overflow: hidden;
 }
 
@@ -231,20 +232,20 @@
 .resumo-moeda {
   font-size: 0.75rem;
   font-weight: 500;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 
 .resumo-nota {
   margin: 1rem 0 0;
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--color-text-subtle);
   line-height: 1.4;
 }
 
 .grafico-legenda {
   margin: 0.75rem 0 0;
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--color-text-subtle);
 }
 

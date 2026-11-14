@@ -69,6 +69,37 @@ describe('PlanilhaPageComponent', () => {
     expect(removeLabels[0]).not.toBe(removeLabels[1]);
   });
 
+  it('should update the OnPush list and expose labels while editing', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    fixture.detectChanges();
+
+    app.adicionarLancamento('entrada', { descricao: 'Salário', valor: 500 });
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('.coluna-entrada .item-descricao').textContent,
+    ).toContain('Salário');
+
+    app.iniciarEdicao('entrada', app.entradas[0]);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('label[for="edit-desc-entrada-1"]').textContent,
+    ).toContain('Descrição');
+    expect(
+      fixture.nativeElement.querySelector('.item-edicao[role="group"]')
+        .getAttribute('aria-label'),
+    ).toContain('Salário');
+
+    app.editDescricao = 'Salário atualizado';
+    app.editValor = 600;
+    app.salvarEdicao('entrada');
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.coluna-entrada .item-descricao').textContent,
+    ).toContain('Salário atualizado');
+  });
+
   it('should show a warning when changes cannot be persisted', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;

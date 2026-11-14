@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { PlanilhaPageComponent } from './features/planilha/pages/planilha-page.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [PlanilhaPageComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
 })
 export class AppComponent {}

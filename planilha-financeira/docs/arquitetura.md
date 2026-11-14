@@ -4,21 +4,23 @@ Este documento descreve como o Planejador de Finanças está organizado hoje e c
 
 ## Visão geral
 
-A aplicação é uma SPA Angular 19 baseada em componentes standalone. O ponto de entrada registra o locale `pt-BR`, configura `LOCALE_ID` e `DEFAULT_CURRENCY_CODE` como `BRL` e monta o componente raiz. O componente raiz delega a tela para a feature de planilha.
+A aplicação é uma SPA Angular 19 baseada em componentes standalone. O ponto de entrada registra o locale `pt-BR`, configura `LOCALE_ID` e `DEFAULT_CURRENCY_CODE` como `BRL` e monta o componente raiz. O roteador carrega a página inicial da planilha sob demanda.
 
 ```text
 main.ts
   └── AppComponent
-        └── PlanilhaPageComponent
-              ├── LancamentoCategoriaComponent (entradas, economias e saídas)
-              └── GraficoCategoriasComponent (Chart.js)
+        └── RouterOutlet
+              └── PlanilhaPageComponent (rota inicial lazy-loaded)
+                    ├── PlanilhaFacade (estado e regras de aplicação)
+                    ├── LancamentoCategoriaComponent (entradas, economias e saídas)
+                    └── GraficoCategoriasComponent (Chart.js)
 ```
 
-O estado da aplicação é mantido na página da planilha. Serviços isolam persistência e CSV; funções puras de domínio calculam totais e dados do gráfico.
+O `PlanilhaFacade`, fornecido pela página, coordena estado, persistência e regras de aplicação; a página trata eventos de interface, diálogos e operações de arquivo. `PlanilhaStorageService` e `PlanilhaCsvService` isolam persistência e CSV; funções puras de domínio calculam totais e dados do gráfico.
 
 ## Referência do código
 
-Esta descrição foi conferida com base no último commit que alterou o código da aplicação (`planilha-financeira/src/`) na data da revisão:
+Esta descrição foi conferida com base no código-fonte da aplicação. O commit abaixo é a referência anterior usada na revisão inicial e não inclui as mudanças locais em andamento:
 
 - **Commit:** [`5c1042c671b9429cce81f27ca958a5aeda3d128e`](https://github.com/GabriellyBailon/PlanilhaInterativa/commit/5c1042c671b9429cce81f27ca958a5aeda3d128e)
 - **Data e mensagem:** 2026-11-14 — `Validação, nome obrigatório.`
@@ -34,8 +36,10 @@ git diff 5c1042c671b9429cce81f27ca958a5aeda3d128e..HEAD -- planilha-financeira/s
 | Área | Responsabilidade |
 |---|---|
 | `src/main.ts` e `src/app/app.config.ts` | Inicialização Angular, locale e configurações globais |
-| `src/app/app.component.ts` | Componente raiz; monta a página da planilha |
-| `src/app/features/planilha/pages/` | Estado da tela, ações do usuário, validações de fluxo, coordenação de serviços e composição dos componentes |
+| `src/app/app.routes.ts` e `src/app/app.config.ts` | Rota inicial lazy-loaded, fallback e configuração global do roteador |
+| `src/app/app.component.ts` | Componente raiz; disponibiliza o `RouterOutlet` |
+| `src/app/features/planilha/pages/` | Eventos e estado transitório da interface, diálogos, operações de arquivo e composição dos componentes |
+| `src/app/features/planilha/data-access/planilha.facade.ts` | Estado da planilha, regras de aplicação, cálculos derivados e coordenação da persistência |
 | `src/app/features/planilha/components/lancamento-categoria/` | Formulário e lista reutilizados para cada tipo de lançamento; mantém valores transitórios do formulário e emite eventos para a página |
 | `src/app/features/planilha/components/grafico-categorias/` | Apresentação do gráfico Chart.js e ciclo de vida da instância |
 | `src/app/features/planilha/domain/` | Modelos e cálculos independentes da interface, como totais e agrupamento de categorias |
@@ -48,7 +52,7 @@ Os estilos da tela ficam em `pages/styles/`; cada componente mantém seus própr
 
 `EstadoPlanilha` representa o estado persistido: listas de `entradas`, `saidas` e `economias`, `nextId`, nome opcional da página e preferência opcional de exibição dos percentuais. Cada `LancamentoPersistido` contém `id`, `descricao`, `valor` e, opcionalmente, `criadoEm` em formato de data serializável.
 
-`TipoLancamento` restringe as operações da tela a `entrada`, `saida` ou `economia`. A página mantém as três listas e os campos de edição; o componente de categoria não grava dados nem acessa serviços: ele emite ações para a página e recebe os dados atuais por `@Input`.
+`TipoLancamento` restringe as operações da tela a `entrada`, `saida` ou `economia`. A facade mantém as três listas e os cálculos derivados; a página mantém somente o estado transitório da edição e da interface. O componente de categoria não grava dados nem acessa serviços: ele emite ações para a página e recebe os dados atuais por `@Input`.
 
 Totais e saldo são derivados do estado, não persistidos como valores independentes:
 
@@ -63,14 +67,14 @@ Os percentuais de gastos e economias usam o total de entradas como base. Quando 
 ### Lançamentos
 
 1. `LancamentoCategoriaComponent` coleta descrição e valor e emite o evento de inclusão.
-2. `PlanilhaPageComponent` rejeita descrição vazia após `trim` ou valor não finito/menor ou igual a zero; a diretiva monetária formata a entrada em BRL.
-3. A página cria o identificador e a data/hora, atualiza a lista correspondente e persiste o estado.
-4. Edição e remoção seguem o mesmo fluxo centralizado na página. A edição também valida a data/hora local antes de salvar.
+2. `PlanilhaPageComponent` encaminha a ação para `PlanilhaFacade`, que rejeita descrição vazia após `trim` ou valor não finito/menor ou igual a zero; a diretiva monetária formata a entrada em BRL.
+3. A facade cria o identificador e a data/hora, atualiza a lista correspondente sem mutar a referência anterior e persiste o estado.
+4. Edição e remoção seguem o mesmo fluxo centralizado na facade. A edição também valida a data/hora local antes de salvar.
 5. Os totais, saldo, resumo e dados do gráfico são derivados das listas atualizadas.
 
 ### Persistência local
 
-`PlanilhaStorageService` usa a chave `planilha-financeira:v1`. A página carrega o estado na inicialização e o salva após alterações relevantes. O serviço valida o JSON antes de devolvê-lo, incluindo listas, IDs, valores e datas; ajusta `nextId` para ficar acima do maior ID existente. Estados legados sem `economias` são carregados com uma lista vazia.
+`PlanilhaStorageService` usa a chave `planilha-financeira:v1`. A facade carrega o estado na inicialização e o salva após alterações relevantes. O serviço valida o JSON antes de devolvê-lo, incluindo listas, IDs, valores e datas; ajusta `nextId` para ficar acima do maior ID existente. Estados legados sem `economias` são carregados com uma lista vazia.
 
 Se o JSON não puder ser lido ou validado, `carregar()` retorna `null`. `salvar()` retorna `false` se o ambiente não tiver `localStorage` ou a gravação falhar; a página então avisa que as alterações podem não ter sido salvas e recomenda exportar um CSV.
 
@@ -91,13 +95,19 @@ Na exportação, a página exige nome e ao menos um lançamento; o serviço seri
 
 `PlanilhaPageComponent` fornece ao gráfico dados calculados por `obterDadosGrafico()` em `domain/planilha-calculos.ts`. As categorias são agrupadas separadamente por tipo, descrições iguais ignorando maiúsculas/minúsculas são somadas e os rótulos recebem prefixos para distinguir ganho, economia e gasto. A página também fornece as paletas de cores.
 
-O resultado derivado é mantido em cache entre verificações de mudanças e recalculado após operações da página que persistem o estado. Assim, o componente do gráfico só recebe uma nova referência quando os dados são invalidados.
+O resultado derivado é mantido em cache pela facade e recalculado após operações que persistem o estado. Assim, o componente do gráfico só recebe uma nova referência quando os dados são invalidados.
 
 `GraficoCategoriasComponent` cria e atualiza o gráfico, formata os valores do tooltip em BRL e destrói a instância ao desmontar. A inicialização inicial ocorre após a renderização; atualizações de dados atualizam a instância existente.
 
+## Renderização e estilos
+
+A página e os componentes de categoria e gráfico usam `OnPush`. Listas dinâmicas usam `trackBy` por tipo de categoria e ID do lançamento; atualizações de lançamentos substituem a lista e o item alterado por novas referências. A importação CSV solicita verificação de mudanças após a leitura assíncrona.
+
+Tokens compartilhados de cor, superfície, foco, raio e sombra são definidos em `src/styles.css` e consumidos pelas folhas de estilo dos componentes. A regra global `:focus-visible` padroniza o indicador de teclado, e animações respeitam a preferência `prefers-reduced-motion`.
+
 ## Limites e convenções
 
-- A página coordena estado e efeitos; componentes filhos emitem ações em vez de modificar listas persistidas diretamente.
+- A facade coordena estado e regras da planilha; a página coordena eventos da interface e efeitos de arquivo; componentes filhos emitem ações em vez de modificar listas persistidas diretamente.
 - Regras financeiras e cálculos derivados pertencem a `domain/`; não devem depender de Angular, DOM ou `localStorage`.
 - Acesso a arquivos e persistência ficam em `data-access/`; componentes não devem duplicar parsing de CSV ou lógica de armazenamento.
 - Dados do gráfico devem ser derivados das listas, sem armazenar cópias calculadas no estado.

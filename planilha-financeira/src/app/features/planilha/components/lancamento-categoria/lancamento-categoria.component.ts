@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   EventEmitter,
   Input,
@@ -12,14 +13,13 @@ import { BrlCurrencyDirective } from '../../../../shared/directives/brl-currency
 import { BrlPipe } from '../../../../shared/pipes/brl.pipe';
 import { DataHoraLocalPipe } from '../../../../shared/pipes/data-hora-local.pipe';
 import {
+  EdicaoAtiva,
   LancamentoPersistido,
+  NovoLancamento,
   TipoLancamento,
 } from '../../domain/planilha.model';
 
-export interface EdicaoAtiva {
-  tipo: TipoLancamento;
-  id: number;
-}
+export type { EdicaoAtiva, NovoLancamento } from '../../domain/planilha.model';
 
 export interface CategoriaLancamentoConfig {
   tipo: TipoLancamento;
@@ -30,11 +30,6 @@ export interface CategoriaLancamentoConfig {
   mensagemVazia: string;
   rotuloTotal: string;
   acaoLimpar: string;
-}
-
-export interface NovoLancamento {
-  descricao: string;
-  valor: number;
 }
 
 @Component({
@@ -53,6 +48,7 @@ export interface NovoLancamento {
     './lancamento-categoria.component.css',
     './lancamento-categoria.responsive.css',
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LancamentoCategoriaComponent implements OnChanges {
   @Input({ required: true }) categoria!: CategoriaLancamentoConfig;
@@ -86,6 +82,10 @@ export class LancamentoCategoriaComponent implements OnChanges {
 
   estaEditando(id: number): boolean {
     return this.edicaoAtiva?.tipo === this.categoria.tipo && this.edicaoAtiva.id === id;
+  }
+
+  trackByLancamento(_index: number, lancamento: LancamentoPersistido): number {
+    return lancamento.id;
   }
 
   aoAdicionar(): void {

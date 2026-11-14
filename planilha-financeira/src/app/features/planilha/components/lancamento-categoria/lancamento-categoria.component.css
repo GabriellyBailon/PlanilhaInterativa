@@ -1,8 +1,29 @@
 .coluna {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  --category-accent: var(--color-primary);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--category-accent);
+  border-radius: var(--radius-card);
   padding: 1.25rem;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.coluna:hover {
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.09);
+  transform: translateY(-2px);
+}
+
+.coluna-entrada {
+  --category-accent: #16a34a;
+}
+
+.coluna-saida {
+  --category-accent: #dc2626;
+}
+
+.coluna-economia {
+  --category-accent: #7c3aed;
 }
 
 @media (max-width: 768px) {
@@ -27,15 +48,15 @@
 
 
 .coluna-entrada h2 {
-  color: #166534;
+  color: var(--color-success);
 }
 
 .coluna-saida h2 {
-  color: #991b1b;
+  color: var(--color-danger);
 }
 
 .coluna-economia h2 {
-  color: #7c3aed;
+  color: var(--color-economy);
 }
 
 .formulario {
@@ -49,22 +70,20 @@
 .formulario label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #475569;
+  color: var(--color-text-muted);
 }
 
 
 .formulario input {
   padding: 0.5rem 0.75rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.375rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
   font-size: 1rem;
 }
 
 
-.formulario input:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 1px;
-  border-color: #3b82f6;
+.formulario input:focus-visible {
+  border-color: var(--color-focus-ring);
 }
 
 .formulario button[type='submit'] {
@@ -72,7 +91,7 @@
   padding: 0.625rem 1rem;
   border: none;
   border-radius: 0.375rem;
-  background: #2563eb;
+  background: var(--color-primary);
   color: #fff;
   font-size: 0.9375rem;
   font-weight: 600;
@@ -81,7 +100,7 @@
 
 
 .formulario button[type='submit']:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: var(--color-primary-hover);
 }
 
 .formulario button[type='submit']:disabled {
@@ -100,7 +119,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 @media (max-width: 768px) {
@@ -115,8 +134,8 @@
   flex-wrap: wrap;
   align-items: flex-start;
   padding: 0.625rem 0;
-  background: #fff;
-  border-radius: 0.375rem;
+  background: var(--color-surface);
+  border-radius: var(--radius-control);
 }
 
 .item-descricao {
@@ -150,21 +169,21 @@
   flex-shrink: 0;
   font-size: 0.75rem;
   font-weight: 400;
-  color: #94a3b8;
+  color: var(--color-text-subtle);
   white-space: nowrap;
 }
 
 
 .valor.entrada {
-  color: #166534;
+  color: var(--color-success);
 }
 
 .valor.saida {
-  color: #991b1b;
+  color: var(--color-danger);
 }
 
 .valor.economia {
-  color: #7c3aed;
+  color: var(--color-economy);
   font-weight: 700;
 }
 
@@ -175,8 +194,8 @@
   padding: 0;
   border: none;
   border-radius: 50%;
-  background: #f1f5f9;
-  color: #64748b;
+  background: var(--color-border);
+  color: var(--color-text-muted);
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
@@ -189,8 +208,8 @@
 }
 
 .editar:hover {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: var(--color-primary-surface);
+  color: var(--color-primary-hover);
 }
 
 .remover {
@@ -198,54 +217,71 @@
 }
 
 .remover:hover {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger-surface);
+  color: var(--color-danger);
 }
 
 .item-edicao {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   gap: 0.5rem;
   width: 100%;
 }
 
+.item-edicao-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.item-edicao-campo label {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.item-edicao-campo-descricao {
+  flex: 1 1 12rem;
+  min-width: 8rem;
+}
+
+.item-edicao-campo-valor {
+  flex: 0 1 8rem;
+  min-width: 6rem;
+}
+
+.item-edicao-campo-data {
+  flex: 1 1 12rem;
+}
+
 
 .item-edicao-descricao {
-  flex: 1 1 8rem;
+  width: 100%;
   min-width: 0;
   padding: 0.375rem 0.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.375rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
   font-size: 0.9375rem;
 }
 
 
 .item-edicao-valor,
 .item-edicao-data {
+  width: 100%;
+  min-width: 0;
   padding: 0.375rem 0.5rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.375rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-control);
   font-size: 0.9375rem;
 }
 
-.item-edicao-valor {
-  flex: 0 1 7rem;
-  min-width: 5.5rem;
-}
 
-.item-edicao-data {
-  flex: 1 1 12rem;
-  min-width: 0;
-}
-
-
-.item-edicao-descricao:focus,
-.item-edicao-valor:focus,
-.item-edicao-data:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 1px;
-  border-color: #3b82f6;
+.item-edicao-descricao:focus-visible,
+.item-edicao-valor:focus-visible,
+.item-edicao-data:focus-visible {
+  border-color: var(--color-focus-ring);
 }
 
 .item-edicao-acoes {
@@ -268,12 +304,12 @@
 
 .btn-salvar-edicao {
   border: none;
-  background: #2563eb;
+  background: var(--color-primary);
   color: #fff;
 }
 
 .btn-salvar-edicao:hover:not(:disabled) {
-  background: #1d4ed8;
+  background: var(--color-primary-hover);
 }
 
 .btn-salvar-edicao:disabled {
@@ -282,37 +318,37 @@
 }
 
 .btn-cancelar-edicao {
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  color: #475569;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
 }
 
 .btn-cancelar-edicao:hover {
-  background: #f1f5f9;
+  background: var(--color-neutral-hover);
 }
 
 .vazio {
   margin: 0;
   font-size: 0.875rem;
-  color: #94a3b8;
+  color: var(--color-text-subtle);
   font-style: italic;
 }
 
 .subtotal {
   margin: 1rem 0 0;
   padding-top: 0.75rem;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--color-border);
   font-size: 0.9375rem;
 }
 
 .btn-apagar-categoria {
   margin-top: 0.75rem;
-  border-color: #fecaca;
-  color: #991b1b;
+  border-color: var(--color-danger-surface);
+  color: var(--color-danger);
 }
 
 .btn-apagar-categoria:hover:not(:disabled) {
-  background: #fef2f2;
+  background: var(--color-danger-highlight);
 }
 
 .btn-apagar-categoria:disabled {

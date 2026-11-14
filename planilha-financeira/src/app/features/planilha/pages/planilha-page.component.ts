@@ -1,4 +1,6 @@
 import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   OnInit,
@@ -11,23 +13,17 @@ import { BrlPipe } from '../../../shared/pipes/brl.pipe';
 import { GraficoCategoriasComponent } from '../components/grafico-categorias/grafico-categorias.component';
 import {
   CategoriaLancamentoConfig,
-  EdicaoAtiva,
   LancamentoCategoriaComponent,
-  NovoLancamento,
 } from '../components/lancamento-categoria/lancamento-categoria.component';
 import {
-  calcularFracao,
-  obterDadosGrafico,
-  somarLancamentos,
-} from '../domain/planilha-calculos';
-import {
   DadosGrafico,
+  EdicaoAtiva,
   LancamentoPersistido,
-  PaletaGrafico,
+  NovoLancamento,
   TipoLancamento,
 } from '../domain/planilha.model';
 import { PlanilhaCsvService } from '../data-access/planilha-csv.service';
-import { PlanilhaStorageService } from '../data-access/planilha-storage.service';
+import { PlanilhaFacade } from '../data-access/planilha.facade';
 
 @Component({
   selector: 'app-planilha-page',
@@ -39,6 +35,7 @@ import { PlanilhaStorageService } from '../data-access/planilha-storage.service'
     GraficoCategoriasComponent,
     LancamentoCategoriaComponent,
   ],
+  providers: [PlanilhaFacade],
   templateUrl: './planilha-page.component.html',
   styleUrls: [
     './styles/planilha-base.css',
@@ -46,10 +43,12 @@ import { PlanilhaStorageService } from '../data-access/planilha-storage.service'
     './styles/grafico.css',
     './styles/responsivo.css',
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlanilhaPageComponent implements OnInit {
-  private readonly storage = inject(PlanilhaStorageService);
+  private readonly facade = inject(PlanilhaFacade);
   private readonly csvService = inject(PlanilhaCsvService);
+  private readonly changeDetector = inject(ChangeDetectorRef);
 
   @ViewChild('modalAviso')
   set modalAviso(dialogo: ElementRef<HTMLDialogElement> | undefined) {
@@ -64,10 +63,6 @@ export class PlanilhaPageComponent implements OnInit {
       dialogo.nativeElement.showModal();
     }
   }
-
-  entradas: LancamentoPersistido[] = [];
-  saidas: LancamentoPersistido[] = [];
-  economias: LancamentoPersistido[] = [];
 
   readonly categorias: CategoriaLancamentoConfig[] = [
     {
@@ -102,82 +97,93 @@ export class PlanilhaPageComponent implements OnInit {
     },
   ];
 
-  nomePagina = '';
-  mostrarResumoPercentuais = true;
-  versaoResetFormularios = 0;
-
   editando: EdicaoAtiva | null = null;
   editDescricao = '';
   editValor = 0;
   editDataHora = '';
-
-  private nextId = 1;
-  private dadosGraficoEmCache: DadosGrafico | null = null;
+  versaoResetFormularios = 0;
   csvErro = '';
-  erroPersistencia = '';
   mensagemConfirmacao = '';
   private acaoConfirmada: (() => void) | null = null;
 
-  private readonly coresGanhos = [
-    '#22c55e',
-    '#16a34a',
-    '#4ade80',
-    '#15803d',
-    '#86efac',
-    '#14532d',
-    '#a3e635',
-    '#65a30d',
-  ];
-  private readonly coresGastos = [
-    '#ef4444',
-    '#f97316',
-    '#eab308',
-    '#8b5cf6',
-    '#06b6d4',
-    '#ec4899',
-    '#14b8a6',
-    '#a855f7',
-    '#f43f5e',
-    '#64748b',
-    '#0ea5e9',
-    '#84cc16',
-  ];
-  private readonly coresEconomias = [
-    '#ff00ff',
-    '#00e5ff',
-    '#ff1744',
-    '#ffea00',
-    '#d500f9',
-    '#00e676',
-    '#ff6d00',
-    '#304ffe',
-    '#f50057',
-    '#76ff03',
-  ];
+  get entradas(): LancamentoPersistido[] {
+    return this.facade.entradas;
+  }
+  set entradas(value: LancamentoPersistido[]) {
+    this.facade.entradas = value;
+  }
+
+  get saidas(): LancamentoPersistido[] {
+    return this.facade.saidas;
+  }
+  set saidas(value: LancamentoPersistido[]) {
+    this.facade.saidas = value;
+  }
+
+  get economias(): LancamentoPersistido[] {
+    return this.facade.economias;
+  }
+  set economias(value: LancamentoPersistido[]) {
+    this.facade.economias = value;
+  }
+
+  get nomePagina(): string {
+    return this.facade.nomePagina;
+  }
+  set nomePagina(value: string) {
+    this.facade.nomePagina = value;
+  }
+
+  get mostrarResumoPercentuais(): boolean {
+    return this.facade.mostrarResumoPercentuais;
+  }
+  set mostrarResumoPercentuais(value: boolean) {
+    this.facade.mostrarResumoPercentuais = value;
+  }
+
+  get erroPersistencia(): string {
+    return this.facade.erroPersistencia;
+  }
+
+  private get nextId(): number {
+    return this.facade.nextId;
+  }
+  private set nextId(value: number) {
+    this.facade.nextId = value;
+  }
 
   get totalEntradas(): number {
-    return somarLancamentos(this.entradas);
+    return this.facade.totalEntradas;
   }
-
   get totalSaidas(): number {
-    return somarLancamentos(this.saidas);
+    return this.facade.totalSaidas;
   }
-
   get totalEconomias(): number {
-    return somarLancamentos(this.economias);
+    return this.facade.totalEconomias;
   }
-
   get saldo(): number {
-    return this.totalEntradas - this.totalSaidas - this.totalEconomias;
+    return this.facade.saldo;
   }
-
   get tituloPagina(): string {
-    const nome = this.nomePagina.trim();
-    return nome || 'Planejador de Finanças';
+    return this.facade.tituloPagina;
   }
-
   get temDadosParaExportar(): boolean {
-    return this.totalMovimentado > 0;
+    return this.facade.temDadosParaExportar;
+  }
+  get saldoClasse(): string {
+    return this.facade.saldoClasse;
+  }
+  get totalMovimentado(): number {
+    return this.facade.totalMovimentado;
+  }
+  get fracaoGastosDosGanhos(): number {
+    return this.facade.fracaoGastosDosGanhos;
+  }
+  get fracaoEconomiasDosGanhos(): number {
+    return this.facade.fracaoEconomiasDosGanhos;
+  }
+  get dadosGrafico(): DadosGrafico {
+    return this.facade.dadosGrafico;
   }
 
   get nomeArquivoExportacao(): string {
@@ -195,42 +201,8 @@ export class PlanilhaPageComponent implements OnInit {
     return `${nomeSanitizado}_${dataHora}.csv`;
   }
 
-  get saldoClasse(): string {
-    if (this.saldo < 0) {
-      return 'saldo-negativo';
-    }
-    if (this.saldo > 100) {
-      return 'saldo-positivo';
-    }
-    return 'saldo-alerta';
-  }
-
-  get totalMovimentado(): number {
-    return this.totalEntradas + this.totalSaidas + this.totalEconomias;
-  }
-
-  get fracaoGastosDosGanhos(): number {
-    return this.fracaoDosGanhos(this.totalSaidas);
-  }
-
-  get fracaoEconomiasDosGanhos(): number {
-    return this.fracaoDosGanhos(this.totalEconomias);
-  }
-
-  private fracaoDosGanhos(valor: number): number {
-    return calcularFracao(valor, this.totalEntradas);
-  }
-
-  formatarPercentual(fracao: number): string {
-    const pct = fracao * 100;
-    return `${pct.toLocaleString('pt-BR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 1,
-    })}%`;
-  }
-
   ngOnInit(): void {
-    this.carregarDados();
+    this.facade.carregarDados();
   }
 
   salvarNomePagina(): void {
@@ -239,7 +211,8 @@ export class PlanilhaPageComponent implements OnInit {
 
   fecharAvisos(): void {
     this.csvErro = '';
-    this.erroPersistencia = '';
+    this.facade.erroPersistencia = '';
+    this.changeDetector.markForCheck();
   }
 
   apagarCategoria(tipo: TipoLancamento): void {
@@ -250,11 +223,10 @@ export class PlanilhaPageComponent implements OnInit {
     };
 
     this.solicitarConfirmacao(confirmacoes[tipo], () => {
-      this.atribuirLista(tipo, []);
+      this.facade.apagarCategoria(tipo);
       if (this.editando?.tipo === tipo) {
         this.cancelarEdicao();
       }
-      this.persistir();
     });
   }
 
@@ -262,14 +234,9 @@ export class PlanilhaPageComponent implements OnInit {
     this.solicitarConfirmacao(
       'Deseja apagar todos os registros e o nome da planilha? Esta ação não pode ser desfeita.',
       () => {
-        this.entradas = [];
-        this.saidas = [];
-        this.economias = [];
-        this.nomePagina = '';
-        this.nextId = 1;
+        this.facade.limparTudo();
         this.cancelarEdicao();
         this.versaoResetFormularios += 1;
-        this.persistir();
       },
     );
   }
@@ -277,9 +244,7 @@ export class PlanilhaPageComponent implements OnInit {
   confirmarAcao(): void {
     const acao = this.acaoConfirmada;
     this.cancelarConfirmacao();
-    if (acao) {
-      acao();
-    }
+    acao?.();
   }
 
   cancelarConfirmacao(): void {
@@ -334,6 +299,7 @@ export class PlanilhaPageComponent implements OnInit {
           .then((conteudo) => {
             this.importarCsvTexto(conteudo);
             this.csvErro = '';
+            this.changeDetector.markForCheck();
           })
           .catch((erro: unknown) => {
             this.mostrarErroCsv(
@@ -341,6 +307,7 @@ export class PlanilhaPageComponent implements OnInit {
                 ? erro.message
                 : this.csvService.formatarErro('a', 1),
             );
+            this.changeDetector.markForCheck();
           });
       },
     );
@@ -352,24 +319,21 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   alternarResumoPercentuais(): void {
-    this.mostrarResumoPercentuais = !this.mostrarResumoPercentuais;
-    this.persistir();
+    this.facade.alternarResumoPercentuais();
+    this.changeDetector.markForCheck();
   }
 
   adicionarLancamento(tipo: TipoLancamento, novo: NovoLancamento): void {
-    if (!this.podeAdicionar(novo.descricao, novo.valor)) {
-      return;
-    }
-
-    this.obterLista(tipo).push(this.novoLancamento(novo.descricao, novo.valor));
-    this.persistir();
+    this.facade.adicionarLancamento(tipo, novo);
+    this.changeDetector.markForCheck();
   }
 
   iniciarEdicao(tipo: TipoLancamento, item: LancamentoPersistido): void {
     this.editando = { tipo, id: item.id };
     this.editDescricao = item.descricao;
     this.editValor = item.valor;
-    this.editDataHora = this.formatarDataHoraParaEdicao(item.criadoEm);
+    this.editDataHora = this.facade.formatarDataHoraParaEdicao(item.criadoEm);
+    this.changeDetector.markForCheck();
   }
 
   cancelarEdicao(): void {
@@ -377,6 +341,7 @@ export class PlanilhaPageComponent implements OnInit {
     this.editDescricao = '';
     this.editValor = 0;
     this.editDataHora = '';
+    this.changeDetector.markForCheck();
   }
 
   salvarEdicao(tipo: TipoLancamento): void {
@@ -384,101 +349,48 @@ export class PlanilhaPageComponent implements OnInit {
       return;
     }
 
-    if (!this.podeAdicionar(this.editDescricao, this.editValor)) {
+    if (!this.editDescricao.trim() || !Number.isFinite(this.editValor) || this.editValor <= 0) {
       return;
     }
 
-    const criadoEm = this.converterDataHoraLocalParaIso(this.editDataHora);
-    if (!criadoEm) {
-      return;
-    }
-
-    const lista = this.obterLista(tipo);
-    const item = lista.find((l) => l.id === this.editando!.id);
-    if (!item) {
+    if (
+      this.facade.salvarEdicao(
+        tipo,
+        this.editando,
+        this.editDescricao,
+        this.editValor,
+        this.editDataHora,
+      )
+    ) {
       this.cancelarEdicao();
-      return;
+    } else if (!this.facade.temLancamento(tipo, this.editando.id)) {
+      this.cancelarEdicao();
     }
-
-    item.descricao = this.editDescricao.trim();
-    item.valor = this.asNumero(this.editValor);
-    item.criadoEm = criadoEm;
-    this.cancelarEdicao();
-    this.persistir();
+    this.changeDetector.markForCheck();
   }
 
   removerLancamento(tipo: TipoLancamento, id: number): void {
     if (this.editando?.tipo === tipo && this.editando.id === id) {
       this.cancelarEdicao();
     }
-    this.atribuirLista(
-      tipo,
-      this.obterLista(tipo).filter((item) => item.id !== id),
-    );
-    this.persistir();
+    this.facade.removerLancamento(tipo, id);
+    this.changeDetector.markForCheck();
   }
 
   obterLancamentos(tipo: TipoLancamento): LancamentoPersistido[] {
-    return this.obterLista(tipo);
+    return this.facade.obterLancamentos(tipo);
   }
 
   totalDaCategoria(tipo: TipoLancamento): number {
-    return somarLancamentos(this.obterLista(tipo));
+    return this.facade.totalDaCategoria(tipo);
   }
 
-  private obterLista(tipo: TipoLancamento): LancamentoPersistido[] {
-    switch (tipo) {
-      case 'entrada':
-        return this.entradas;
-      case 'saida':
-        return this.saidas;
-      case 'economia':
-        return this.economias;
-    }
+  trackByCategoria(_index: number, categoria: CategoriaLancamentoConfig): TipoLancamento {
+    return categoria.tipo;
   }
 
-  private atribuirLista(tipo: TipoLancamento, lista: LancamentoPersistido[]): void {
-    switch (tipo) {
-      case 'entrada':
-        this.entradas = lista;
-        break;
-      case 'saida':
-        this.saidas = lista;
-        break;
-      case 'economia':
-        this.economias = lista;
-        break;
-    }
-  }
-
-  private carregarDados(): void {
-    const estado = this.storage.carregar();
-    if (!estado) {
-      return;
-    }
-
-    this.entradas = estado.entradas;
-    this.saidas = estado.saidas;
-    this.economias = estado.economias ?? [];
-    this.nextId = estado.nextId;
-    this.nomePagina = estado.nomePagina ?? '';
-    this.mostrarResumoPercentuais = estado.mostrarResumoPercentuais !== false;
-  }
-
-  private persistir(): void {
-    this.dadosGraficoEmCache = null;
-    const nome = this.nomePagina.trim();
-    const salvo = this.storage.salvar({
-      entradas: this.entradas,
-      saidas: this.saidas,
-      economias: this.economias,
-      nextId: this.nextId,
-      nomePagina: nome || undefined,
-      ...(this.mostrarResumoPercentuais ? {} : { mostrarResumoPercentuais: false }),
-    });
-    this.erroPersistencia = salvo
-      ? ''
-      : 'Não foi possível salvar seus dados neste navegador. Baixe uma cópia para evitar perder suas alterações.';
+  formatarPercentual(fracao: number): string {
+    return this.facade.formatarPercentual(fracao);
   }
 
   gerarCsv(): string {
@@ -491,7 +403,7 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   private aceitarArquivoCsv(arquivo: File): boolean {
-    return arquivo && arquivo.name.toLowerCase().endsWith('.csv');
+    return arquivo.name.toLowerCase().endsWith('.csv');
   }
 
   private mostrarErroCsv(mensagem: string): void {
@@ -501,89 +413,16 @@ export class PlanilhaPageComponent implements OnInit {
   private solicitarConfirmacao(mensagem: string, acao: () => void): void {
     this.mensagemConfirmacao = mensagem;
     this.acaoConfirmada = acao;
+    this.changeDetector.markForCheck();
   }
 
   private importarCsvTexto(texto: string): void {
     const estado = this.csvService.importarCsvTexto(texto, this.nextId);
-    this.entradas = estado.entradas;
-    this.saidas = estado.saidas;
-    this.economias = estado.economias;
-    this.nomePagina = estado.nomePagina ?? '';
-    this.nextId = estado.nextId;
-    this.persistir();
+    this.facade.importarEstado(estado);
   }
 
-  private formatarDataHoraParaEdicao(data?: string): string {
-    const valor = data ? new Date(data) : new Date();
-    if (Number.isNaN(valor.getTime())) {
-      return '';
-    }
-
-    return [
-      `${String(valor.getFullYear()).padStart(4, '0')}-${String(valor.getMonth() + 1).padStart(2, '0')}-${String(valor.getDate()).padStart(2, '0')}`,
-      `${String(valor.getHours()).padStart(2, '0')}:${String(valor.getMinutes()).padStart(2, '0')}:${String(valor.getSeconds()).padStart(2, '0')}`,
-    ].join('T');
-  }
-
-  private converterDataHoraLocalParaIso(valor: string): string | null {
-    const correspondencia = valor.match(
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/,
-    );
-    if (!correspondencia) {
-      return null;
-    }
-
-    const [, anoTexto, mesTexto, diaTexto, horaTexto, minutoTexto, segundoTexto = '0'] = correspondencia;
-    const partes = [anoTexto, mesTexto, diaTexto, horaTexto, minutoTexto, segundoTexto].map(Number);
-    const data = new Date(partes[0], partes[1] - 1, partes[2], partes[3], partes[4], partes[5]);
-
-    if (
-      data.getFullYear() !== partes[0] ||
-      data.getMonth() !== partes[1] - 1 ||
-      data.getDate() !== partes[2] ||
-      data.getHours() !== partes[3] ||
-      data.getMinutes() !== partes[4] ||
-      data.getSeconds() !== partes[5]
-    ) {
-      return null;
-    }
-
-    return data.toISOString();
-  }
-
-
-  private podeAdicionar(descricao: string, valor: number): boolean {
-    return descricao.trim().length > 0 && this.asNumero(valor) > 0;
-  }
-
-  private asNumero(valor: unknown): number {
-    const numero = typeof valor === 'number' ? valor : Number(valor);
-    return Number.isFinite(numero) && numero >= 0 ? numero : 0;
-  }
-
-  private novoLancamento(descricao: string, valor: unknown): LancamentoPersistido {
-    return {
-      id: this.nextId++,
-      descricao: descricao.trim(),
-      valor: this.asNumero(valor),
-      criadoEm: new Date().toISOString(),
-    };
-  }
-
-  get dadosGrafico(): DadosGrafico {
-    if (this.dadosGraficoEmCache === null) {
-      const paleta: PaletaGrafico = {
-        ganhos: this.coresGanhos,
-        gastos: this.coresGastos,
-        economias: this.coresEconomias,
-      };
-      this.dadosGraficoEmCache = obterDadosGrafico(
-        this.entradas,
-        this.economias ?? [],
-        this.saidas,
-        paleta,
-      );
-    }
-    return this.dadosGraficoEmCache;
+  private persistir(): void {
+    this.facade.persistir();
+    this.changeDetector.markForCheck();
   }
 }
