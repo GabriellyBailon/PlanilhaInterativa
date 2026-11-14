@@ -26,7 +26,9 @@ import {
   TipoLancamento,
 } from '../domain/planilha.model';
 import { PlanilhaCsvService } from '../data-access/planilha-csv.service';
+import { PlanilhaLancamentoService } from '../data-access/planilha-lancamento.service';
 import { PlanilhaStorageService } from '../data-access/planilha-storage.service';
+import { PlanilhaUiService } from '../data-access/planilha-ui.service';
 
 @Component({
   selector: 'app-planilha-page',
@@ -49,6 +51,8 @@ import { PlanilhaStorageService } from '../data-access/planilha-storage.service'
 export class PlanilhaPageComponent implements OnInit {
   private readonly storage = inject(PlanilhaStorageService);
   private readonly csvService = inject(PlanilhaCsvService);
+  private readonly lancamentoService = inject(PlanilhaLancamentoService);
+  private readonly uiService = inject(PlanilhaUiService);
 
   @ViewChild('modalAviso')
   set modalAviso(dialogo: ElementRef<HTMLDialogElement> | undefined) {
@@ -174,13 +178,7 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   apagarCategoria(tipo: TipoLancamento): void {
-    const confirmacoes: Record<TipoLancamento, string> = {
-      entrada: 'Deseja apagar todos os registros de Entradas? Esta ação não pode ser desfeita.',
-      saida: 'Deseja apagar todos os registros de Saídas? Esta ação não pode ser desfeita.',
-      economia: 'Deseja apagar todos os registros de Economias? Esta ação não pode ser desfeita.',
-    };
-
-    this.solicitarConfirmacao(confirmacoes[tipo], () => {
+    this.solicitarConfirmacao(this.uiService.confirmacaoCategoria(tipo), () => {
       this.atribuirLista(tipo, []);
       if (this.editando?.tipo === tipo) {
         this.cancelarEdicao();
@@ -190,19 +188,16 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   limparTudo(): void {
-    this.solicitarConfirmacao(
-      'Deseja apagar todos os registros e o nome da planilha? Esta ação não pode ser desfeita.',
-      () => {
-        this.entradas = [];
-        this.saidas = [];
-        this.economias = [];
-        this.nomePagina = '';
-        this.nextId = 1;
-        this.cancelarEdicao();
-        this.versaoResetFormularios += 1;
-        this.persistir();
-      },
-    );
+    this.solicitarConfirmacao(this.uiService.confirmacaoLimparTudo(), () => {
+      this.entradas = [];
+      this.saidas = [];
+      this.economias = [];
+      this.nomePagina = '';
+      this.nextId = 1;
+      this.cancelarEdicao();
+      this.versaoResetFormularios += 1;
+      this.persistir();
+    });
   }
 
   confirmarAcao(): void {
@@ -228,18 +223,7 @@ export class PlanilhaPageComponent implements OnInit {
       return;
     }
 
-    const csv = this.gerarCsv();
-    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-
-    link.href = url;
-    link.download = this.nomeArquivoExportacao;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+    this.uiService.baixarCsv(this.gerarCsv(), this.nomeArquivoExportacao);
     this.csvErro = '';
   }
 
@@ -252,34 +236,30 @@ export class PlanilhaPageComponent implements OnInit {
       return;
     }
 
-    if (!this.aceitarArquivoCsv(arquivo)) {
+    if (!this.uiService.arquivoCsvValido(arquivo)) {
       this.mostrarErroCsv('Selecione um arquivo .csv para importar os dados.');
       return;
     }
 
-    this.solicitarConfirmacao(
-      'Importar este arquivo substituirá todos os dados atuais desta planilha. Deseja continuar?',
-      () => {
-        arquivo
-          .text()
-          .then((conteudo) => {
-            this.importarCsvTexto(conteudo);
-            this.csvErro = '';
-          })
-          .catch((erro: unknown) => {
-            this.mostrarErroCsv(
-              erro instanceof Error
-                ? erro.message
-                : this.csvService.formatarErro('a', 1),
-            );
-          });
-      },
-    );
+    this.solicitarConfirmacao(this.uiService.confirmacaoImportacao(), () => {
+      arquivo
+        .text()
+        .then((conteudo) => {
+          this.importarCsvTexto(conteudo);
+          this.csvErro = '';
+        })
+        .catch((erro: unknown) => {
+          this.mostrarErroCsv(
+            erro instanceof Error
+              ? erro.message
+              : this.csvService.formatarErro('a', 1),
+          );
+        });
+    });
   }
 
   abrirSeletorCsv(): void {
-    const input = document.getElementById('arquivo-csv-importacao') as HTMLInputElement | null;
-    input?.click();
+    this.uiService.abrirSeletorCsv('arquivo-csv-importacao');
   }
 
   alternarResumoPercentuais(): void {
@@ -288,11 +268,15 @@ export class PlanilhaPageComponent implements OnInit {
   }
 
   adicionarLancamento(tipo: TipoLancamento, novo: NovoLancamento): void {
-    if (!this.podeAdicionar(novo.descricao, novo.valor)) {
+    if (!this.lancamentoService.validarNovoLancamento(novo.descricao, novo.valor)) {
       return;
     }
 
-    this.obterLista(tipo).push(this.novoLancamento(novo.descricao, novo.valor));
+    const lista = this.obterLista(tipo);
+    lista.push(
+      this.lancamentoService.criarLancamento(novo.descricao, novo.valor, this.nextId),
+    );
+    this.nextId += 1;
     this.persistir();
   }
 
@@ -300,7 +284,7 @@ export class PlanilhaPageComponent implements OnInit {
     this.editando = { tipo, id: item.id };
     this.editDescricao = item.descricao;
     this.editValor = item.valor;
-    this.editDataHora = this.formatarDataHoraParaEdicao(item.criadoEm);
+    this.editDataHora = this.lancamentoService.formatarDataHoraParaEdicao(item.criadoEm);
   }
 
   cancelarEdicao(): void {
@@ -315,11 +299,11 @@ export class PlanilhaPageComponent implements OnInit {
       return;
     }
 
-    if (!this.podeAdicionar(this.editDescricao, this.editValor)) {
+    if (!this.lancamentoService.validarNovoLancamento(this.editDescricao, this.editValor)) {
       return;
     }
 
-    const criadoEm = this.converterDataHoraLocalParaIso(this.editDataHora);
+    const criadoEm = this.lancamentoService.converterDataHoraLocalParaIso(this.editDataHora);
     if (!criadoEm) {
       return;
     }
@@ -332,7 +316,7 @@ export class PlanilhaPageComponent implements OnInit {
     }
 
     item.descricao = this.editDescricao.trim();
-    item.valor = this.asNumero(this.editValor);
+    item.valor = this.lancamentoService.asNumero(this.editValor);
     item.criadoEm = criadoEm;
     this.cancelarEdicao();
     this.persistir();
@@ -421,10 +405,6 @@ export class PlanilhaPageComponent implements OnInit {
     });
   }
 
-  private aceitarArquivoCsv(arquivo: File): boolean {
-    return arquivo && arquivo.name.toLowerCase().endsWith('.csv');
-  }
-
   private mostrarErroCsv(mensagem: string): void {
     this.csvErro = mensagem;
   }
@@ -442,63 +422,6 @@ export class PlanilhaPageComponent implements OnInit {
     this.nomePagina = estado.nomePagina ?? '';
     this.nextId = estado.nextId;
     this.persistir();
-  }
-
-  private formatarDataHoraParaEdicao(data?: string): string {
-    const valor = data ? new Date(data) : new Date();
-    if (Number.isNaN(valor.getTime())) {
-      return '';
-    }
-
-    return [
-      `${String(valor.getFullYear()).padStart(4, '0')}-${String(valor.getMonth() + 1).padStart(2, '0')}-${String(valor.getDate()).padStart(2, '0')}`,
-      `${String(valor.getHours()).padStart(2, '0')}:${String(valor.getMinutes()).padStart(2, '0')}:${String(valor.getSeconds()).padStart(2, '0')}`,
-    ].join('T');
-  }
-
-  private converterDataHoraLocalParaIso(valor: string): string | null {
-    const correspondencia = valor.match(
-      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/,
-    );
-    if (!correspondencia) {
-      return null;
-    }
-
-    const [, anoTexto, mesTexto, diaTexto, horaTexto, minutoTexto, segundoTexto = '0'] = correspondencia;
-    const partes = [anoTexto, mesTexto, diaTexto, horaTexto, minutoTexto, segundoTexto].map(Number);
-    const data = new Date(partes[0], partes[1] - 1, partes[2], partes[3], partes[4], partes[5]);
-
-    if (
-      data.getFullYear() !== partes[0] ||
-      data.getMonth() !== partes[1] - 1 ||
-      data.getDate() !== partes[2] ||
-      data.getHours() !== partes[3] ||
-      data.getMinutes() !== partes[4] ||
-      data.getSeconds() !== partes[5]
-    ) {
-      return null;
-    }
-
-    return data.toISOString();
-  }
-
-
-  private podeAdicionar(descricao: string, valor: number): boolean {
-    return descricao.trim().length > 0 && this.asNumero(valor) > 0;
-  }
-
-  private asNumero(valor: unknown): number {
-    const numero = typeof valor === 'number' ? valor : Number(valor);
-    return Number.isFinite(numero) && numero >= 0 ? numero : 0;
-  }
-
-  private novoLancamento(descricao: string, valor: unknown): LancamentoPersistido {
-    return {
-      id: this.nextId++,
-      descricao: descricao.trim(),
-      valor: this.asNumero(valor),
-      criadoEm: new Date().toISOString(),
-    };
   }
 
   get dadosGrafico(): DadosGrafico {
