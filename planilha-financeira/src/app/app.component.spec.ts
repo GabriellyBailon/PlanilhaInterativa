@@ -273,4 +273,66 @@ describe('AppComponent', () => {
     expect(app2.saidas[0].criadoEm).toBe(app1.saidas[0].criadoEm);
     expect(app2.saldo).toBe(100);
   });
+
+  it('should export CSV with all three areas and entries only when there is data', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.nomePagina = 'Orçamento';
+    app.entradas = [{ id: 1, descricao: 'Salário', valor: 2000, criadoEm: '2026-11-14T10:00:00.000Z' }];
+    app.saidas = [{ id: 2, descricao: 'Aluguel', valor: 900, criadoEm: '2026-11-14T12:30:00.000Z' }];
+    app.economias = [{ id: 3, descricao: 'Poupança', valor: 300, criadoEm: '2026-11-14T15:45:00.000Z' }];
+
+    expect(app.temDadosParaExportar).toBeTrue();
+
+    const csv = app.gerarCsv();
+    expect(csv).toContain('Area,Descricao,Valor,DataAlteracao');
+    expect(csv).toContain('Entradas');
+    expect(csv).toContain('Saidas');
+    expect(csv).toContain('Economias');
+    expect(csv).toContain('Salário');
+    expect(csv).toContain('2000');
+  });
+
+  it('should reject invalid CSV content and point to the offending cell', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    const csv = [
+      'Area,Descricao,Valor,DataAlteracao',
+      'Entradas,Salário,abc,2026-11-14T10:00:00.000Z',
+    ].join('\n');
+
+    expect(() => (app as any).importarCsvTexto(csv)).toThrowError(
+      'Ops! Os dados da planilha estão em formato incorreto. Verifique a célula c2',
+    );
+  });
+
+  it('should import valid CSV and replace current data', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.entradas = [{ id: 9, descricao: 'Antigo', valor: 100, criadoEm: '2026-01-01T00:00:00.000Z' }];
+    app.saidas = [{ id: 10, descricao: 'Antigo gasto', valor: 40, criadoEm: '2026-01-02T00:00:00.000Z' }];
+    app.economias = [{ id: 11, descricao: 'Antiga reserva', valor: 15, criadoEm: '2026-01-03T00:00:00.000Z' }];
+
+    const csv = [
+      'Area,Descricao,Valor,DataAlteracao',
+      'Entradas,Freela,150,2026-11-15T12:00:00.000Z',
+      'Saidas,Supermercado,45,2026-11-16T08:00:00.000Z',
+      'Economias,Reserva,50,2026-11-17T09:00:00.000Z',
+    ].join('\n');
+
+    (app as any).importarCsvTexto(csv);
+
+    expect(app.entradas).toEqual([
+      jasmine.objectContaining({ descricao: 'Freela', valor: 150 }),
+    ]);
+    expect(app.saidas).toEqual([
+      jasmine.objectContaining({ descricao: 'Supermercado', valor: 45 }),
+    ]);
+    expect(app.economias).toEqual([
+      jasmine.objectContaining({ descricao: 'Reserva', valor: 50 }),
+    ]);
+  });
 });

@@ -12,10 +12,39 @@
       maxlength="80"
       aria-label="Nome da planilha"
     />
+    <div class="acoes-planilha" aria-label="Ações da planilha">
+      <button
+        type="button"
+        class="btn-exportar"
+        (click)="exportarCsv()"
+        [disabled]="!temDadosParaExportar"
+        [attr.aria-disabled]="!temDadosParaExportar"
+      >
+        Exportar CSV
+      </button>
+      <button type="button" class="btn-importar" (click)="abrirSeletorCsv()">
+        Importar CSV
+      </button>
+      <input
+        id="arquivo-csv-importacao"
+        type="file"
+        accept=".csv"
+        class="arquivo-csv-input"
+        (change)="aoSelecionarArquivoCsv($event)"
+      />
+    </div>
+    <p class="info-csv">
+      Exporte seus dados para backup ou importe um arquivo .csv para substituir os
+      dados atuais da planilha.
+    </p>
     <p class="saldo" [class]="saldoClasse">
       Saldo total:
       <strong>{{ saldo | brl }}</strong>
     </p>
+    <div *ngIf="csvErro" class="mensagem-erro" role="alert" aria-live="assertive">
+      <span class="mensagem-erro-icone" aria-hidden="true">!</span>
+      <span>{{ csvErro }}</span>
+    </div>
   </header>
 
   <div class="colunas">

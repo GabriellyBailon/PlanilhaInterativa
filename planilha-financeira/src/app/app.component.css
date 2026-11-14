@@ -96,10 +96,100 @@
   transition: background-color 0.2s, color 0.2s;
 }
 
+.acoes-planilha {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 0 auto 1rem;
+}
+
+.info-csv {
+  margin: -0.5rem auto 1rem;
+  max-width: 42rem;
+  color: #475569;
+  font-size: 0.875rem;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.btn-exportar,
+.btn-importar {
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+}
+
+.btn-exportar {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #fff;
+}
+
+.btn-importar {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #fff;
+}
+
+.btn-exportar:hover:not(:disabled),
+.btn-importar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.12);
+}
+
+.btn-exportar:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+.arquivo-csv-input {
+  display: none;
+}
+
+.mensagem-erro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  max-width: 42rem;
+  margin: 0 auto 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: 0.75rem;
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.mensagem-erro-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
 @media (max-width: 768px) {
   .saldo {
     padding: 0.6rem 1rem;
     font-size: 1rem;
+  }
+
+  .acoes-planilha {
+    gap: 0.5rem;
   }
 }
 
@@ -107,6 +197,15 @@
   .saldo {
     padding: 0.5rem 0.75rem;
     font-size: 0.9rem;
+  }
+
+  .acoes-planilha {
+    flex-direction: column;
+  }
+
+  .btn-exportar,
+  .btn-importar {
+    width: 100%;
   }
 }
 

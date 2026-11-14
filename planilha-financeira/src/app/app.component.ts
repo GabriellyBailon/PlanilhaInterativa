@@ -68,6 +68,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private nextId = 1;
   private chart?: Chart;
+  csvErro = '';
+
+  private readonly cabecalhoCsv = ['Area', 'Descricao', 'Valor', 'DataAlteracao'];
 
   private readonly coresGanhos = [
     '#22c55e',
@@ -127,6 +130,25 @@ export class AppComponent implements OnInit, OnDestroy {
     return nome || 'Planejador de Finanças';
   }
 
+  get temDadosParaExportar(): boolean {
+    return this.totalMovimentado > 0;
+  }
+
+  get nomeArquivoExportacao(): string {
+    const nomeBase = this.nomePagina.trim() || 'planilha-financeira';
+    const nomeSanitizado = nomeBase.replace(/[^a-zA-Z0-9_\- ]/g, '').trim() || 'planilha-financeira';
+    const agora = new Date();
+    const dataHora = [
+      String(agora.getDate()).padStart(2, '0'),
+      String(agora.getMonth() + 1).padStart(2, '0'),
+      String(agora.getFullYear()),
+      String(agora.getHours()).padStart(2, '0'),
+      String(agora.getMinutes()).padStart(2, '0'),
+      String(agora.getSeconds()).padStart(2, '0'),
+    ].join('-');
+    return `${nomeSanitizado}_${dataHora}.csv`;
+  }
+
   get saldoClasse(): string {
     if (this.saldo < 0) {
       return 'saldo-negativo';
@@ -179,6 +201,63 @@ export class AppComponent implements OnInit, OnDestroy {
 
   salvarNomePagina(): void {
     this.persistir();
+  }
+
+  exportarCsv(): void {
+    if (!this.temDadosParaExportar) {
+      return;
+    }
+
+    const csv = this.gerarCsv();
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = this.nomeArquivoExportacao;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    this.csvErro = '';
+  }
+
+  aoSelecionarArquivoCsv(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const arquivo = input.files?.[0];
+    input.value = '';
+
+    if (!arquivo) {
+      return;
+    }
+
+    if (!this.aceitarArquivoCsv(arquivo)) {
+      this.mostrarErroCsv(this.formatarErroCsv('a', 1));
+      return;
+    }
+
+    const confirmar = window.confirm(
+      'Ao importar uma planilha, os dados atuais do site serão substituídos. Deseja continuar?',
+    );
+    if (!confirmar) {
+      return;
+    }
+
+    arquivo
+      .text()
+      .then((conteudo) => {
+        this.importarCsvTexto(conteudo);
+        this.csvErro = '';
+      })
+      .catch(() => {
+        this.mostrarErroCsv(this.formatarErroCsv('a', 1));
+      });
+  }
+
+  abrirSeletorCsv(): void {
+    const input = document.getElementById('arquivo-csv-importacao') as HTMLInputElement | null;
+    input?.click();
   }
 
   alternarResumoPercentuais(): void {
@@ -328,6 +407,224 @@ export class AppComponent implements OnInit, OnDestroy {
       nomePagina: nome || undefined,
       ...(this.mostrarResumoPercentuais ? {} : { mostrarResumoPercentuais: false }),
     });
+  }
+
+  gerarCsv(): string {
+    const linhas: string[][] = [this.cabecalhoCsv];
+
+    const adicionarLinha = (area: string, lancamentos: LancamentoPersistido[]) => {
+      lancamentos.forEach((item) => {
+        linhas.push([
+          area,
+          item.descricao,
+          String(item.valor),
+          item.criadoEm ?? new Date().toISOString(),
+        ]);
+      });
+    };
+
+    adicionarLinha('Entradas', this.entradas);
+    adicionarLinha('Saidas', this.saidas);
+    adicionarLinha('Economias', this.economias);
+
+    return linhas
+      .map((linha) =>
+        linha
+          .map((valor) => this.escaparCsv(String(valor)))
+          .join(','),
+      )
+      .join('\n');
+  }
+
+  private aceitarArquivoCsv(arquivo: File): boolean {
+    return arquivo && arquivo.name.toLowerCase().endsWith('.csv');
+  }
+
+  private mostrarErroCsv(mensagem: string): void {
+    this.csvErro = mensagem;
+  }
+
+  private importarCsvTexto(texto: string): void {
+    const linhas = this.parsearCsv(texto);
+    if (linhas.length < 2) {
+      throw new Error(this.formatarErroCsv('a', 1));
+    }
+
+    const cabecalho = linhas[0].map((valor) => this.normalizarCampo(valor));
+    const cabecalhoEsperado = this.cabecalhoCsv.map((valor) => this.normalizarCampo(valor));
+
+    if (
+      cabecalho.length !== cabecalhoEsperado.length ||
+      cabecalho.some((valor, indice) => valor !== cabecalhoEsperado[indice])
+    ) {
+      throw new Error(this.formatarErroCsv('a', 1));
+    }
+
+    const entradas: LancamentoPersistido[] = [];
+    const saidas: LancamentoPersistido[] = [];
+    const economias: LancamentoPersistido[] = [];
+
+    for (let indice = 1; indice < linhas.length; indice++) {
+      const linha = linhas[indice];
+      if (linha.length === 0 || linha.every((coluna) => this.normalizarCampo(coluna).trim() === '')) {
+        continue;
+      }
+      if (linha.length < 4) {
+        throw new Error(this.formatarErroCsv('C', indice + 1));
+      }
+
+      const [area, descricao, valor, dataAlteracao] = linha;
+      const areaNormalizada = this.normalizarCampo(area).toLowerCase();
+      const descricaoNormalizada = this.normalizarCampo(descricao).trim();
+      const valorNumerico = this.parsearValorCsv(valor, indice + 1);
+      const criadoEm = this.parsearDataAlteracao(dataAlteracao, indice + 1);
+
+      if (!descricaoNormalizada) {
+        throw new Error(this.formatarErroCsv('B', indice + 1));
+      }
+
+      const registro: LancamentoPersistido = {
+        id: this.nextId++,
+        descricao: descricaoNormalizada,
+        valor: valorNumerico,
+        criadoEm,
+      };
+
+      switch (areaNormalizada) {
+        case 'entradas':
+        case 'ganhos':
+          entradas.push(registro);
+          break;
+        case 'saidas':
+        case 'gastos':
+          saidas.push(registro);
+          break;
+        case 'economias':
+          economias.push(registro);
+          break;
+        default:
+          throw new Error(this.formatarErroCsv('A', indice + 1));
+      }
+    }
+
+    this.entradas = entradas;
+    this.saidas = saidas;
+    this.economias = economias;
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
+  private parsearCsv(texto: string): string[][] {
+    const linhas: string[][] = [];
+    let linhaAtual: string[] = [];
+    let valorAtual = '';
+    let dentroAspas = false;
+
+    for (let indice = 0; indice < texto.length; indice++) {
+      const caractere = texto[indice];
+
+      if (caractere === '"') {
+        if (dentroAspas && texto[indice + 1] === '"') {
+          valorAtual += '"';
+          indice += 1;
+        } else {
+          dentroAspas = !dentroAspas;
+        }
+        continue;
+      }
+
+      if (caractere === ',' && !dentroAspas) {
+        linhaAtual.push(valorAtual);
+        valorAtual = '';
+        continue;
+      }
+
+      if ((caractere === '\n' || caractere === '\r') && !dentroAspas) {
+        if (caractere === '\r' && texto[indice + 1] === '\n') {
+          indice += 1;
+        }
+        linhaAtual.push(valorAtual);
+        if (linhaAtual.some((coluna) => coluna.trim() !== '')) {
+          linhas.push(linhaAtual);
+        }
+        linhaAtual = [];
+        valorAtual = '';
+        continue;
+      }
+
+      valorAtual += caractere;
+    }
+
+    if (valorAtual || linhaAtual.length > 0) {
+      linhaAtual.push(valorAtual);
+      if (linhaAtual.some((coluna) => coluna.trim() !== '')) {
+        linhas.push(linhaAtual);
+      }
+    }
+
+    return linhas;
+  }
+
+  private escaparCsv(valor: string): string {
+    const texto = valor.replace(/"/g, '""');
+    return /[",\n]/.test(texto) ? `"${texto}"` : texto;
+  }
+
+  private normalizarCampo(valor: string | undefined): string {
+    return (valor ?? '').replace(/\r/g, '').trim();
+  }
+
+  private parsearValorCsv(valor: string | undefined, linha: number): number {
+    const valorNormalizado = this.normalizarCampo(valor).replace(/\s+/g, '');
+
+    if (!valorNormalizado) {
+      throw new Error(this.formatarErroCsv('C', linha));
+    }
+
+    const convertido = Number(valorNormalizado.replace('.', '').replace(',', '.'));
+    if (!Number.isFinite(convertido) || convertido <= 0) {
+      throw new Error(this.formatarErroCsv('C', linha));
+    }
+
+    return convertido;
+  }
+
+  private parsearDataAlteracao(valor: string | undefined, linha: number): string {
+    const texto = this.normalizarCampo(valor);
+    const data = this.parsearDataTexto(texto);
+    if (!data) {
+      throw new Error(this.formatarErroCsv('D', linha));
+    }
+    return data.toISOString();
+  }
+
+  private parsearDataTexto(texto: string): Date | null {
+    if (!texto) {
+      return null;
+    }
+
+    const iso = new Date(texto);
+    if (!Number.isNaN(iso.getTime())) {
+      return iso;
+    }
+
+    const formatoBrasileiro = /^\d{2}\/\d{2}\/\d{4}(?:\s+\d{2}:\d{2}(:\d{2})?)?$/;
+    if (!formatoBrasileiro.test(texto)) {
+      return null;
+    }
+
+    const [data, horario = '00:00:00'] = texto.split(' ');
+    const [dia, mes, ano] = data.split('/').map(Number);
+    const [horaText, minutoText, segundoText = '00'] = horario.split(':');
+    const hora = Number(horaText ?? 0);
+    const minuto = Number(minutoText ?? 0);
+    const segundo = Number(segundoText ?? 0);
+    const dataDate = new Date(ano, mes - 1, dia, hora, minuto, segundo);
+    return Number.isNaN(dataDate.getTime()) ? null : dataDate;
+  }
+
+  private formatarErroCsv(coluna: string, linha: number): string {
+    return `Ops! Os dados da planilha estão em formato incorreto. Verifique a célula ${coluna.toLowerCase()}${linha}`;
   }
 
   private podeAdicionar(descricao: string, valor: number): boolean {
