@@ -1,0 +1,101 @@
+@media (max-width: 480px) {
+.coluna {
+    padding: 0.75rem;
+  }
+
+.coluna h2 {
+    font-size: 0.95rem;
+    margin: 0 0 0.5rem;
+  }
+
+.formulario {
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+  }
+
+.formulario label {
+    font-size: 0.8rem;
+  }
+
+.formulario input {
+    padding: 0.45rem 0.6rem;
+    font-size: 0.95rem;
+  }
+
+.formulario button[type='submit'] {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    margin-top: 0.15rem;
+  }
+
+.item {
+    gap: 0.25rem;
+    padding: 0.35rem 0;
+    flex-wrap: wrap;
+  }
+
+.item-descricao {
+    font-size: 0.8rem;
+    flex: 1 1 100%;
+  }
+
+.valor {
+    font-size: 0.8rem;
+  }
+
+.item-data {
+    font-size: 0.7rem;
+    flex: 1 1 100%;
+  }
+
+.editar,
+  .remover {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+.item-edicao {
+    gap: 0.35rem;
+  }
+
+.item-edicao-descricao {
+    flex: 1 1 100%;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.4rem;
+  }
+
+.item-edicao-valor {
+    flex: 0 1 5rem;
+  }
+
+  .item-edicao-valor,
+  .item-edicao-data {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.4rem;
+  }
+
+  .item-edicao-data {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+.item-edicao-acoes {
+    gap: 0.25rem;
+  }
+
+.btn-salvar-edicao,
+  .btn-cancelar-edicao {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.75rem;
+    flex: 1 1 auto;
+    min-width: 4rem;
+  }
+
+.subtotal {
+    margin: 0.5rem 0 0;
+    padding-top: 0.35rem;
+    font-size: 0.8rem;
+  }
+
+}

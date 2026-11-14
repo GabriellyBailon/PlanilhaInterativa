@@ -3,7 +3,7 @@
 > **Para agentes de IA:** leia este arquivo antes de alterar o código.  
 > **Obrigatório:** ao concluir qualquer feature nova ou ajuste de comportamento, atualize as seções relevantes (especialmente **Histórico de funcionalidades**, **Funcionalidades atuais** e **Arquivos-chave**). Registre data (`AAAA-MM-DD`), o que mudou e quais arquivos foram tocados.
 
-**Última atualização:** 2026-05-27
+**Última atualização:** 2026-11-14
 
 ---
 
@@ -64,11 +64,14 @@ PlanilhaInterativa/
 │   ├── _redirects                   ← redireciona 404 para SPA
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── app.component.ts/html/css   ← tela principal + gráfico
+│   │   │   ├── app.component.ts/html       ← shell da aplicação
 │   │   │   ├── app.config.ts
-│   │   │   ├── directives/brl-currency.directive.ts
-│   │   │   ├── pipes/brl.pipe.ts
-│   │   │   └── services/planilha-storage.service.ts
+│   │   │   ├── features/planilha/
+│   │   │   │   ├── pages/                  ← composição da tela + estilos por área
+│   │   │   │   ├── components/             ← gráfico e seção reutilizável de categoria
+│   │   │   │   ├── domain/                 ← modelos e cálculos puros
+│   │   │   │   └── data-access/            ← localStorage e CSV
+│   │   │   └── shared/                     ← diretiva monetária e pipes reutilizáveis
 │   │   ├── main.ts
 │   │   └── styles.css
 │   ├── angular.json
@@ -120,6 +123,12 @@ interface EstadoPlanilha {
 - Valores monetários via diretiva `appBrlCurrency` e pipe `brl` (formato pt-BR, 2 casas decimais).
 - **Persistência local:** ao adicionar ou remover, o estado (`entradas`, `economias`, `saídas`, `nextId`) é salvo em `localStorage`. Ao abrir a página, os dados são restaurados automaticamente. JSON inválido ou corrompido é ignorado (começa vazio). Dados antigos sem `economias` carregam com lista vazia.
 
+### Importação e exportação CSV
+
+- Exporta as três áreas no formato agrupado usado pela planilha e mantém a data/hora de cada lançamento.
+- Importa tanto o formato agrupado quanto o formato tabular `Area;Descricao;Valor;DataAlteracao`.
+- A leitura e validação são feitas em `PlanilhaCsvService`; o estado atual só é substituído após a importação completa. Arquivos inválidos exibem a referência da célula.
+
 ### Saldo
 
 - `saldo = totalEntradas - totalSaidas - totalEconomias`
@@ -136,7 +145,7 @@ interface EstadoPlanilha {
 - Exibe **percentual e valor em R$** apenas para **gastos** e **economias** (quanto representam dos ganhos), com barras de progresso.
 - Oculta o resumo quando o usuário desativou a exibição ou quando não há ganhos registrados (mesmo que existam gastos ou economias).
 
-### Gráfico de pizza (`app.component.ts`)
+### Gráfico de pizza (`features/planilha/components/grafico-categorias/`)
 
 - Título na UI: **"Distribuição por categoria"**
 - **Agrupamento:** lançamentos com o **mesmo nome** (descrição, case-insensitive) são somados em uma fatia. No gráfico, cada fatia é prefixada por tipo (`Ganho:`, `Economia:`, `Gasto:`) para evitar conflito entre categorias homônimas.
@@ -145,7 +154,7 @@ interface EstadoPlanilha {
 - **Gastos** (saídas): fatias com paleta variada (`coresGastos`).
 - Ordem das fatias: ganhos (A–Z), economias (A–Z), gastos (A–Z), todos com `pt-BR`.
 - Atualiza ao adicionar/remover lançamento; tooltip mostra `Nome: R$ valor`.
-- Canvas: `#pieChart` em `app.component.html`.
+- Canvas: componente `GraficoCategoriasComponent`, incluído pela página da planilha.
 
 ---
 
@@ -153,28 +162,35 @@ interface EstadoPlanilha {
 
 | Arquivo | Responsabilidade |
 |---------|------------------|
-| `planilha-financeira/src/app/app.component.ts` | Estado, CRUD de lançamentos, persistência, agrupamento, Chart.js |
-| `planilha-financeira/src/app/services/planilha-storage.service.ts` | Leitura/gravação e validação do estado em `localStorage` |
-| `planilha-financeira/src/app/app.component.html` | Layout, formulários, listas, canvas |
-| `planilha-financeira/src/app/app.component.css` | Estilos (saldo, colunas, gráfico) |
-| `planilha-financeira/src/app/directives/brl-currency.directive.ts` | Máscara/input BRL |
-| `planilha-financeira/src/app/pipes/brl.pipe.ts` | Exibição BRL nas listas |
-| `planilha-financeira/src/app/pipes/data-hora-local.pipe.ts` | Formata `criadoEm` para `dd/MM/aaaa HH:mm` (pt-BR, fuso local) |
-| `planilha-financeira/src/app/app.component.spec.ts` | Testes (saldo, agrupamento no gráfico) |
+| `planilha-financeira/src/app/app.component.ts` | Shell standalone que monta a página da planilha |
+| `planilha-financeira/src/app/features/planilha/pages/planilha-page.component.ts` | Estado da tela, ações, edição e coordenação de persistência |
+| `planilha-financeira/src/app/features/planilha/pages/planilha-page.component.html` | Cabeçalho, resumo financeiro e composição dos componentes |
+| `planilha-financeira/src/app/features/planilha/pages/styles/` | Estilos da página divididos por área e responsividade |
+| `planilha-financeira/src/app/features/planilha/components/lancamento-categoria/` | Formulário, lista, edição e ações reutilizados nas três categorias |
+| `planilha-financeira/src/app/features/planilha/components/grafico-categorias/` | Ciclo de vida e apresentação Chart.js |
+| `planilha-financeira/src/app/features/planilha/domain/planilha.model.ts` | Modelos de lançamento e estado persistido |
+| `planilha-financeira/src/app/features/planilha/domain/planilha-calculos.ts` | Totais, frações e agrupamento puro para o gráfico |
+| `planilha-financeira/src/app/features/planilha/data-access/planilha-storage.service.ts` | Leitura/gravação e validação do estado em `localStorage` |
+| `planilha-financeira/src/app/features/planilha/data-access/planilha-csv.service.ts` | Serialização e parsing dos formatos CSV aceitos |
+| `planilha-financeira/src/app/shared/directives/brl-currency.directive.ts` | Máscara/input BRL |
+| `planilha-financeira/src/app/shared/pipes/brl.pipe.ts` | Exibição de valores em BRL |
+| `planilha-financeira/src/app/shared/pipes/data-hora-local.pipe.ts` | Formata `criadoEm` para `dd/MM/aaaa HH:mm` (pt-BR, fuso local) |
+| `planilha-financeira/src/app/features/planilha/pages/planilha-page.component.spec.ts` | Testes da tela e dos fluxos da planilha |
 
-### Métodos privados importantes (gráfico)
+### Cálculos do gráfico
 
-- `agruparPorCategoria(lancamentos, nomePadrao)` — agrupa por descrição normalizada (`toLowerCase()`).
-- `obterDadosGrafico()` — monta `labels`, `dados`, `cores` para o Chart.js.
-- `criarGrafico()` / `atualizarGrafico()` — ciclo de vida do gráfico.
+- `obterDadosGrafico()` em `domain/planilha-calculos.ts` — agrupa descrições e monta `labels`, `dados` e `cores`.
+- `GraficoCategoriasComponent` — cria, atualiza e destrói a instância Chart.js.
+- `LancamentoCategoriaComponent` — mantém um único template para entradas, saídas e economias.
 
 ---
 
 ## Convenções para contribuições
 
 - Manter UI e textos em **português (Brasil)**.
-- Preferir mudanças mínimas; reutilizar `agruparPorCategoria`, `brl`, `appBrlCurrency`.
-- Novos comportamentos do gráfico: ajustar `obterDadosGrafico()` e testes em `app.component.spec.ts`. Consultar **`docs/aprendizados-grafico-chartjs.md`** antes de alterar ciclo de vida do Chart.js ou persistência.
+- Preferir mudanças mínimas; reutilizar `obterDadosGrafico()`, `brl` e `appBrlCurrency`.
+- Regras financeiras e agrupamentos devem permanecer em funções puras de `domain/`; acesso a `localStorage` e arquivos fica em `data-access/`.
+- Novos comportamentos do gráfico: ajustar `domain/planilha-calculos.ts` e seus testes. Consultar **`docs/aprendizados-grafico-chartjs.md`** antes de alterar ciclo de vida do Chart.js ou persistência.
 - Não commitar `node_modules/`, `dist/`, `.angular/cache/`.
 - Após mudanças de comportamento: **atualizar este `CONTEXTO.md`** e manter `planilha-financeira/README.md` alinhado (visão do usuário).
 
@@ -186,6 +202,7 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-11-14 | Refactor | Separação da página da planilha, componentes por responsabilidade, domínio, acesso a dados e estilos; importação CSV tabular passou a ser reconhecida e a validação não altera IDs/dados parcialmente | `src/app/app.component.ts/html/spec.ts`, `src/app/features/planilha/`, `src/app/shared/`, `README.md`, `CONTEXTO.md` |
 | 2026-05-27 | Infra | Configuração de publicação via Netlify: netlify.toml, .netlifyignore, _redirects e guia de deploy | `netlify.toml`, `.netlifyignore`, `_redirects`, `GUIA-DEPLOY-NETLIFY.md` |
 | 2026-05-27 | Feature | Responsividade completa com media queries para mobile (480px), tablet (768px) e desktop (1024px+); ajustes de padding, font-size, gap e layouts | `app.component.css`, `styles.css` |
 | 2026-05-27 | Feature | Edição inline de lançamentos (descrição e valor) nas três colunas, com persistência | `app.component.ts/html/css`, `app.component.spec.ts` |

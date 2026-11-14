@@ -1,0 +1,132 @@
+<section class="coluna" [ngClass]="'coluna-' + categoria.tipo">
+  <h2>{{ categoria.titulo }}</h2>
+
+  <form class="formulario" (ngSubmit)="aoAdicionar()">
+    <label [for]="'descricao-' + categoria.tipo">Descrição</label>
+    <input
+      [id]="'descricao-' + categoria.tipo"
+      type="text"
+      [(ngModel)]="descricaoNova"
+      [name]="'descricao' + categoria.tipo"
+      [placeholder]="categoria.placeholderDescricao"
+      required
+    />
+
+    <label [for]="'valor-' + categoria.tipo">Valor</label>
+    <input
+      [id]="'valor-' + categoria.tipo"
+      type="text"
+      appBrlCurrency
+      [(ngModel)]="valorNovo"
+      [name]="'valor' + categoria.tipo"
+      placeholder="R$ 0,00"
+      inputmode="numeric"
+      required
+    />
+
+    <button type="submit" [disabled]="!descricaoNova.trim() || valorNovo <= 0">
+      {{ categoria.acaoAdicionar }}
+    </button>
+  </form>
+
+  <ul class="lista" *ngIf="lancamentos.length > 0; else vazio">
+    <li
+      class="item"
+      *ngFor="let item of lancamentos"
+      [class.item-editando]="estaEditando(item.id)"
+    >
+      <ng-container *ngIf="!estaEditando(item.id); else editar">
+        <span class="item-descricao">{{ item.descricao }}</span>
+        <span class="valor" [ngClass]="categoria.tipo">{{ item.valor | brl }}</span>
+        <time
+          class="item-data"
+          *ngIf="item.criadoEm"
+          [attr.datetime]="item.criadoEm"
+        >
+          {{ item.criadoEm | dataHoraLocal }}
+        </time>
+        <button
+          type="button"
+          class="editar"
+          (click)="iniciarEdicao.emit(item)"
+          [attr.aria-label]="'Editar ' + categoria.rotulo"
+        >
+          ✎
+        </button>
+        <button
+          type="button"
+          class="remover"
+          (click)="remover.emit(item.id)"
+          [attr.aria-label]="'Remover ' + categoria.rotulo"
+        >
+          ×
+        </button>
+      </ng-container>
+      <ng-template #editar>
+        <div class="item-edicao">
+          <input
+            class="item-edicao-descricao"
+            type="text"
+            [(ngModel)]="editDescricao"
+            (ngModelChange)="editDescricaoChange.emit($event)"
+            [name]="'edit-desc-' + categoria.tipo + '-' + item.id"
+            [attr.aria-label]="'Descrição ' + categoria.rotulo"
+          />
+          <input
+            class="item-edicao-valor"
+            type="text"
+            appBrlCurrency
+            [(ngModel)]="editValor"
+            (ngModelChange)="editValorChange.emit($event)"
+            [name]="'edit-val-' + categoria.tipo + '-' + item.id"
+            inputmode="numeric"
+            [attr.aria-label]="'Valor ' + categoria.rotulo"
+          />
+          <input
+            class="item-edicao-data"
+            type="datetime-local"
+            step="1"
+            [(ngModel)]="editDataHora"
+            (ngModelChange)="editDataHoraChange.emit($event)"
+            [name]="'edit-data-' + categoria.tipo + '-' + item.id"
+            [attr.aria-label]="'Data e hora ' + categoria.rotulo"
+            required
+          />
+          <div class="item-edicao-acoes">
+            <button
+              type="button"
+              class="btn-salvar-edicao"
+              (click)="salvarEdicao.emit(categoria.tipo)"
+              [disabled]="!editDescricao.trim() || editValor <= 0 || !editDataHora"
+            >
+              Salvar
+            </button>
+            <button
+              type="button"
+              class="btn-cancelar-edicao"
+              (click)="cancelarEdicao.emit()"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </ng-template>
+    </li>
+  </ul>
+  <ng-template #vazio>
+    <p class="vazio">{{ categoria.mensagemVazia }}</p>
+  </ng-template>
+
+  <p class="subtotal">
+    {{ categoria.rotuloTotal }}:
+    <strong>{{ total | brl }}</strong>
+  </p>
+  <button
+    type="button"
+    class="btn-cancelar-edicao btn-apagar-categoria"
+    (click)="limpar.emit()"
+    [disabled]="lancamentos.length === 0"
+  >
+    {{ categoria.acaoLimpar }}
+  </button>
+</section>

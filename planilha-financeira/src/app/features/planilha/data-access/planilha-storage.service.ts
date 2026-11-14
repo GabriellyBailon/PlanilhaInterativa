@@ -1,22 +1,13 @@
 import { Injectable } from '@angular/core';
+import {
+  EstadoPlanilha,
+  LancamentoPersistido,
+} from '../domain/planilha.model';
 
-export interface LancamentoPersistido {
-  id: number;
-  descricao: string;
-  valor: number;
-  /** ISO 8601 — horário local do usuário no momento do lançamento */
-  criadoEm?: string;
-}
-
-export interface EstadoPlanilha {
-  entradas: LancamentoPersistido[];
-  saidas: LancamentoPersistido[];
-  economias: LancamentoPersistido[];
-  nextId: number;
-  nomePagina?: string;
-  /** `false` quando o usuário ocultou o resumo; omitido ou `true` = visível */
-  mostrarResumoPercentuais?: boolean;
-}
+export type {
+  EstadoPlanilha,
+  LancamentoPersistido,
+} from '../domain/planilha.model';
 
 const STORAGE_KEY = 'planilha-financeira:v1';
 

@@ -42,6 +42,15 @@ O arquivo exportado usa este formato em colunas agrupadas por área:
 
 - A primeira linha pode conter o nome da página; ele é exportado como texto para evitar que o Excel o converta em data
 - Há uma seção para `Entradas`, `Saídas` e `Economias` em colunas agrupadas
+- A importação também aceita CSV tabular com as colunas `Area`, `Descricao`, `Valor` e `DataAlteracao`:
+
+  ```csv
+  Area;Descricao;Valor;DataAlteracao
+  Entradas;Freela;R$ 200,00;15/10/2026 09:30:45
+  Saídas;Conta de Luz;R$ 150,00;15/10/2026 18:20:10
+  Economias;Reserva;R$ 50,00;15/10/2026 07:05:30
+  ```
+
 - Os arquivos exportados incluem assinatura UTF-8 para preservar acentos ao abrir no Excel
 - `Descrição` é o nome do lançamento
 - `Valor` pode vir em formato numérico ou em moeda (`R$ 200,00`)

@@ -1,0 +1,147 @@
+<main class="app">
+  <header class="header">
+    <label class="titulo-pagina-label" for="nome-pagina">Nome da planilha</label>
+    <input
+      id="nome-pagina"
+      class="titulo-pagina"
+      type="text"
+      [(ngModel)]="nomePagina"
+      (blur)="salvarNomePagina()"
+      name="nomePagina"
+      [placeholder]="tituloPagina"
+      maxlength="80"
+      aria-label="Nome da planilha"
+    />
+    <div class="acoes-planilha" aria-label="Ações da planilha">
+      <button
+        type="button"
+        class="btn-exportar"
+        (click)="exportarCsv()"
+        [disabled]="!temDadosParaExportar"
+        [attr.aria-disabled]="!temDadosParaExportar"
+      >
+        Exportar CSV
+      </button>
+      <button type="button" class="btn-importar" (click)="abrirSeletorCsv()">
+        Importar CSV
+      </button>
+      <button type="button" class="btn-limpar-tudo" (click)="limparTudo()">
+        Limpar tudo
+      </button>
+      <input
+        id="arquivo-csv-importacao"
+        type="file"
+        accept=".csv"
+        class="arquivo-csv-input"
+        (change)="aoSelecionarArquivoCsv($event)"
+      />
+    </div>
+    <p class="info-csv">
+      Exporte seus dados para backup ou importe um arquivo .csv para substituir os
+      dados atuais da planilha.
+    </p>
+    <p class="saldo" [class]="saldoClasse">
+      Saldo total:
+      <strong>{{ saldo | brl }}</strong>
+    </p>
+    <div *ngIf="csvErro" class="mensagem-erro" role="alert" aria-live="assertive">
+      <span class="mensagem-erro-icone" aria-hidden="true">!</span>
+      <span>{{ csvErro }}</span>
+    </div>
+  </header>
+
+  <div class="colunas">
+    <app-lancamento-categoria
+      *ngFor="let categoria of categorias"
+      [categoria]="categoria"
+      [lancamentos]="obterLancamentos(categoria.tipo)"
+      [total]="totalDaCategoria(categoria.tipo)"
+      [resetarFormulario]="versaoResetFormularios"
+      [edicaoAtiva]="editando"
+      [editDescricao]="editDescricao"
+      (editDescricaoChange)="editDescricao = $event"
+      [editValor]="editValor"
+      (editValorChange)="editValor = $event"
+      [editDataHora]="editDataHora"
+      (editDataHoraChange)="editDataHora = $event"
+      (adicionar)="adicionarLancamento(categoria.tipo, $event)"
+      (iniciarEdicao)="iniciarEdicao(categoria.tipo, $event)"
+      (salvarEdicao)="salvarEdicao($event)"
+      (cancelarEdicao)="cancelarEdicao()"
+      (remover)="removerLancamento(categoria.tipo, $event)"
+      (limpar)="apagarCategoria(categoria.tipo)"
+    ></app-lancamento-categoria>
+  </div>
+
+  <section class="grafico-secao">
+    <div class="grafico-secao-cabecalho">
+      <h2>Distribuição por categoria</h2>
+      <button
+        type="button"
+        class="btn-resumo-toggle"
+        (click)="alternarResumoPercentuais()"
+        [attr.aria-pressed]="mostrarResumoPercentuais"
+        [attr.aria-label]="
+          mostrarResumoPercentuais
+            ? 'Ocultar resumo percentual em relação aos ganhos'
+            : 'Mostrar resumo percentual em relação aos ganhos'
+        "
+      >
+        {{ mostrarResumoPercentuais ? 'Ocultar percentuais' : 'Mostrar percentuais' }}
+      </button>
+    </div>
+    <div class="grafico-layout">
+      <div class="grafico-container">
+        <app-grafico-categorias [dados]="dadosGrafico"></app-grafico-categorias>
+      </div>
+
+      <aside
+        class="resumo-percentuais"
+        *ngIf="mostrarResumoPercentuais && totalEntradas > 0"
+        aria-labelledby="resumo-percentuais-titulo"
+      >
+        <h3 id="resumo-percentuais-titulo">Em relação aos ganhos</h3>
+        <p class="resumo-total">
+          Total de ganhos:
+          <strong class="resumo-total-valor">{{ totalEntradas | brl }}</strong>
+        </p>
+        <ul class="resumo-lista">
+          <li class="resumo-item resumo-gastos">
+            <span class="resumo-rotulo">Gastos</span>
+            <div
+              class="resumo-barra"
+              role="presentation"
+              [style.--fracao]="fracaoGastosDosGanhos"
+            ></div>
+            <span class="resumo-valores">
+              <strong>{{ formatarPercentual(fracaoGastosDosGanhos) }}</strong>
+              <span class="resumo-moeda">{{ totalSaidas | brl }}</span>
+            </span>
+          </li>
+          <li class="resumo-item resumo-economias">
+            <span class="resumo-rotulo">Economias</span>
+            <div
+              class="resumo-barra"
+              role="presentation"
+              [style.--fracao]="fracaoEconomiasDosGanhos"
+            ></div>
+            <span class="resumo-valores">
+              <strong>{{ formatarPercentual(fracaoEconomiasDosGanhos) }}</strong>
+              <span class="resumo-moeda">{{ totalEconomias | brl }}</span>
+            </span>
+          </li>
+        </ul>
+        <p class="resumo-nota">
+          Percentuais de gastos e economias sobre o total de ganhos.
+        </p>
+      </aside>
+    </div>
+
+    <p
+      class="grafico-legenda"
+      *ngIf="totalMovimentado === 0"
+    >
+      Adicione entradas, economias ou saídas para visualizar o gráfico.
+    </p>
+  </section>
+</main>
