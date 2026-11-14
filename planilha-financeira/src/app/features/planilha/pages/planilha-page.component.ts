@@ -72,23 +72,23 @@ export class PlanilhaPageComponent implements OnInit {
   readonly categorias: CategoriaLancamentoConfig[] = [
     {
       tipo: 'entrada',
-      titulo: 'Entradas (Ganhos)',
+      titulo: 'Ganhos',
       rotulo: 'entrada',
       acaoAdicionar: 'Adicionar ganho',
       placeholderDescricao: 'Ex.: Salário',
       mensagemVazia: 'Nenhuma entrada registrada.',
       rotuloTotal: 'Total de ganhos',
-      acaoLimpar: 'Limpar todas as Entradas',
+      acaoLimpar: 'Limpar todos os ganhos',
     },
     {
       tipo: 'saida',
-      titulo: 'Saídas (Gastos)',
+      titulo: 'Gastos',
       rotulo: 'saída',
       acaoAdicionar: 'Adicionar gasto',
       placeholderDescricao: 'Ex.: Aluguel',
       mensagemVazia: 'Nenhuma saída registrada.',
       rotuloTotal: 'Total de gastos',
-      acaoLimpar: 'Limpar todas as Saídas',
+      acaoLimpar: 'Limpar todos os gastos',
     },
     {
       tipo: 'economia',
@@ -98,7 +98,7 @@ export class PlanilhaPageComponent implements OnInit {
       placeholderDescricao: 'Ex.: Reserva de emergência',
       mensagemVazia: 'Nenhuma economia registrada.',
       rotuloTotal: 'Total de economias',
-      acaoLimpar: 'Limpar todas as Economias',
+      acaoLimpar: 'Limpar todas as economias',
     },
   ];
 
@@ -289,7 +289,7 @@ export class PlanilhaPageComponent implements OnInit {
 
   exportarCsv(): void {
     if (!this.nomePagina.trim()) {
-      this.csvErro = 'Para exportar o arquivo, informe um nome para a Planilha.';
+      this.csvErro = 'Dê um nome à planilha antes de baixar a cópia.';
       return;
     }
 
@@ -322,12 +322,12 @@ export class PlanilhaPageComponent implements OnInit {
     }
 
     if (!this.aceitarArquivoCsv(arquivo)) {
-      this.mostrarErroCsv(this.csvService.formatarErro('a', 1));
+      this.mostrarErroCsv('Selecione um arquivo .csv para importar os dados.');
       return;
     }
 
     this.solicitarConfirmacao(
-      'Ao importar uma planilha, os dados atuais do site serão substituídos. Deseja continuar?',
+      'Importar este arquivo substituirá todos os dados atuais desta planilha. Deseja continuar?',
       () => {
         arquivo
           .text()
@@ -478,7 +478,7 @@ export class PlanilhaPageComponent implements OnInit {
     });
     this.erroPersistencia = salvo
       ? ''
-      : 'Não foi possível salvar os dados neste navegador. Exporte um CSV para evitar perder suas alterações.';
+      : 'Não foi possível salvar seus dados neste navegador. Baixe uma cópia para evitar perder suas alterações.';
   }
 
   gerarCsv(): string {
