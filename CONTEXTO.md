@@ -59,6 +59,9 @@ PlanilhaInterativa/
 ├── docs/
 │   └── aprendizados-grafico-chartjs.md  ← fixes e armadilhas Chart.js + Angular
 ├── planilha-financeira/
+│   ├── docs/
+│   │   ├── arquitetura.md              ← camadas, responsabilidades e fluxos de dados
+│   │   └── exemplo-planilha.csv        ← exemplo de importação/exportação
 │   ├── netlify.toml                 ← configuração de build e headers
 │   ├── .netlifyignore               ← arquivos a ignorar no deploy
 │   ├── _redirects                   ← redireciona 404 para SPA
@@ -112,22 +115,25 @@ interface EstadoPlanilha {
 
 ### Cabeçalho
 
-- Campo **Nome da planilha** no topo (ex.: `Maio 2026`); salvo em `localStorage` ao sair do campo (`blur`). Placeholder padrão: **Planejador de Finanças**.
+- Campo **Nome da planilha** no topo (ex.: `Maio 2026`), limitado a 80 caracteres e salvo em `localStorage` ao sair do campo (`blur`). Placeholder padrão: **Planejador de Finanças**.
 
 ### Lançamentos
 
 - Três colunas: entradas, economias e saídas, cada uma com formulário (descrição + valor) e lista com botões **editar** (✎) e **remover** (×).
-- **Edição inline:** ao clicar em editar, descrição e valor viram campos editáveis (mesma validação do formulário: descrição não vazia, valor &gt; 0); **Salvar** persiste e atualiza gráfico/saldo; **Cancelar** descarta. Apenas um lançamento em edição por vez. `criadoEm` não é alterado na edição.
+- **Edição inline:** ao clicar em editar, descrição, valor e data/hora viram campos editáveis; exige descrição não vazia, valor &gt; 0 e data/hora local válida. **Salvar** persiste e atualiza gráfico/saldo; **Cancelar** descarta. Apenas um lançamento em edição por vez. A data/hora original é mantida se não for alterada.
 - Cada lançamento na lista exibe **data e hora locais** ao lado do valor (ex.: `27/05/2026 20:56`), gravadas em `criadoEm` (ISO) ao adicionar. Lançamentos antigos sem data não mostram horário.
-- **Descrição e valor obrigatórios** (`required` no HTML + validação no componente); botão desabilitado se descrição vazia ou valor ≤ 0.
-- Valores monetários via diretiva `appBrlCurrency` e pipe `brl` (formato pt-BR, 2 casas decimais).
-- **Persistência local:** ao adicionar ou remover, o estado (`entradas`, `economias`, `saídas`, `nextId`) é salvo em `localStorage`. Ao abrir a página, os dados são restaurados automaticamente. JSON inválido ou corrompido é ignorado (começa vazio). Dados antigos sem `economias` carregam com lista vazia.
+- **Validações dos formulários:** descrição obrigatória após remover espaços em branco e valor finito maior que zero; o botão fica desabilitado quando algum desses critérios falha. A edição também exige data/hora local válida (datas impossíveis, como 31 de fevereiro, não são salvas).
+- Valores monetários via diretiva `appBrlCurrency` e pipe `brl` (formato pt-BR, 2 casas decimais); a entrada considera os dígitos como centavos, remove outros caracteres e bloqueia a tecla de sinal negativo.
+- Cada coluna tem ação para apagar seus lançamentos, com confirmação. **Limpar tudo** remove lançamentos e nome da planilha, também após confirmação.
+- **Persistência local:** lançamentos, nome, próximo ID e preferência de exibição do resumo são salvos em `localStorage`. Ao abrir a página, os dados são restaurados automaticamente. O estado é validado (listas, IDs inteiros positivos, descrições textuais, valores finitos positivos e datas válidas quando presentes); JSON inválido ou corrompido é ignorado. Dados antigos sem `economias` carregam com lista vazia.
 
 ### Importação e exportação CSV
 
-- Exporta as três áreas no formato agrupado usado pela planilha e mantém a data/hora de cada lançamento.
-- Importa tanto o formato agrupado quanto o formato tabular `Area;Descricao;Valor;DataAlteracao`.
-- A leitura e validação são feitas em `PlanilhaCsvService`; o estado atual só é substituído após a importação completa. Arquivos inválidos exibem a referência da célula.
+- Exporta as três áreas no formato agrupado usado pela planilha, mantém a data/hora de cada lançamento e inclui BOM UTF-8. É necessário ter dados e informar um nome para exportar; o nome é sanitizado para compor o arquivo.
+- Importa o formato agrupado e o tabular com cabeçalho exato e ordenado `Area;Descricao;Valor;DataAlteracao`. A extensão `.csv` é verificada sem distinção entre maiúsculas e minúsculas, e a substituição exige confirmação.
+- No tabular, `Area` aceita `Entradas`/`Ganhos`, `Saídas`/`Gastos` ou `Economias` (normalização de caixa e acentos); descrição e data são obrigatórias e o valor deve ser positivo. O valor remove `R$` e espaços, trata ponto como separador de milhar e vírgula como decimal.
+- Datas de importação aceitam ISO reconhecido por `Date` e `dd/mm/aaaa`, com horário opcional `HH:mm` ou `HH:mm:ss`; sem horário, usa meia-noite. O formato agrupado usa a primeira linha para o nome e a segunda para identificar as áreas.
+- `PlanilhaCsvService` valida antes da substituição e informa uma referência de célula. No tabular, A/B/C/D correspondem a área/descrição/valor/data. No agrupado, falha de descrição vazia aponta para a coluna da descrição; erros de valor/data usam as referências padrão C/D, que podem não corresponder à seção em que ocorreu o problema. O nome da planilha é lido apenas no formato agrupado.
 
 ### Saldo
 
@@ -202,6 +208,8 @@ Registre aqui cada feature ou ajuste relevante (mais recente no topo).
 
 | Data | Tipo | Descrição | Arquivos principais |
 |------|------|-----------|---------------------|
+| 2026-11-14 | Docs | Criação da documentação de arquitetura com camadas, responsabilidades, fluxos de dados, persistência, CSV e gráfico | `planilha-financeira/docs/arquitetura.md`, `planilha-financeira/README.md`, `CONTEXTO.md` |
+| 2026-11-14 | Docs | README e contexto técnico alinhados às funcionalidades atuais e às validações dos formulários e CSV; correção da regra de edição da data/hora | `planilha-financeira/README.md`, `CONTEXTO.md` |
 | 2026-11-14 | Refactor | Separação da página da planilha, componentes por responsabilidade, domínio, acesso a dados e estilos; importação CSV tabular passou a ser reconhecida e a validação não altera IDs/dados parcialmente | `src/app/app.component.ts/html/spec.ts`, `src/app/features/planilha/`, `src/app/shared/`, `README.md`, `CONTEXTO.md` |
 | 2026-05-27 | Infra | Configuração de publicação via Netlify: netlify.toml, .netlifyignore, _redirects e guia de deploy | `netlify.toml`, `.netlifyignore`, `_redirects`, `GUIA-DEPLOY-NETLIFY.md` |
 | 2026-05-27 | Feature | Responsividade completa com media queries para mobile (480px), tablet (768px) e desktop (1024px+); ajustes de padding, font-size, gap e layouts | `app.component.css`, `styles.css` |

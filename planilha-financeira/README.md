@@ -1,29 +1,34 @@
 # Planejador de Finanças
 
-Aplicação Angular para controle de entradas (ganhos) e saídas (gastos), com formatação em Real brasileiro e gráfico de pizza por categoria, atualizado em tempo real a cada lançamento.
+Aplicação Angular para controle de entradas (ganhos), economias e saídas (gastos), com formatação em Real brasileiro, saldo e gráfico de pizza por categoria.
 
 ## Funcionalidades
 
-- Colunas para **entradas**, **economias** e **saídas**, com lista, **edição** (✎) e remoção de itens
-- Valores em **R$** com duas casas decimais (formato pt-BR)
-- Bloqueio de valores negativos ou zero nos campos monetários
+- Três áreas — **entradas**, **economias** e **saídas** — para adicionar, editar e remover lançamentos; cada área também pode ser apagada separadamente
+- Descrição obrigatória e valor maior que zero. Valores digitados são formatados em **R$**, com duas casas decimais (pt-BR)
+- Data e hora local exibidas em cada lançamento; ao editar, também é possível alterar a data e a hora
+- **Saldo total** calculado como entradas menos saídas e economias
+- **Resumo percentual** de gastos e economias em relação aos ganhos, com valores e barras; pode ser ocultado e sua preferência é salva
 - **Gráfico de pizza — distribuição por categoria**
-  - Lançamentos com o **mesmo nome** (descrição) são **somados** em uma única fatia (ex.: dois "Aluguel" viram uma categoria)
-  - A comparação de nomes ignora maiúsculas e minúsculas (`Aluguel` = `aluguel`)
+  - Entradas, economias e saídas são agrupadas separadamente por descrição; nomes iguais ignorando maiúsculas/minúsculas são somados
   - **Ganhos:** cada categoria de entrada com cor em tons de verde
+  - **Economias:** paleta vibrante
   - **Gastos:** cada categoria de saída com cor distinta (paleta variada)
-  - Legenda e tooltip com nome da categoria e valor em R$
+  - Legenda e tooltip identificam o tipo, a categoria e o valor em R$
 - **Saldo total** com cores:
   - Verde: saldo positivo maior que R$ 100,00
   - Amarelo: saldo entre R$ 0,00 e R$ 100,00 (inclusive)
   - Vermelho: saldo negativo
+- Ações para **limpar tudo** (lançamentos e nome da planilha), sempre com confirmação
 - **Exportação e importação em CSV**
   - Exporta todos os registros das áreas de ganhos, gastos e economias
   - Aceita apenas arquivos `.csv`
   - Antes da importação, solicita confirmação para substituir os dados atuais
-  - Valida o formato e mostra o erro com a referência da célula, por exemplo: `c2`
+  - Valida os dados e mostra o erro com a referência da célula, por exemplo: `c2`
 
-> Os lançamentos são **salvos automaticamente no navegador** (`localStorage`). Ao recarregar a página, entradas e saídas são restauradas no mesmo dispositivo.
+> Lançamentos, nome da planilha e preferência de exibição dos percentuais são salvos automaticamente no navegador (`localStorage`). Ao recarregar a página, os dados são restaurados no mesmo dispositivo.
+
+O nome da planilha aceita até **80 caracteres**. Para exportar, informe um nome e tenha pelo menos um lançamento.
 
 ## Como usar a importação/exportação CSV
 
@@ -42,7 +47,7 @@ O arquivo exportado usa este formato em colunas agrupadas por área:
 
 - A primeira linha pode conter o nome da página; ele é exportado como texto para evitar que o Excel o converta em data
 - Há uma seção para `Entradas`, `Saídas` e `Economias` em colunas agrupadas
-- A importação também aceita CSV tabular com as colunas `Area`, `Descricao`, `Valor` e `DataAlteracao`:
+- A importação também aceita CSV tabular com o cabeçalho, nesta ordem: `Area;Descricao;Valor;DataAlteracao`:
 
   ```csv
   Area;Descricao;Valor;DataAlteracao
@@ -52,23 +57,25 @@ O arquivo exportado usa este formato em colunas agrupadas por área:
   ```
 
 - Os arquivos exportados incluem assinatura UTF-8 para preservar acentos ao abrir no Excel
-- `Descrição` é o nome do lançamento
-- `Valor` pode vir em formato numérico ou em moeda (`R$ 200,00`)
-- `Data de alteração` inclui data e horário (`dd/mm/aaaa HH:mm:ss`) e pode ser alterada na aplicação após a importação
+- `Area` aceita `Entradas` ou `Ganhos`, `Saídas` ou `Gastos`, e `Economias` (diferenças de acentuação e maiúsculas/minúsculas são normalizadas)
+- `Descrição` é obrigatória e não pode ficar em branco
+- `Valor` é obrigatório, deve ser maior que zero e aceita formato brasileiro, com vírgula decimal e prefixo `R$` opcional (por exemplo, `200,00` ou `R$ 200,00`); pontos são tratados como separadores de milhar
+- `DataAlteracao` / `Data de alteração` é obrigatória. São aceitas datas ISO e datas brasileiras `dd/mm/aaaa`, com horário opcional (`HH:mm` ou `HH:mm:ss`); sem horário, usa-se meia-noite
+- O CSV agrupado usa a primeira linha para o nome da planilha e a segunda para identificar as áreas. No formato tabular, o nome da planilha não é incluído
+- A importação valida o arquivo inteiro antes de substituir os dados atuais; em caso de falha, os dados existentes permanecem
 
 ### Importação
 
 1. Clique em **Importar CSV**
 2. Selecione um arquivo `.csv`
 3. Confirme a substituição dos dados atuais
-4. Caso o arquivo esteja em formato inválido, a aplicação mostra a mensagem:
-   `Ops! Os dados da planilha estão em formato incorreto. Verifique a célula c2`
+4. Se houver erro, a mensagem indica uma célula a conferir; no CSV tabular, as colunas são `A` área, `B` descrição, `C` valor e `D` data. No agrupado, erros de descrição apontam para a coluna correspondente; referências de valor/data podem não refletir a coluna da seção
 
 ### Exportação
 
-1. Adicione pelo menos um registro em qualquer área
+1. Informe o nome da planilha e adicione pelo menos um registro em qualquer área
 2. Clique em **Exportar CSV**
-3. O arquivo será salvo com o nome da planilha e a data/hora atual
+3. O arquivo será salvo com o nome da planilha e a data/hora atual no formato CSV agrupado
 
 ### Arquivo de exemplo
 
@@ -98,4 +105,5 @@ npm run build
 
 ## Documentação para desenvolvedores
 
-Contexto técnico e histórico de mudanças para agentes de IA: [`../CONTEXTO.md`](../CONTEXTO.md) (na raiz do workspace).
+- [Arquitetura da aplicação](docs/arquitetura.md): camadas, responsabilidades e principais fluxos de dados.
+- Contexto técnico e histórico de mudanças para agentes de IA: [`../CONTEXTO.md`](../CONTEXTO.md) (na raiz do workspace).
