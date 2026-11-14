@@ -97,6 +97,7 @@ export class PlanilhaPageComponent implements OnInit {
 
   private nextId = 1;
   csvErro = '';
+  erroPersistencia = '';
 
   private readonly coresGanhos = [
     '#22c55e',
@@ -432,7 +433,7 @@ export class PlanilhaPageComponent implements OnInit {
 
   private persistir(): void {
     const nome = this.nomePagina.trim();
-    this.storage.salvar({
+    const salvo = this.storage.salvar({
       entradas: this.entradas,
       saidas: this.saidas,
       economias: this.economias,
@@ -440,6 +441,9 @@ export class PlanilhaPageComponent implements OnInit {
       nomePagina: nome || undefined,
       ...(this.mostrarResumoPercentuais ? {} : { mostrarResumoPercentuais: false }),
     });
+    this.erroPersistencia = salvo
+      ? ''
+      : 'Não foi possível salvar os dados neste navegador. Exporte um CSV para evitar perder suas alterações.';
   }
 
   gerarCsv(): string {

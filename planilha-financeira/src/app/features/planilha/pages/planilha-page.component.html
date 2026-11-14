@@ -48,6 +48,15 @@
       <span class="mensagem-erro-icone" aria-hidden="true">!</span>
       <span>{{ csvErro }}</span>
     </div>
+    <div
+      *ngIf="erroPersistencia"
+      class="mensagem-erro mensagem-erro-persistencia"
+      role="alert"
+      aria-live="assertive"
+    >
+      <span class="mensagem-erro-icone" aria-hidden="true">!</span>
+      <span>{{ erroPersistencia }}</span>
+    </div>
   </header>
 
   <div class="colunas">

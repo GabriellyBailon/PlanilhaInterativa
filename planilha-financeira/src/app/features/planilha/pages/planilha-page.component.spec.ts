@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { PlanilhaPageComponent } from './planilha-page.component';
 import { obterDadosGrafico } from '../domain/planilha-calculos';
+import { PlanilhaStorageService } from '../data-access/planilha-storage.service';
 
 const paletaGrafico = {
   ganhos: ['green'],
@@ -24,6 +25,20 @@ describe('PlanilhaPageComponent', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
+  });
+
+  it('should show a warning when changes cannot be persisted', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    const app = fixture.componentInstance;
+    spyOn(TestBed.inject(PlanilhaStorageService), 'salvar').and.returnValue(false);
+
+    app.adicionarLancamento('entrada', { descricao: 'Salário', valor: 500 });
+    fixture.detectChanges();
+
+    expect(app.erroPersistencia).toContain('Não foi possível salvar os dados');
+    expect(
+      fixture.nativeElement.querySelector('.mensagem-erro-persistencia').textContent,
+    ).toContain('Exporte um CSV');
   });
 
   it('should calculate saldo from entradas and saidas', () => {

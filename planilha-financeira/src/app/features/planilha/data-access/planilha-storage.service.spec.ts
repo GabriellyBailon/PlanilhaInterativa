@@ -24,8 +24,21 @@ describe('PlanilhaStorageService', () => {
       nextId: 4,
     };
 
-    service.salvar(estado);
+    expect(service.salvar(estado)).toBe(true);
     expect(service.carregar()).toEqual(estado);
+  });
+
+  it('should report when storage cannot save estado', () => {
+    spyOn(localStorage, 'setItem').and.throwError('quota exceeded');
+
+    expect(
+      service.salvar({
+        entradas: [],
+        saidas: [],
+        economias: [],
+        nextId: 1,
+      }),
+    ).toBe(false);
   });
 
   it('should treat economias null as empty list', () => {

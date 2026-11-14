@@ -31,15 +31,16 @@ export class PlanilhaStorageService {
     }
   }
 
-  salvar(estado: EstadoPlanilha): void {
-    if (typeof localStorage === 'undefined') {
-      return;
-    }
-
+  salvar(estado: EstadoPlanilha): boolean {
     try {
+      if (typeof localStorage === 'undefined') {
+        return false;
+      }
+
       localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+      return true;
     } catch {
-      // quota excedida ou storage indisponível — ignora sem quebrar a UI
+      return false;
     }
   }
 

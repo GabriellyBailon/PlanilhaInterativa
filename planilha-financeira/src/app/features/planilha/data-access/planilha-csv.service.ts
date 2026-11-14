@@ -67,7 +67,7 @@ export class PlanilhaCsvService {
           return;
         }
 
-        linha[secao.base] = item.descricao;
+        linha[secao.base] = this.protegerDescricaoParaPlanilha(item.descricao);
         linha[secao.base + 1] = this.formatarValor(item.valor);
         linha[secao.base + 2] = this.formatarData(item.criadoEm ?? new Date().toISOString());
       });
@@ -128,7 +128,7 @@ export class PlanilhaCsvService {
 
       const [area, descricao, valor, dataAlteracao] = linha;
       const areaNormalizada = this.normalizarTexto(area);
-      const descricaoNormalizada = this.normalizarCampo(descricao);
+      const descricaoNormalizada = this.restaurarDescricaoPlanilha(descricao);
       const valorNumerico = this.parsearValor(valor, indice + 1);
       const criadoEm = this.parsearDataAlteracao(dataAlteracao, indice + 1);
 
@@ -189,7 +189,7 @@ export class PlanilhaCsvService {
           continue;
         }
 
-        const descricao = this.normalizarCampo(linha[secao.indice]);
+        const descricao = this.restaurarDescricaoPlanilha(linha[secao.indice]);
         const valor = this.normalizarCampo(linha[secao.indice + 1]);
         const data = this.normalizarCampo(linha[secao.indice + 2]);
 
@@ -277,7 +277,22 @@ export class PlanilhaCsvService {
 
   private escaparCampo(valor: string): string {
     const texto = valor.replace(/"/g, '""');
-    return /[";\n]/.test(texto) ? `"${texto}"` : texto;
+    return /[";\r\n]/.test(texto) ? `"${texto}"` : texto;
+  }
+
+  private protegerDescricaoParaPlanilha(descricao: string): string {
+    if (/^'\s*[=+\-@]/.test(descricao) || /^\s*[=+\-@]/.test(descricao)) {
+      return `'${descricao}`;
+    }
+    return descricao;
+  }
+
+  private restaurarDescricaoPlanilha(valor: string | undefined): string {
+    const descricao = this.normalizarCampo(valor);
+    if (/^''\s*[=+\-@]/.test(descricao) || /^'\s*[=+\-@]/.test(descricao)) {
+      return descricao.slice(1);
+    }
+    return descricao;
   }
 
   private formatarValor(valor: number): string {
@@ -424,6 +439,17 @@ export class PlanilhaCsvService {
 
     const iso = new Date(texto);
     if (!Number.isNaN(iso.getTime())) {
+      const dataIso = texto.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|[T\s])/);
+      if (
+        dataIso &&
+        !this.dataCalendarioValida(
+          Number(dataIso[1]),
+          Number(dataIso[2]),
+          Number(dataIso[3]),
+        )
+      ) {
+        return null;
+      }
       return iso;
     }
 
@@ -438,8 +464,41 @@ export class PlanilhaCsvService {
     const hora = Number(horaText ?? 0);
     const minuto = Number(minutoText ?? 0);
     const segundo = Number(segundoText ?? 0);
+    if (
+      !this.dataCalendarioValida(ano, mes, dia) ||
+      hora > 23 ||
+      minuto > 59 ||
+      segundo > 59
+    ) {
+      return null;
+    }
+
     const dataDate = new Date(ano, mes - 1, dia, hora, minuto, segundo);
-    return Number.isNaN(dataDate.getTime()) ? null : dataDate;
+    if (ano >= 0 && ano < 100) {
+      dataDate.setFullYear(ano);
+    }
+    if (
+      Number.isNaN(dataDate.getTime()) ||
+      dataDate.getFullYear() !== ano ||
+      dataDate.getMonth() !== mes - 1 ||
+      dataDate.getDate() !== dia ||
+      dataDate.getHours() !== hora ||
+      dataDate.getMinutes() !== minuto ||
+      dataDate.getSeconds() !== segundo
+    ) {
+      return null;
+    }
+    return dataDate;
+  }
+
+  private dataCalendarioValida(ano: number, mes: number, dia: number): boolean {
+    if (mes < 1 || mes > 12 || dia < 1) {
+      return false;
+    }
+
+    const anoBissexto = ano % 4 === 0 && (ano % 100 !== 0 || ano % 400 === 0);
+    const diasPorMes = [31, anoBissexto ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return dia <= diasPorMes[mes - 1];
   }
 
   formatarErro(coluna: string, linha: number): string {

@@ -72,7 +72,7 @@ Os percentuais de gastos e economias usam o total de entradas como base. Quando 
 
 `PlanilhaStorageService` usa a chave `planilha-financeira:v1`. A página carrega o estado na inicialização e o salva após alterações relevantes. O serviço valida o JSON antes de devolvê-lo, incluindo listas, IDs, valores e datas; ajusta `nextId` para ficar acima do maior ID existente. Estados legados sem `economias` são carregados com uma lista vazia.
 
-Se o JSON não puder ser lido ou validado, `carregar()` retorna `null`. Se o ambiente não tiver `localStorage` ou a gravação falhar, o serviço não interrompe a interface; no caso de falha de gravação, não há notificação para o usuário.
+Se o JSON não puder ser lido ou validado, `carregar()` retorna `null`. `salvar()` retorna `false` se o ambiente não tiver `localStorage` ou a gravação falhar; a página então avisa que as alterações podem não ter sido salvas e recomenda exportar um CSV.
 
 ### Importação e exportação CSV
 

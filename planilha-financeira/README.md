@@ -57,6 +57,7 @@ O arquivo exportado usa este formato em colunas agrupadas por área:
   ```
 
 - Os arquivos exportados incluem assinatura UTF-8 para preservar acentos ao abrir no Excel
+- Descrições que poderiam ser interpretadas como fórmulas por programas de planilha são exportadas como texto e preservadas ao reimportar o CSV no aplicativo
 - `Area` aceita `Entradas` ou `Ganhos`, `Saídas` ou `Gastos`, e `Economias` (diferenças de acentuação e maiúsculas/minúsculas são normalizadas)
 - `Descrição` é obrigatória e não pode ficar em branco
 - `Valor` é obrigatório, deve ser maior que zero e aceita formato brasileiro, com vírgula decimal e prefixo `R$` opcional (por exemplo, `200,00` ou `R$ 200,00`); pontos são tratados como separadores de milhar
