@@ -20,10 +20,10 @@
         [disabled]="!temDadosParaExportar"
         [attr.aria-disabled]="!temDadosParaExportar"
       >
-        Exportar CSV
+        Baixar planilha
       </button>
       <button type="button" class="btn-importar" (click)="abrirSeletorCsv()">
-        Importar CSV
+        Importar planilha
       </button>
       <button type="button" class="btn-limpar-tudo" (click)="limparTudo()">
         Limpar tudo
@@ -37,8 +37,7 @@
       />
     </div>
     <p class="info-csv">
-      Exporte seus dados para backup ou importe um arquivo .csv para substituir os
-      dados atuais da planilha.
+      Baixe sua planilha para guardar uma cópia ou importe outra planilha compatível (.csv).
     </p>
     <p class="saldo" [class]="saldoClasse">
       Saldo total:

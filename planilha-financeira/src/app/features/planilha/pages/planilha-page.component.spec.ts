@@ -27,6 +27,21 @@ describe('PlanilhaPageComponent', () => {
     expect(app).toBeTruthy();
   });
 
+  it('should use user-friendly labels for file actions', () => {
+    const fixture = TestBed.createComponent(PlanilhaPageComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.btn-exportar').textContent).toContain(
+      'Baixar planilha',
+    );
+    expect(fixture.nativeElement.querySelector('.btn-importar').textContent).toContain(
+      'Importar planilha',
+    );
+    expect(fixture.nativeElement.querySelector('.info-csv').textContent).toContain(
+      'planilha compatível (.csv)',
+    );
+  });
+
   it('should identify edit and remove actions by lancamento', () => {
     const fixture = TestBed.createComponent(PlanilhaPageComponent);
     fixture.componentInstance.entradas = [
@@ -62,11 +77,11 @@ describe('PlanilhaPageComponent', () => {
     app.adicionarLancamento('entrada', { descricao: 'Salário', valor: 500 });
     fixture.detectChanges();
 
-    expect(app.erroPersistencia).toContain('Não foi possível salvar os dados');
+    expect(app.erroPersistencia).toContain('Não foi possível salvar seus dados');
     expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeTruthy();
     expect(
       fixture.nativeElement.querySelector('.mensagem-erro-persistencia').textContent,
-    ).toContain('Exporte um CSV');
+    ).toContain('Baixe uma cópia');
 
     fixture.nativeElement.querySelector('.btn-fechar-aviso').click();
     fixture.detectChanges();
@@ -475,7 +490,7 @@ describe('PlanilhaPageComponent', () => {
     fixture.detectChanges();
 
     expect(app.csvErro).toBe(
-      'Para exportar o arquivo, informe um nome para a Planilha.',
+      'Dê um nome à planilha antes de baixar a cópia.',
     );
     expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain(app.csvErro);
@@ -506,7 +521,7 @@ describe('PlanilhaPageComponent', () => {
 
     expect(fixture.nativeElement.querySelector('[role="alertdialog"]')).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain(
-      'os dados atuais do site serão substituídos',
+      'substituirá todos os dados atuais desta planilha',
     );
     expect(app.entradas[0].descricao).toBe('Existente');
 
@@ -533,7 +548,7 @@ describe('PlanilhaPageComponent', () => {
     ].join('\n');
 
     expect(() => (app as any).importarCsvTexto(csv)).toThrowError(
-      'Ops! Os dados da planilha estão em formato incorreto. Verifique a célula c5',
+      'Não foi possível importar os dados. Confira a célula C5 e tente novamente.',
     );
   });
 
