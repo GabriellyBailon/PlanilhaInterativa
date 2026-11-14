@@ -123,10 +123,15 @@ O arquivo `netlify.toml` já contém configurações otimizadas:
 - **index.html**: Cache de 1 hora (permite atualizações sem hard refresh)
 
 ### Security Headers
-- **X-Frame-Options**: Previne clickjacking
+- **Content-Security-Policy**: Restringe scripts, conexões, imagens, fontes e enquadramento ao necessário para a aplicação
+- **Strict-Transport-Security**: Instrui o navegador a usar HTTPS após uma conexão segura
+- **X-Frame-Options**: Mantém compatibilidade contra clickjacking em navegadores antigos
 - **X-Content-Type-Options**: Bloqueia MIME sniffing
-- **X-XSS-Protection**: Proteção contra XSS
 - **Referrer-Policy**: Controla informações de referência
+
+A política permite estilos inline porque o Angular injeta estilos de componentes no navegador. O build de produção desativa a inclusão de CSS crítico inline para manter `script-src` sem permissão para scripts inline. `X-XSS-Protection` não é usado; CSP é a proteção moderna configurada.
+
+Os headers estão declarados nas configurações Netlify da raiz do repositório e da aplicação, para cobrir os dois diretórios de base descritos neste guia.
 
 ### Versão Node.js
 - Node.js 18.20.0 (LTS estável e compatível com Angular 19)
