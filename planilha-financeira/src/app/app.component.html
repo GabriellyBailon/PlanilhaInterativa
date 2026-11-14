@@ -133,12 +133,21 @@
                 inputmode="numeric"
                 aria-label="Valor da entrada"
               />
+              <input
+                class="item-edicao-data"
+                type="datetime-local"
+                step="1"
+                [(ngModel)]="editDataHora"
+                [name]="'edit-data-entrada-' + item.id"
+                aria-label="Data e hora da entrada"
+                required
+              />
               <div class="item-edicao-acoes">
                 <button
                   type="button"
                   class="btn-salvar-edicao"
                   (click)="salvarEdicao('entrada')"
-                  [disabled]="!editDescricao.trim() || editValor <= 0"
+                  [disabled]="!editDescricao.trim() || editValor <= 0 || !editDataHora"
                 >
                   Salvar
                 </button>
@@ -249,12 +258,21 @@
                 inputmode="numeric"
                 aria-label="Valor da saída"
               />
+              <input
+                class="item-edicao-data"
+                type="datetime-local"
+                step="1"
+                [(ngModel)]="editDataHora"
+                [name]="'edit-data-saida-' + item.id"
+                aria-label="Data e hora da saída"
+                required
+              />
               <div class="item-edicao-acoes">
                 <button
                   type="button"
                   class="btn-salvar-edicao"
                   (click)="salvarEdicao('saida')"
-                  [disabled]="!editDescricao.trim() || editValor <= 0"
+                  [disabled]="!editDescricao.trim() || editValor <= 0 || !editDataHora"
                 >
                   Salvar
                 </button>
@@ -365,12 +383,21 @@
                 inputmode="numeric"
                 aria-label="Valor da economia"
               />
+              <input
+                class="item-edicao-data"
+                type="datetime-local"
+                step="1"
+                [(ngModel)]="editDataHora"
+                [name]="'edit-data-economia-' + item.id"
+                aria-label="Data e hora da economia"
+                required
+              />
               <div class="item-edicao-acoes">
                 <button
                   type="button"
                   class="btn-salvar-edicao"
                   (click)="salvarEdicao('economia')"
-                  [disabled]="!editDescricao.trim() || editValor <= 0"
+                  [disabled]="!editDescricao.trim() || editValor <= 0 || !editDataHora"
                 >
                   Salvar
                 </button>

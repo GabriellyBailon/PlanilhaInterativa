@@ -1,6 +1,5 @@
-Area,Descricao,Valor,DataAlteracao
-Entradas,Salario,2500,2026-11-14T10:00:00.000Z
-Saidas,Aluguel,1200,2026-11-14T11:30:00.000Z
-Economias,Reserva,500,2026-11-14T12:00:00.000Z
-Entradas,Freela,800,2026-11-15T09:15:00.000Z
-Saidas,Supermercado,340,2026-11-15T18:45:00.000Z
+"=""Maio 2026""";;;;;;;;;;;
+;Entradas;;;;Saídas;;;;Economias;;
+;Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração
+;Freela;R$ 200,00;15/10/2026 09:30:45;;Conta de Luz;R$ 150,00;15/10/2026 18:20:10;;Reserva;R$ 50,00;15/10/2026 07:05:30
+;Projeto Extra;R$ 800,00;18/10/2026 16:15:00;;Supermercado;R$ 340,00;18/10/2026 18:45:20;;Investimento;R$ 500,00;18/10/2026 21:00:00

@@ -65,6 +65,7 @@ export class AppComponent implements OnInit, OnDestroy {
   editando: EdicaoAtiva | null = null;
   editDescricao = '';
   editValor = 0;
+  editDataHora = '';
 
   private nextId = 1;
   private chart?: Chart;
@@ -209,7 +210,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     const csv = this.gerarCsv();
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
 
@@ -310,12 +311,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.editando = { tipo, id: item.id };
     this.editDescricao = item.descricao;
     this.editValor = item.valor;
+    this.editDataHora = this.formatarDataHoraParaEdicao(item.criadoEm);
   }
 
   cancelarEdicao(): void {
     this.editando = null;
     this.editDescricao = '';
     this.editValor = 0;
+    this.editDataHora = '';
   }
 
   estaEditando(tipo: TipoLancamento, id: number): boolean {
@@ -331,6 +334,11 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const criadoEm = this.converterDataHoraLocalParaIso(this.editDataHora);
+    if (!criadoEm) {
+      return;
+    }
+
     const lista = this.obterLista(tipo);
     const item = lista.find((l) => l.id === this.editando!.id);
     if (!item) {
@@ -340,6 +348,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
     item.descricao = this.editDescricao.trim();
     item.valor = this.asNumero(this.editValor);
+    item.criadoEm = criadoEm;
     this.cancelarEdicao();
     this.persistir();
     this.atualizarGrafico();
@@ -410,29 +419,59 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   gerarCsv(): string {
-    const linhas: string[][] = [this.cabecalhoCsv];
+    const totalColunas = 12;
+    const secaoBase = { entradas: 1, saidas: 5, economias: 9 };
+    const secoes = [
+      { chave: 'entradas', label: 'Entradas', items: this.entradas, base: secaoBase.entradas },
+      { chave: 'saidas', label: 'Saídas', items: this.saidas, base: secaoBase.saidas },
+      { chave: 'economias', label: 'Economias', items: this.economias, base: secaoBase.economias },
+    ] as const;
 
-    const adicionarLinha = (area: string, lancamentos: LancamentoPersistido[]) => {
-      lancamentos.forEach((item) => {
-        linhas.push([
-          area,
-          item.descricao,
-          String(item.valor),
-          item.criadoEm ?? new Date().toISOString(),
-        ]);
+    const linhas: string[][] = [
+      [
+        this.nomePagina.trim()
+          ? `="${this.nomePagina.trim().replace(/"/g, '""')}"`
+          : '',
+        ...Array(totalColunas - 1).fill(''),
+      ],
+      ['', 'Entradas', '', '', '', 'Saídas', '', '', '', 'Economias', '', ''],
+      [
+        '',
+        'Descrição',
+        'Valor',
+        'Data de alteração',
+        '',
+        'Descrição',
+        'Valor',
+        'Data de alteração',
+        '',
+        'Descrição',
+        'Valor',
+        'Data de alteração',
+      ],
+    ];
+
+    const maiorQuantidade = Math.max(...secoes.map((secao) => secao.items.length), 0);
+
+    for (let indice = 0; indice < maiorQuantidade; indice++) {
+      const linha = Array(totalColunas).fill('');
+
+      secoes.forEach((secao) => {
+        const item = secao.items[indice];
+        if (!item) {
+          return;
+        }
+
+        linha[secao.base] = item.descricao;
+        linha[secao.base + 1] = this.formatarValorCsv(item.valor);
+        linha[secao.base + 2] = this.formatarDataCsv(item.criadoEm ?? new Date().toISOString());
       });
-    };
 
-    adicionarLinha('Entradas', this.entradas);
-    adicionarLinha('Saidas', this.saidas);
-    adicionarLinha('Economias', this.economias);
+      linhas.push(linha);
+    }
 
     return linhas
-      .map((linha) =>
-        linha
-          .map((valor) => this.escaparCsv(String(valor)))
-          .join(','),
-      )
+      .map((linha) => linha.map((valor) => this.escaparCsv(String(valor))).join(';'))
       .join('\n');
   }
 
@@ -448,6 +487,11 @@ export class AppComponent implements OnInit, OnDestroy {
     const linhas = this.parsearCsv(texto);
     if (linhas.length < 2) {
       throw new Error(this.formatarErroCsv('a', 1));
+    }
+
+    if (this.ehFormatoAgrupado(linhas)) {
+      this.importarCsvAgrupado(linhas);
+      return;
     }
 
     const cabecalho = linhas[0].map((valor) => this.normalizarCampo(valor));
@@ -515,6 +559,8 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private parsearCsv(texto: string): string[][] {
+    texto = texto.replace(/^\uFEFF/, '');
+    const delimitador = this.determinarSeparadorCsv(texto);
     const linhas: string[][] = [];
     let linhaAtual: string[] = [];
     let valorAtual = '';
@@ -533,7 +579,7 @@ export class AppComponent implements OnInit, OnDestroy {
         continue;
       }
 
-      if (caractere === ',' && !dentroAspas) {
+      if (caractere === delimitador && !dentroAspas) {
         linhaAtual.push(valorAtual);
         valorAtual = '';
         continue;
@@ -567,7 +613,202 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private escaparCsv(valor: string): string {
     const texto = valor.replace(/"/g, '""');
-    return /[",\n]/.test(texto) ? `"${texto}"` : texto;
+    return /[";\n]/.test(texto) ? `"${texto}"` : texto;
+  }
+
+  private formatarValorCsv(valor: number): string {
+    return `R$ ${valor.toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+  }
+
+  private formatarDataCsv(data: string): string {
+    const valor = new Date(data);
+    if (Number.isNaN(valor.getTime())) {
+      return '';
+    }
+
+    const dataLocal = [
+      String(valor.getDate()).padStart(2, '0'),
+      String(valor.getMonth() + 1).padStart(2, '0'),
+      String(valor.getFullYear()),
+    ].join('/');
+    const horaLocal = [
+      String(valor.getHours()).padStart(2, '0'),
+      String(valor.getMinutes()).padStart(2, '0'),
+      String(valor.getSeconds()).padStart(2, '0'),
+    ].join(':');
+
+    return `${dataLocal} ${horaLocal}`;
+  }
+
+  private formatarDataHoraParaEdicao(data?: string): string {
+    const valor = data ? new Date(data) : new Date();
+    if (Number.isNaN(valor.getTime())) {
+      return '';
+    }
+
+    return [
+      `${String(valor.getFullYear()).padStart(4, '0')}-${String(valor.getMonth() + 1).padStart(2, '0')}-${String(valor.getDate()).padStart(2, '0')}`,
+      `${String(valor.getHours()).padStart(2, '0')}:${String(valor.getMinutes()).padStart(2, '0')}:${String(valor.getSeconds()).padStart(2, '0')}`,
+    ].join('T');
+  }
+
+  private converterDataHoraLocalParaIso(valor: string): string | null {
+    const correspondencia = valor.match(
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/,
+    );
+    if (!correspondencia) {
+      return null;
+    }
+
+    const [, anoTexto, mesTexto, diaTexto, horaTexto, minutoTexto, segundoTexto = '0'] = correspondencia;
+    const partes = [anoTexto, mesTexto, diaTexto, horaTexto, minutoTexto, segundoTexto].map(Number);
+    const data = new Date(partes[0], partes[1] - 1, partes[2], partes[3], partes[4], partes[5]);
+
+    if (
+      data.getFullYear() !== partes[0] ||
+      data.getMonth() !== partes[1] - 1 ||
+      data.getDate() !== partes[2] ||
+      data.getHours() !== partes[3] ||
+      data.getMinutes() !== partes[4] ||
+      data.getSeconds() !== partes[5]
+    ) {
+      return null;
+    }
+
+    return data.toISOString();
+  }
+
+  private determinarSeparadorCsv(texto: string): ';' | ',' {
+    const linhas = texto
+      .split(/\r?\n/)
+      .map((linha) => linha.trim())
+      .filter((linha) => linha.length > 0);
+
+    if (linhas.length === 0) {
+      return ';';
+    }
+
+    const quantidadePontosVirgula = linhas.reduce(
+      (total, linha) => total + (linha.split(';').length - 1),
+      0,
+    );
+    const quantidadeVirgulas = linhas.reduce(
+      (total, linha) => total + (linha.split(',').length - 1),
+      0,
+    );
+
+    return quantidadePontosVirgula >= quantidadeVirgulas ? ';' : ',';
+  }
+
+  private ehFormatoAgrupado(linhas: string[][]): boolean {
+    if (linhas.length < 3) {
+      return false;
+    }
+
+    return Object.keys(this.obterIndicesSecoes(linhas[1])).length >= 3;
+  }
+
+  private importarCsvAgrupado(linhas: string[][]): void {
+    const indicesSecoes = this.obterIndicesSecoes(linhas[1]);
+    const entradas: LancamentoPersistido[] = [];
+    const saidas: LancamentoPersistido[] = [];
+    const economias: LancamentoPersistido[] = [];
+
+    for (let indice = 3; indice < linhas.length; indice++) {
+      const linha = linhas[indice];
+      if (linha.every((coluna) => this.normalizarCampo(coluna).trim() === '')) {
+        continue;
+      }
+
+      const dadosPorSecao = [
+        { tipo: 'entradas' as const, indice: indicesSecoes['entradas'] ?? -1 },
+        { tipo: 'saidas' as const, indice: indicesSecoes['saidas'] ?? -1 },
+        { tipo: 'economias' as const, indice: indicesSecoes['economias'] ?? -1 },
+      ];
+
+      for (const secao of dadosPorSecao) {
+        if (secao.indice < 0) {
+          continue;
+        }
+
+        const descricao = this.normalizarCampo(linha[secao.indice]);
+        const valor = this.normalizarCampo(linha[secao.indice + 1]);
+        const data = this.normalizarCampo(linha[secao.indice + 2]);
+
+        if (!descricao && !valor && !data) {
+          continue;
+        }
+
+        if (!descricao) {
+          throw new Error(this.formatarErroCsv(this.indiceParaColuna(secao.indice), indice + 1));
+        }
+
+        const registro: LancamentoPersistido = {
+          id: this.nextId++,
+          descricao,
+          valor: this.parsearValorCsv(valor, indice + 1),
+          criadoEm: this.parsearDataAlteracao(data, indice + 1),
+        };
+
+        if (secao.tipo === 'entradas') {
+          entradas.push(registro);
+        } else if (secao.tipo === 'saidas') {
+          saidas.push(registro);
+        } else {
+          economias.push(registro);
+        }
+      }
+    }
+
+    this.entradas = entradas;
+    this.saidas = saidas;
+    this.economias = economias;
+    this.persistir();
+    this.atualizarGrafico();
+  }
+
+  private obterIndicesSecoes(linha: string[]): Record<'entradas' | 'saidas' | 'economias', number> {
+    const indices: Record<'entradas' | 'saidas' | 'economias', number> = {
+      entradas: -1,
+      saidas: -1,
+      economias: -1,
+    };
+
+    for (let indice = 0; indice < linha.length; indice++) {
+      const valor = this.normalizarTextoCsv(linha[indice]);
+
+      if (valor.includes('entradas')) {
+        indices['entradas'] = indice;
+      } else if (valor.includes('saidas') || valor.includes('gastos')) {
+        indices['saidas'] = indice;
+      } else if (valor.includes('economias')) {
+        indices['economias'] = indice;
+      }
+    }
+
+    return indices;
+  }
+
+  private indiceParaColuna(indice: number): string {
+    let restante = indice;
+    let letras = '';
+
+    while (restante >= 0) {
+      letras = String.fromCharCode(65 + (restante % 26)) + letras;
+      restante = Math.floor(restante / 26) - 1;
+    }
+
+    return letras || 'a';
+  }
+
+  private normalizarTextoCsv(valor: string | undefined): string {
+    return this.normalizarCampo(valor)
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 
   private normalizarCampo(valor: string | undefined): string {
@@ -575,13 +816,17 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   private parsearValorCsv(valor: string | undefined, linha: number): number {
-    const valorNormalizado = this.normalizarCampo(valor).replace(/\s+/g, '');
+    const valorNormalizado = this.normalizarCampo(valor)
+      .replace(/R\$/gi, '')
+      .replace(/\s+/g, '')
+      .replace(/\./g, '')
+      .replace(',', '.');
 
     if (!valorNormalizado) {
       throw new Error(this.formatarErroCsv('C', linha));
     }
 
-    const convertido = Number(valorNormalizado.replace('.', '').replace(',', '.'));
+    const convertido = Number(valorNormalizado);
     if (!Number.isFinite(convertido) || convertido <= 0) {
       throw new Error(this.formatarErroCsv('C', linha));
     }

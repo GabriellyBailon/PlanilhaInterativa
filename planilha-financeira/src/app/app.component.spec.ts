@@ -188,6 +188,31 @@ describe('AppComponent', () => {
     expect(app.totalEntradas).toBe(600);
   });
 
+  it('should allow changing the date and time of an imported lancamento', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+
+    app.entradas = [{
+      id: 1,
+      descricao: 'Salário importado',
+      valor: 500,
+      criadoEm: '2026-05-27T10:00:00.000Z',
+    }];
+    app.iniciarEdicao('entrada', app.entradas[0]);
+    app.editDataHora = '2026-05-28T14:35:12';
+    app.salvarEdicao('entrada');
+
+    expect(app.entradas[0].criadoEm).toBe(
+      new Date(2026, 4, 28, 14, 35, 12).toISOString(),
+    );
+
+    const reloadedFixture = TestBed.createComponent(AppComponent);
+    reloadedFixture.detectChanges();
+    expect(reloadedFixture.componentInstance.entradas[0].criadoEm).toBe(
+      new Date(2026, 4, 28, 14, 35, 12).toISOString(),
+    );
+  });
+
   it('should not save edit with empty description or zero value', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
@@ -286,12 +311,27 @@ describe('AppComponent', () => {
     expect(app.temDadosParaExportar).toBeTrue();
 
     const csv = app.gerarCsv();
-    expect(csv).toContain('Area,Descricao,Valor,DataAlteracao');
+    const linhasCsv = csv.split('\n');
+    expect(linhasCsv[0]).toContain('"=""Orçamento"""');
+    expect(linhasCsv[2]).toBe(
+      ';Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração',
+    );
+    expect(linhasCsv[3]).toMatch(
+      /;Salário;R\$ 2\.000,00;\d{2}\/11\/2026 \d{2}:\d{2}:\d{2};;Aluguel;R\$ 900,00;\d{2}\/11\/2026 \d{2}:\d{2}:\d{2};;Poupança;R\$ 300,00;\d{2}\/11\/2026 \d{2}:\d{2}:\d{2}/,
+    );
+    expect(csv).toContain('Orçamento');
     expect(csv).toContain('Entradas');
-    expect(csv).toContain('Saidas');
+    expect(csv).toContain('Saídas');
     expect(csv).toContain('Economias');
+    expect(csv).toContain('Descrição');
+    expect(csv).toContain('Data de alteração');
+    expect(csv).toContain('R$ 2.000,00');
+    expect(csv).toContain('R$ 900,00');
+    expect(csv).toContain('R$ 300,00');
+    expect(linhasCsv[3]).toMatch(/;Salário;R\$ 2\.000,00;\d{2}\/11\/2026 \d{2}:\d{2}:\d{2};;Aluguel/);
     expect(csv).toContain('Salário');
-    expect(csv).toContain('2000');
+    expect(csv).toContain('Aluguel');
+    expect(csv).toContain('Poupança');
   });
 
   it('should reject invalid CSV content and point to the offending cell', () => {
@@ -299,16 +339,19 @@ describe('AppComponent', () => {
     const app = fixture.componentInstance;
 
     const csv = [
-      'Area,Descricao,Valor,DataAlteracao',
-      'Entradas,Salário,abc,2026-11-14T10:00:00.000Z',
+      'Maio 2026;;;;;;',
+      ';Entradas;;;;Saídas;;;;Economias;',
+      'Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração',
+      ';Freela;R$ 200,00;15/10/2026;;Conta de Luz;R$ 150,00;15/10/2026;;Reserva;R$ 50,00;15/10/2026',
+      ';Despesas;abc;15/10/2026;;',
     ].join('\n');
 
     expect(() => (app as any).importarCsvTexto(csv)).toThrowError(
-      'Ops! Os dados da planilha estão em formato incorreto. Verifique a célula c2',
+      'Ops! Os dados da planilha estão em formato incorreto. Verifique a célula c5',
     );
   });
 
-  it('should import valid CSV and replace current data', () => {
+  it('should import valid grouped CSV and replace current data', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
 
@@ -317,22 +360,34 @@ describe('AppComponent', () => {
     app.economias = [{ id: 11, descricao: 'Antiga reserva', valor: 15, criadoEm: '2026-01-03T00:00:00.000Z' }];
 
     const csv = [
-      'Area,Descricao,Valor,DataAlteracao',
-      'Entradas,Freela,150,2026-11-15T12:00:00.000Z',
-      'Saidas,Supermercado,45,2026-11-16T08:00:00.000Z',
-      'Economias,Reserva,50,2026-11-17T09:00:00.000Z',
+      'Maio 2026;;;;;;;;;;',
+      ';Entradas;;;;Saídas;;;;Economias;',
+      'Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração',
+      ';Freela;R$ 150,00;15/11/2026 09:30:45;;Supermercado;R$ 45,00;16/11/2026 18:20:10;;Reserva;R$ 50,00;17/11/2026 07:05:30',
     ].join('\n');
 
     (app as any).importarCsvTexto(csv);
 
     expect(app.entradas).toEqual([
-      jasmine.objectContaining({ descricao: 'Freela', valor: 150 }),
+      jasmine.objectContaining({
+        descricao: 'Freela',
+        valor: 150,
+        criadoEm: new Date(2026, 10, 15, 9, 30, 45).toISOString(),
+      }),
     ]);
     expect(app.saidas).toEqual([
-      jasmine.objectContaining({ descricao: 'Supermercado', valor: 45 }),
+      jasmine.objectContaining({
+        descricao: 'Supermercado',
+        valor: 45,
+        criadoEm: new Date(2026, 10, 16, 18, 20, 10).toISOString(),
+      }),
     ]);
     expect(app.economias).toEqual([
-      jasmine.objectContaining({ descricao: 'Reserva', valor: 50 }),
+      jasmine.objectContaining({
+        descricao: 'Reserva',
+        valor: 50,
+        criadoEm: new Date(2026, 10, 17, 7, 5, 30).toISOString(),
+      }),
     ]);
   });
 });

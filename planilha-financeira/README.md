@@ -31,19 +31,21 @@ A planilha pode exportar e importar dados em formato CSV para backup, migração
 
 ### Estrutura do CSV
 
-O arquivo exportado usa este formato:
+O arquivo exportado usa este formato em colunas agrupadas por área:
 
 ```csv
-Area,Descricao,Valor,DataAlteracao
-Entradas,Salario,2500,2026-11-14T10:00:00.000Z
-Saidas,Aluguel,1200,2026-11-14T11:30:00.000Z
-Economias,Reserva,500,2026-11-14T12:00:00.000Z
+"=""Maio 2026""";;;;;;;;;;;
+;Entradas;;;;Saídas;;;;Economias;;
+;Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração;;Descrição;Valor;Data de alteração
+;Freela;R$ 200,00;15/10/2026 09:30:45;;Conta de Luz;R$ 150,00;15/10/2026 18:20:10;;Reserva;R$ 50,00;15/10/2026 07:05:30
 ```
 
-- `Area` aceita: `Entradas`, `Saidas`, `Economias`
-- `Descricao` é o nome do lançamento
-- `Valor` deve ser numérico e maior que zero
-- `DataAlteracao` aceita datas em ISO 8601 ou no formato brasileiro (`dd/mm/aaaa`)
+- A primeira linha pode conter o nome da página; ele é exportado como texto para evitar que o Excel o converta em data
+- Há uma seção para `Entradas`, `Saídas` e `Economias` em colunas agrupadas
+- Os arquivos exportados incluem assinatura UTF-8 para preservar acentos ao abrir no Excel
+- `Descrição` é o nome do lançamento
+- `Valor` pode vir em formato numérico ou em moeda (`R$ 200,00`)
+- `Data de alteração` inclui data e horário (`dd/mm/aaaa HH:mm:ss`) e pode ser alterada na aplicação após a importação
 
 ### Importação
 
